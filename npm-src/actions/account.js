@@ -747,8 +747,8 @@ export const accountOpt=async ({ commit, rootGetters,dispatch },{method,params})
 export const _accountOpt=async ({ commit, rootGetters,dispatch },{method,params={}})=>{
 
   helper.trimParams(params);
-  params.crontab=params.crontab||null;
-  dispatch("crontab/setCrontab",params.crontab,{root:true});
+  // params.crontab=params.crontab||null;
+  // dispatch("crontab/setCrontab",params.crontab,{root:true});
   
   let account=rootGetters["user/getAccountObject"];
   if(!account){

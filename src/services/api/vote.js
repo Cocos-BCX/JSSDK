@@ -19,7 +19,7 @@ export const publishVotes=(store,witnesses_ids,committee_ids,new_proxy_id,callba
 
         let {vote_ids}=getters.getVotesState;
 
-        new_options.voting_account = new_proxy_id ? new_proxy_id : "1.2.5";
+        new_options.voting_account = new_proxy_id ? new_proxy_id : "1.2.2";
         new_options.num_witness = witnesses_ids.length;
         new_options.num_committee = committee_ids.length;
 
@@ -184,7 +184,7 @@ const updateAccountData=async (store,type)=>{
     account=account.data.account;
     account=Immutable.fromJS(account);
     let proxyId=account.getIn(["options","voting_account"]);
-    let proxy_account_id=proxyId === "1.2.5" ? "" : proxyId;
+    let proxy_account_id=proxyId === "1.2.2" ? "" : proxyId;
     let proxy=null;
     if(proxy_account_id){
         proxy=await API.Account.getUser(proxy_account_id,false);
@@ -200,7 +200,7 @@ const updateAccountData=async (store,type)=>{
     let proxyOptions = proxy ? proxy.get("options") : null;
     let current_proxy_input = proxy ? proxy.get("name") : "";
     
-    if (proxy_account_id === "1.2.5") {
+    if (proxy_account_id === "1.2.2") {
         proxy_account_id = "";
         current_proxy_input = "";
     }
@@ -214,7 +214,7 @@ const updateAccountData=async (store,type)=>{
   
     let proxyPromise = null,
         proxy_vids = Immutable.Set([]);
-    const hasProxy = proxy_account_id !== "1.2.5";
+    const hasProxy = proxy_account_id !== "1.2.2";
     if (hasProxy && proxyOptions) {
         let proxy_votes = proxyOptions.get("votes");
         let proxy_vote_ids = proxy_votes.toArray();
