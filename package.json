@@ -1,0 +1,82 @@
+{
+  "name": "bcxjs",
+  "version": "1.0.0",
+  "description": "bcx",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint ./**/*.{vue,js}",
+    "dev": "webpack-dev-server --progress --colors --inline --hot",
+    "release": "webpack --config webpack.pro.config.js -p --progress --display-error-details --colors",
+    "release-npm": "cross-env BABEL_ENV=es babel npm-src -d build-npm/dist",
+    "release-node": "webpack --config webpack.pro.node.config.js -p --progress --display-error-details --colors"
+  },
+  "keywords": [
+    "bcx",
+    "bcxjs",
+    "blockchain"
+  ],
+  "author": "bcx",
+  "license": "ISC",
+  "dependencies": {
+    "babel-polyfill": "^6.26.0",
+    "bcxjs-lzma": "^1.0.1",
+    "bcxjs-cores": "^1.4.1",
+    "bcxjs-ws": "^1.0.5",
+    "bignumber.js": "^4.1.0",
+    "file-saver": "^1.3.8",
+    "fractional": "^1.0.0",
+    "immutable": "^3.8.2",
+    "indexeddbshim": "2.2.1",
+    "js-cookie": "^2.2.0",
+    "lodash": "^4.17.10",
+    "numeral": "^2.0.6",
+    "tcomb": "^3.2.27",
+    "websocket": "1.0.26",
+    "ws": "^5.2.1"
+  },
+  "devDependencies": {
+    "@vue/test-utils": "^1.0.0-beta.10",
+    "babel-cli": "^6.0.0",
+    "babel-core": "^6.26.0",
+    "babel-jest": "^22.1.0",
+    "babel-loader": "^7.1.4",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
+    "babel-register": "^6.26.0",
+    "eslint": "^4.16.0",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-config-vue": "latest",
+    "eslint-friendly-formatter": "^3.0.0",
+    "eslint-import-resolver-webpack": "^0.8.4",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-node": "^5.2.1",
+    "eslint-plugin-vue": "latest",
+    "file-loader": "^0.9.0",
+    "inject-loader": "^3.0.1",
+    "jasmine": "^2.9.0",
+    "jest": "^22.1.4",
+    "jsdom": "^11.5.1",
+    "jsdom-global": "^3.0.2",
+    "node-fetch": "^2.1.2",
+    "vue": "^2.5.13",
+    "vue-template-compiler": "^2.5.13",
+    "vue-test-utils": "^1.0.0-beta.11",
+    "vuex": "^3.0.1",
+    "webpack": "^4.0.1",
+    "webpack-cli": "3.1.2",
+    "webpack-dev-server": "3.1.0",
+    "bcl-worker-loader": "^1.0.0",
+    "cross-env": "^5.0.1"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.js$": "<rootDir>/node_modules/babel-jest"
+    },
+    "verbose": true,
+    "transformIgnorePatterns": []
+  }
+}
