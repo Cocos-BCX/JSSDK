@@ -420,7 +420,6 @@ const actions = {
                 name_or_account:account_name,
                 owner_pubkey,
             },{root:true}).then(account_id=>{
-                console.info("account_id",account_id);
                 if(registrar){
                     return result;
                 }else{

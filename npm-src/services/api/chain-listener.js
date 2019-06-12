@@ -95,24 +95,24 @@ class ChainListener {
                 let opCount=0;//op counts
                 //Traversing trx
                 res.data.transactions.some((trx,trx_index)=>{  
-                  opCount+=trx[1].operations.length;
-                  if(opCount>this.sub_max_ops){
-                    trx[1].operations.length=this.sub_max_ops;
-                  }
-                  //Traversing OP Account record
-                  trx[1].operations.forEach((op,op_index)=>{
-                    this._subscribers.forEach(subscriber => {
-                        subscriber.notify({
-                          block_num:head_block_number,
-                          id:head_block_number+"."+trx_index+"."+op_index,
-                          op,
-                          result:trx[1].operation_results[op_index]
-                        });
-                    });
-                  })
-                  if(opCount>this.sub_max_ops){
-                    return true;
-                  }
+                    opCount+=trx[1].operations.length;
+                    if(opCount>this.sub_max_ops){
+                      trx[1].operations.length=this.sub_max_ops;
+                    }
+                    //Traversing OP Account record
+                    trx[1].operations.forEach((op,op_index)=>{
+                      this._subscribers.forEach(subscriber => {
+                          subscriber.notify({
+                            block_num:head_block_number,
+                            id:head_block_number+"."+trx_index+"."+op_index,
+                            op,
+                            result:trx[1].operation_results[op_index]
+                          });
+                      });
+                    })
+                    if(opCount>this.sub_max_ops){
+                      return true;
+                    }
                 })
              }
             // subscriber.notify(operation);

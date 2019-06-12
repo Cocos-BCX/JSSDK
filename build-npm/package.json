@@ -1,6 +1,6 @@
 {
   "name": "bcxjs-api",
-  "version": "1.4.18",
+  "version": "1.4.30",
   "description": "",
   "main": "./dist/main.js",
   "dependencies": {

@@ -83,6 +83,7 @@ const process_transaction=(transaction,store)=>{
 }
 
 const transactionOpWorker = async (fromId,operations,fromAccount,propose_options,store) => {
+  if(true){
       const opObjects=await buildOPObjects(operations,fromId,fromAccount,store);
       if(opObjects.success==false){
         return opObjects;
@@ -133,7 +134,7 @@ const transactionOpWorker = async (fromId,operations,fromAccount,propose_options
           resolve(res);
         }
       })
-    
+    }
 };
 
 const transactionOp = async (fromId,operations,fromAccount,proposeAccountId="",store) => {

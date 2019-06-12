@@ -113,14 +113,15 @@ export const initConnection =(store,params) => {
         _startConnectTimer=setTimeout(() => {
           startConnect(selectedNodeUrl);
         }, 3000);
+        return;
       } 
     }
     
     //RPC connected
     if (status === 'realopen') {
       commit(types.SET_WS_CONNECTING,false);
-      dispatch("IDB_INIT");
-      
+        dispatch("IDB_INIT");
+
       
       // ChainStore.init().then(()=>{
       //   API.ChainListener.enable();

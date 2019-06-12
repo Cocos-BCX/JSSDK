@@ -76,7 +76,6 @@ module.exports = idb_helper = {
                     reject(error)
                 }
             }
-            
             let store = transaction.objectStore(store_name);
             let request = store.openCursor()
             request.onsuccess = e => {

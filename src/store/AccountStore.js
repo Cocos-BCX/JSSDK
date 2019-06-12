@@ -39,9 +39,9 @@ const actions={
         return new Promise((resolve, reject) => {
             iDB.load_data("linked_accounts")
             .then(data => {
-                if(data.length){
+                if(!data.length){
                     //config current account
-                  dispatch("tryToSetCurrentAccount",null);
+                    accountStorage.set("currentAccount", null);
                 }
                 let accountPromises = data.filter(a => {
                     if (a.chainId) {
@@ -54,21 +54,22 @@ const actions={
                     dispatch("_addIgnoredAccount",a.name)
                     return FetchChain("getAccount", a.name);
                 });
-
-                state.linkedAccounts=linkedAccounts.asImmutable();
                 Promise.all(accountPromises).then(results => {
-                    ChainStore.subscribe(()=>{
-                        dispatch("chainStoreUpdate");
+                    state.linkedAccounts=linkedAccounts.asImmutable();
+                    dispatch("tryToSetCurrentAccount",null).then(acc_res=>{
+                        ChainStore.subscribe(()=>{
+                            dispatch("chainStoreUpdate");
+                        });
+                        resolve();
+                        state.subbed=true;
                     });
-                    resolve();
-                    state.subbed=true;
                 }).catch(err => {
                     ChainStore.subscribe(()=>{
                         dispatch("chainStoreUpdate");
                     });     
                     state.subbed=true;
                     reject(err);
-                });
+                });  
             }).catch(err => {
 				// alert(err);
                 reject(err);
@@ -107,27 +108,22 @@ const actions={
                 }
             })
         })
-
         state.initial_account_refs_load = pending;
         dispatch("tryToSetCurrentAccount")
     },
     tryToSetCurrentAccount:({dispatch,state})=>{
-
         if (accountStorage.get("currentAccount", null)) {
             return dispatch("setCurrentAccount",accountStorage.get("currentAccount", null));
         }
-
-        // let {starredAccounts} = SettingsStore.getState();
-        // if (starredAccounts.size) {
-        //     return dispatch("setCurrentAccount",starredAccounts.first().name);
-        // }
-
         if (state.linkedAccounts.size) {
-             dispatch("setCurrentAccount",state.linkedAccounts.first())
+           return dispatch("setCurrentAccount",state.linkedAccounts.first())
         }
+        return true;
     },
     setCurrentAccount:async ({dispatch,state},name)=>{
+        let isCreateAccount=false;
         if(name&&typeof name=="object"){
+            isCreateAccount=!!name.isCreateAccount;
             name=name.account;
         }
         if (!name) {
@@ -145,7 +141,7 @@ const actions={
                         delete acc_res.success;
                         resolve(acc_res)
                     });
-                },2000)
+                },isCreateAccount?2000:100);
             })
         }else{
             return {code:0,message:"Name can not be empty"};
@@ -172,27 +168,29 @@ const actions={
             chainId: Apis.instance().chain_id
         }).then(() => {
             //console.log("[AccountStore.js] ----- Added account to store: ----->", account.name);
-            return dispatch("AccountRefsStore/loadDbData",null,{root:true}).then(()=>{
-                return dispatch("loadDbData").then(()=>{
-                    state.linkedAccounts = state.linkedAccounts.add(account.name);
-                    if (state.linkedAccounts.size === 1) {
-                        return dispatch("setCurrentAccount",account.name).then(()=>{
-                            if(owner_pubkey){
-                                return API.Account.getAccountIdByOwnerPubkey(owner_pubkey).then(userId=>{
-                                    let id = userId && userId[0];
-                                    if(id){
-                                        id=userId[0];
-                                        return id;
-                                    }
-                                    dispatch("account/account_signup_complete",{userId:id},{root:true});
-                                })
+            // return dispatch("AccountRefsStore/loadDbData",null,{root:true}).then(()=>{
+            //     return dispatch("loadDbData").then(()=>{
+                  
+            //     })  
+            // })  
+            state.linkedAccounts = state.linkedAccounts.add(account.name);
+
+            if (state.linkedAccounts.size === 1) {
+                return dispatch("setCurrentAccount",{account:account.name,isCreateAccount:true}).then((acc_res)=>{
+                    if(owner_pubkey){
+                        return API.Account.getAccountIdByOwnerPubkey(owner_pubkey).then(userId=>{
+                            let id = userId && userId[0];
+                            if(id){
+                                id=userId[0];
+                                return id;
                             }
-                        });  
-                    }else{
-                        return {code:1}
+                            dispatch("account/account_signup_complete",{userId:id},{root:true});
+                        })
                     }
-                })  
-            })          
+                });  
+            }else{
+                return {code:1}
+            }        
         });
     }
 }

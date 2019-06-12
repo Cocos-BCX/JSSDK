@@ -1,7 +1,6 @@
 // require('babel-polyfill');
-// if(process.browser){
-  require('bcxjs-indexeddbshim');
-//}
+require('bcxjs-indexeddbshim');
+
 
 import Vue from 'vue'
 import Vuex from 'vuex';
@@ -32,9 +31,6 @@ import AccountStore from './store/AccountStore.js';
 
 import * as utils from './utils/index';
 
-// var global = module.exports = typeof window != 'undefined' && window.Math == Math
-//   ? window : typeof self != 'undefined' && self.Math == Math ? self
-//   : Function('return this')();
 
   class BCX {
       constructor(params){      
@@ -176,7 +172,7 @@ import * as utils from './utils/index';
 
             transferAsset:"transactions/transferAsset",
             setCurrentAccount:"AccountStore/setCurrentAccount",
-            proposeRelateWorldView:"NHAssets/proposeRelateWorldView"
+            proposeRelateWorldView:"NHAssets/proposeRelateWorldView",
           }
           
           const use_validateAccount_methods={
@@ -186,7 +182,7 @@ import * as utils from './utils/index';
             queryAccountNHAssets:"NHAssets/queryAccountNHAssets",
             queryAccountNHAssetOrders:"NHAssets/queryAccountNHAssetOrders",
             queryNHAssetsByCreator:"NHAssets/queryNHAssetsByCreator",
-            getAccountProposals:"proposals/loadAccountProposals"
+            getAccountProposals:"proposals/loadAccountProposals",
           }
 
           for(let key in apiMethods){
@@ -314,15 +310,15 @@ import * as utils from './utils/index';
 
       getAccounts(params){
         if(params&&params.callback){
-          setTimeout(()=>{
-            params.callback({
+          this.init().then(init_res=>{
+              params.callback(init_res.code==1?{
                 code:1,
                 data:{
                   accounts:this.api.getters["AccountStore/linkedAccounts"].toJS(),
-                 current_account:this.getAccountInfo()
+                  current_account:this.getAccountInfo()
                 }
-            })
-          },500)
+              }:init_res)
+          });
         }
         return {
           accounts:this.api.getters["AccountStore/linkedAccounts"].toJS(),
@@ -464,7 +460,6 @@ import * as utils from './utils/index';
     /**********Interfaces cannot return value, callbacks only **end** United Labs of BCTech.*/
   }
 
-   export default BCX;
-  // global.BCX=BCX;
+  export default BCX;
 
  

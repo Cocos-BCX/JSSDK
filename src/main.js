@@ -228,7 +228,6 @@ var global = module.exports = typeof window != 'undefined' && window.Math == Mat
             init_res=>init_res.code==1?this.api.dispatch(methodPath,params):init_res
           );
         }
-
         if(!params||!params.callback) return initPromise;
         initPromise.then(res=>{ params.callback(res); });
       }
@@ -314,15 +313,15 @@ var global = module.exports = typeof window != 'undefined' && window.Math == Mat
 
       getAccounts(params){
         if(params&&params.callback){
-          setTimeout(()=>{
-            params.callback({
+          this.init().then(init_res=>{
+              params.callback(init_res.code==1?{
                 code:1,
                 data:{
                   accounts:this.api.getters["AccountStore/linkedAccounts"].toJS(),
-                 current_account:this.getAccountInfo()
+                  current_account:this.getAccountInfo()
                 }
-            })
-          },500)
+              }:init_res)
+          });
         }
         return {
           accounts:this.api.getters["AccountStore/linkedAccounts"].toJS(),

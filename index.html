@@ -1406,56 +1406,25 @@
                            li.innerHTML='<a href="#'+el.id+'">'+m_name+'</a>';
                            gel("."+p_class).appendChild(li); 
                         }
-                        //nav_htmls+='<li><a href="#'+el.id+'">'+m_name+'</a></li>';
                     }
                 }
 
                 loadLeftNavs();
                 
                 var _configParams={
-                    // default_ws_node:"ws://192.168.50.166:8050",
+                    default_ws_node:"ws://47.93.62.96:8049",
                     ws_node_list:[
-                        // {url:"ws://39.106.158.132:8090",name:"COCOS最新链(香港)"},
-                        // {url:"ws://47.94.168.216:8090",name:"COCOS节点2"},
-                        //  {url:"ws://192.168.50.166:8050",name:"COCOS节点6"},
-                        // {url:"ws://192.168.50.175:8080",name:"COCOS节点5"},
-                        //,
-                        // {url:"ws://39.96.29.40:8049",name:"COCOS节点4"},   
-                        // {url:"ws://47.93.62.96:8049",name:"COCOS节点1"},
-                        // {url:"ws://39.96.29.40:8053",name:"COCOS节点2"},
-
-                        // {url:"ws://39.97.102.65:8031",name:"COCOS节点2"},
-                        // {url:"ws://39.106.126.54:8049",name:"COCOS节点2"},
                         {url:"ws://39.97.110.222:8040",name:"Cocos - China - Beijing"},   
 			            {url:"ws://47.93.62.96:8049",name:"Cocos - China - Xiamen"} ,
-
-                        // {url:"ws://39.97.110.222:8040",name:"COCOS节点1"},
-                        // {url:"ws://47.93.62.96:8049",name:"COCOS节点2"},
-                        
-                        
-                        //{url:"ws://192.168.50.166:8050",name:"COCOS节点4"}   
-                        // {url:"ws://47.93.62.96:8050",name:"COCOS - China - Beijing"},
-                        // {url:"ws://39.96.33.61:8050",name:"COCOS - China - Shanghai"},
-                        // {url:"ws://39.96.29.40:8050",name:"COCOS - China - Chengdu"},
-                        // {url:"ws://39.106.126.54:8050",name:"COCOS - China - Hong Kong"}
                     ],
                     networks:[
                      {
                         core_asset:"COCOS",
                         chain_id:"7d89b84f22af0b150780a2b121aa6c715b19261c8b7fe0fda3a564574ed7d3e9" 
-                      },
-                      {
-                        core_asset:"COCOS",
-                        chain_id:"b9e7cee4709ddaf08e3b7cba63b71c211c845e37c9bf2b865a7b2a592c8adb28" 
-                      },
-                      {
-                        core_asset:"COCOS",
-                        chain_id:"4d0945ed612cb4d92ccc25051cf1d58b20a386726cce7b68b11a914d72fa0c05" 
                       }
                     ], 
-                    // faucet_url:"http://47.93.62.96:3000",
                     faucet_url:"http://47.93.62.96:8041",
-                    auto_reconnect:true,
+                    auto_reconnect:false,
                     worker:false,
                     real_sub:true,
                     check_cached_nodes_data:false
@@ -1464,13 +1433,12 @@
                 var bcx=new BCX(_configParams);
                 //可以不用初始化，直接调用，API会自动判断是否初始化，热没有初始化则自动初始化
                 bcx.init({
-                    real_sub:true
-                    // subscribeToRpcConnectionStatusCallback:res=>{
-                    //     console.info("subscribeToRpcConnectionStatusCallback res",res);
-                    // }
+                    real_sub:true,
+                    subscribeToRpcConnectionStatusCallback:res=>{
+                        console.info("subscribeToRpcConnectionStatusCallback res",res);
+                    }
                 }).then(res=>{
                     console.info("init res",res);
-            
                     _wallet.init();
                     _user.init();
                     _contracts.init();
@@ -1480,9 +1448,12 @@
                     _explorer.init();
                     _market.init();
                     _others.init();
-
                 });
-
+                // bcx.subscribeToRpcConnectionStatus({
+                //     callback:res=>{
+                //         console.info("subscribeToRpcConnectionStatus res",res);
+                //     }
+                // })
                 var _others={
                     init(){
                         gel("#btn_getVotes").onclick=this.queryVotes;

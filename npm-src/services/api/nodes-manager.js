@@ -1,5 +1,4 @@
 import PersistentStorage from '../persistent-storage';
-
 class NodesManager {
   constructor({ nodes, defaultNode }) {
     this._nodes = nodes;

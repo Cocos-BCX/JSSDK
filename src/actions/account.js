@@ -114,33 +114,22 @@ export const createAccountWithPassword = async (store, params) => {
 
   console.log('Account created : ', result.success);
   if (result.success) {
-    const userId = await API.Account.getAccountIdByOwnerPubkey(result.data.account.owner_key);
-    let id = userId && userId[0];
-    if(id) id=userId[0]
-    if(autoLogin){      
-      // return dispatch("account/passwordLogin",{
-      //   account,
-      //   password
-      // },{ root: true }); 
-      return new Promise(resolve=>{
-        setTimeout(()=>{
-            resolve(dispatch("account/passwordLogin",{
-              account,
-              password
-            },{ root: true }))
-        },2000)
-      })
-      const wallet = createWallet({ password,wif:active_private.toWif() });
-      //const userId = await API.ChainListener.listenToSignupId({ account });
-      commit(types.ACCOUNT_SIGNUP_COMPLETE, { wallet, userId:id });
-      PersistentStorage.saveUserData({
-        id,
-        encrypted_key: wallet.encrypted_key,
-        encryptionKey: wallet.encryptionKey,
-        passwordPubkey: wallet.passwordPubkey
-      });
-    }
-    
+    return new Promise(resolve=>{
+      setTimeout(()=>{
+        if(autoLogin){
+          resolve(dispatch("account/passwordLogin",{
+            account,
+            password
+          },{ root: true }))
+        }else{
+          API.Account.getAccountIdByOwnerPubkey(result.data.account.owner_key).then(userId=>{
+              let id = userId && userId[0];
+              if(id) id=userId[0];
+              resolve({code:1,data:{account_id:id,account_name:account}})
+          });
+        }
+      },2000)
+    })
     return  dispatch("getAccountInfo");
   }
 

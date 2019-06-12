@@ -113,6 +113,7 @@ export const initConnection =(store,params) => {
         _startConnectTimer=setTimeout(() => {
           startConnect(selectedNodeUrl);
         }, 3000);
+        return;
       } 
     }
     

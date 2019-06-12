@@ -147,6 +147,7 @@ const actions={
             Promise.all([add, current]).then(()=>{
                 var database_name = iDB.getDatabaseName(delete_wallet_name)
                 var req = iDB.impl.deleteDatabase(database_name);
+                iDB.close();
                 dispatch("WalletDb/deleteWallet",null,{root:true});
                 dispatch("account/_logout",null,{root:true});
                 resolve({code:1,data:database_name})

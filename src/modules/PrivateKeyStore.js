@@ -197,7 +197,7 @@ const actions = {
         // console.info("state.pending_operation_count11111111",state.pending_operation_count);
 
         if (state.pending_operation_count == 0){
-            console.log("Pending operation done called too many times")
+            // console.log("Pending operation done called too many times")
         }
             // throw new Error("Pending operation done called too many times")
         state.pending_operation_count--
