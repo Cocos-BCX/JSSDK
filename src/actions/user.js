@@ -129,6 +129,7 @@ const getBalances=async (account,rootGetters)=>{
       if(account.success){
         accountBalances=_utils.balancesToObject(account.data.balances);
         result.data=accountBalances;
+        if(account.data.account.contract_asset_locked)
         result.contract_asset_locked=format_contract_asset_locked(account.data.account.contract_asset_locked);
       }else{
         result.code=account.code;
@@ -180,6 +181,7 @@ export const getUserAllBalance=async ({dispatch,rootGetters},params)=>{
     let contract_asset_locked;
     let accountBalances=await getBalances(account,rootGetters);
     if(accountBalances.code==1){
+      if(accountBalances.contract_asset_locked)
       contract_asset_locked=JSON.parse(JSON.stringify(accountBalances.contract_asset_locked));
       accountBalances=JSON.parse(JSON.stringify(accountBalances.data));
     }else{
@@ -235,11 +237,14 @@ export const getUserAllBalance=async ({dispatch,rootGetters},params)=>{
         }
 
         let fromAssetPrecision=fromAsset.get("precision");
-
-        let lock_details=contract_asset_locked._lock_details[id]||{};
-        for(let key in lock_details){
-          lock_details[key]=helper.getFullNum(lock_details[key],fromAssetPrecision);
+        let lock_details;
+        if(contract_asset_locked){
+           lock_details=contract_asset_locked._lock_details[id]||{};
+          for(let key in lock_details){
+            lock_details[key]=helper.getFullNum(lock_details[key],fromAssetPrecision);
+          }
         }
+    
         balances.push({
           id,
           balance:helper.getFullNum(amount,fromAssetPrecision),
@@ -248,8 +253,8 @@ export const getUserAllBalance=async ({dispatch,rootGetters},params)=>{
           eq_value:helper.getFullNum(eqValue,fromAssetPrecision),
           eq_unit:toAsset.symbol,
           eq_precision:toAsset.precision,
-          locked_total:helper.getFullNum(contract_asset_locked._locked_total[id]||0,fromAssetPrecision),
-          lock_details
+          locked_total:contract_asset_locked?helper.getFullNum(contract_asset_locked._locked_total[id]||0,fromAssetPrecision):0,
+          lock_details:lock_details||{}
         })
     }
 

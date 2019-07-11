@@ -109,7 +109,7 @@
     operation_asset_fund_fee_pool: "(account) 向 (asset) 手续费池注入 (amount)",
     operation_asset_claim_fees: "(account) 从 (asset) 资产手续费池中领取 (balance_amount) 资产手续费",
 
-    operation_call_contract_function: "授权人: (caller) ，合约: (contract_name) ,动作: (function_name) ,数据: (arg_list)",
+    operation_call_contract_function: "授权人: (caller) ，合约: (contract_name) ，动作: (function_name) ，数据: (arg_list)",
     operation_contract_create: "(owner) 创建合约 (contract_name)",
     operation_revise_contract:"(reviser) 更新合约 (contract_name)",
     operation_register_nh_asset_creator:"(fee_paying_account) 注册成为开发者",

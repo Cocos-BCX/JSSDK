@@ -60,7 +60,7 @@ var initialState = {
   cache_assets: {},
   pending: false,
   assetsFetched: 0,
-  totalAssets: accountStorage && (0, _typeof3.default)(accountStorage.get("totalAssets")) != "object" ? accountStorage.get("totalAssets") : 3000
+  totalAssets: true ? accountStorage && (0, _typeof3.default)(accountStorage.get("totalAssets")) != "object" ? accountStorage.get("totalAssets") : 3000 : 300
 };
 
 var mutations = (_mutations = {}, (0, _defineProperty3.default)(_mutations, types.FETCH_ASSETS_REQUEST, function (state) {

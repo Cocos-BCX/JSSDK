@@ -18,7 +18,7 @@ var _jsCookie2 = _interopRequireDefault(_jsCookie);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var _host = "GPH" + "_" + "1.4";
+var _host = (true ? window.location.host : "GPH") + "_" + "1.4";
 // Persistent Storage for data cache management
 var PersistentStorage = {
   saveUserData: function saveUserData(_ref) {

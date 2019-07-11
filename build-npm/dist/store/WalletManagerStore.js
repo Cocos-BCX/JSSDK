@@ -215,6 +215,7 @@ var actions = {
             _promise2.default.all([add, current]).then(function () {
                 var database_name = _idbInstance2.default.getDatabaseName(delete_wallet_name);
                 var req = _idbInstance2.default.impl.deleteDatabase(database_name);
+                _idbInstance2.default.close();
                 dispatch("WalletDb/deleteWallet", null, { root: true });
                 dispatch("account/_logout", null, { root: true });
                 resolve({ code: 1, data: database_name });

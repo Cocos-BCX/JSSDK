@@ -62,7 +62,6 @@ const actions = {
       store
     });
     if (!parsedData) return;
-
     const { type } = parsedData.operations[0];
     if (type === 'transfer' || type === 'fill_order' || type === 'cancel_order') {
       // update current user balances

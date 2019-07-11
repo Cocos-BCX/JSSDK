@@ -49,12 +49,12 @@
     trxTypes_asset_claim_fees: "Claim asset fees",
 
     trxTypes_call_contract_function: "Contract transaction",
-    trxTypes_contract_create:"Contract creation",
-    trxTypes_revise_contract:"Renewal contract",
+    trxTypes_contract_create:"Create contract",
+    trxTypes_revise_contract:"Upate contract",
 
-    trxTypes_register_nh_asset_creator:"Registered Developer",
-    trxTypes_creat_world_view:"Creating World View",
-    trxTypes_creat_nh_asset:"NH Asset Creation",
+    trxTypes_register_nh_asset_creator:"Register Developer",
+    trxTypes_creat_world_view:"Create worldview",
+    trxTypes_creat_nh_asset:"NH asset creation",
     trxTypes_updata_game_item:"NH Asset Update",
     trxTypes_delete_nh_asset:"NH asset deletion",
     trxTypes_transfer_nh_asset:"NH Asset Transfer",
@@ -62,7 +62,7 @@
     trxTypes_cancel_nh_asset_order:"NH Asset Certificate Cancellation",
     trxTypes_fill_nh_asset_order:"NH Asset Order Matching",
     trxTypes_relate_nh_asset:"NH asset Association",
-    trxTypes_relate_world_view:"Relevant World View",
+    trxTypes_relate_world_view:"Relevant worldview",
 
     trxTypes_contract_affecteds_asset:"Assets",
 
@@ -75,7 +75,7 @@
     //operation
     operation_pending: "pending {blocks} blocks",
     operation_no_recent: "No recent transactions",
-    operation_reg_account: "(registrar) registered the account (new_account)",
+    operation_reg_account: "(registrar) registered an account (new_account)",
     operation_transfer: "(from) sent (amount) to (to)",
 
     operation_fill_order: "(account) bought (received) at (price)",
@@ -94,8 +94,8 @@
     operation_asset_create: "(account) created the asset (asset)",
     operation_asset_update: "(account) updated the asset (asset)",
     operation_asset_update_restricted:"(payer) updated the asset (target_asset) (restricted_type_text)",
-    operation_lifetime_upgrade_account: "(account) was upgraded to lifetime member",
-    operation_annual_upgrade_account: "(account) was upgraded to annual member",
+    operation_lifetime_upgrade_account: "(account) upgraded to lifetime member",
+    operation_annual_upgrade_account: "(account) upgraded to annual member",
     operation_unlisted_by: "(lister) unlisted the account (listee)",
     operation_whitelisted_by: "(lister) whitelisted the account (listee)",
     operation_blacklisted_by: "(lister) blacklisted the account (listee)",
@@ -103,7 +103,7 @@
     operation_asset_update_feed_producers: "(account) updated the feed producers for the asset (asset)",
     operation_asset_settle: "(account) requested settlement of (amount)",
     operation_asset_global_settle: "(account) requested global settlement of (asset) at (price)",
-    operation_witness_create: "(account) was upgraded to become a witness",
+    operation_witness_create: "(account) upgraded to become a witness",
     operation_witness_update: "(account) update its witness info",
     operation_witness_pay: "Withdrew witness pay to account",
     operation_witness_receive: "Received witness from witness",
@@ -114,9 +114,9 @@
 
     operation_call_contract_function: "Author: (caller) ,Contract: (contract_name) , Action: (function_name) ,Data: (arg_list)",
     operation_contract_create: "(owner) Create Contract (contract_name)",
-    operation_revise_contract:"(reviser) Renewal Contract (contract_name)",
-    operation_register_nh_asset_creator:"(fee_paying_account) Register as a developer",
-    operation_creat_world_view:"(fee_paying_account) Create a world view",
+    operation_revise_contract:"(reviser) Update Contract (contract_name)",
+    operation_register_nh_asset_creator:"(fee_paying_account) Registed as a developer",
+    operation_creat_world_view:"(fee_paying_account) Create a worldview",
     operation_creat_nh_asset:"(fee_paying_account) Creates NH assets with ownership account (owner)",
     operation_delete_nh_asset:"(fee_paying_account) Delete NH Asset (nh_asset)",
     operation_transfer_nh_asset:"Transfer of ownership of (from) NH assets (nh_asset) to (to)",
@@ -127,7 +127,7 @@
     operation_proposal_update: "(fee_paying_account) updated a proposed transaction (proposal)",
     operation_proposal_delete: "(account) deleted a proposed transaction",
 
-    operation_relate_world_view:"(related_account) relation (view_owner) world view (world_view)",
+    operation_relate_world_view:"(related_account) relation (view_owner) worldview (world_view)",
     operation_relate_nh_asset:"(nh_asset_creator) (related) parent NH asset (nh_asset) and child NH asset (nh_asset) Association",
 
 

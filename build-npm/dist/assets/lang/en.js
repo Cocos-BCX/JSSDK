@@ -68,9 +68,6 @@ var en_US = {
     trxTypes_fill_nh_asset_order: "NH Asset Order Matching",
     trxTypes_relate_nh_asset: "NH asset Association",
     trxTypes_relate_world_view: "Relevant World View",
-    trxTypes_crontab_create: "Timing Task Creation",
-    trxTypes_crontab_cancel: "Cancel the task",
-    trxTypes_crontab_recover: "restart timed tasks",
 
     trxTypes_contract_affecteds_asset: "Assets",
 
@@ -135,10 +132,6 @@ var en_US = {
 
     operation_relate_world_view: "(related_account) relation (view_owner) world view (world_view)",
     operation_relate_nh_asset: "(nh_asset_creator) (related) parent NH asset (nh_asset) and child NH asset (nh_asset) Association",
-
-    operation_crontab_create: "(crontab_creator) creates a timed task (result), execution time (start_time), execution interval (execute_interval) seconds, execution times (execute_times), execution transactions:",
-    operation_crontab_cancel: "(fee_paying_account) cancel the task (task)",
-    operation_crontab_recover: "(crontab_owner) restart timed tasks (crontab), restart time (restart_time)",
 
     contract_affecteds_nh_modifined: "(affected_account) NH assets (affected_item) modify data (modified)",
     contract_affecteds_nh_transfer_to: "NH asset (affected_item) transfer (affected_account)",

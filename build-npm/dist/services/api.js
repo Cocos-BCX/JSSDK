@@ -48,10 +48,6 @@ var _explorer = require('./api/explorer');
 
 var _explorer2 = _interopRequireDefault(_explorer);
 
-var _other = require('./api/other');
-
-var _other2 = _interopRequireDefault(_other);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var API = {
@@ -65,8 +61,7 @@ var API = {
   Contract: _contract2.default,
   Vote: _vote2.default,
   NHAssets: _nhAssets2.default,
-  Explorer: _explorer2.default,
-  Other: _other2.default
+  Explorer: _explorer2.default
 };
 
 exports.default = API;

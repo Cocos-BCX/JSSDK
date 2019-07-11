@@ -505,7 +505,7 @@ export const passwordLogin = async (store,params) => {
   const userId = await API.Account.getAccountIdByOwnerPubkey(ownerPubkey);
   let id = userId && userId[0];
   if (id) {
-    if(rootGetters["AccountStore/linkedAccounts"].size){
+    if(rootGetters["WalletDb/wallet"]){
       await dispatch("WalletManagerStore/deleteWallet",null,{root:true});
     }else{
       await dispatch("_logout");
@@ -560,7 +560,7 @@ export const changePassword=async ({dispatch,rootGetters},params)=>{
     return {code:101,message:"Parameter is missing"};
   }
 
-  let {account,oldPassword,newPassword}=params;
+  let {account,oldPassword,newPassword,onlyGetFee=false}=params;
 
   let _passwordKey=rootGetters["WalletDb/_passwordKey"];
   let aes_private=rootGetters["WalletDb/aes_private"];
@@ -606,7 +606,8 @@ export const changePassword=async ({dispatch,rootGetters},params)=>{
                   activePubkey:activeKey.toPublicKey().toPublicKeyString(),
                   ownerPubkey:ownerKey.toPublicKey().toPublicKeyString()
                 }
-              }]
+              }],
+              onlyGetFee
           },{root:true})
 }
 
@@ -911,7 +912,7 @@ export const getAccountInfo=({rootGetters})=>{
     locked:rootGetters["WalletDb/isLocked"]
   } 
   res.account_name=accountObject?accountObject.name:"";
-  res.mode=rootGetters["AccountStore/linkedAccounts"].toJS().length?"wallet":"account";
+  res.mode=rootGetters["WalletDb/wallet"]?"wallet":"account";
   return {
     code:1,
     data:res

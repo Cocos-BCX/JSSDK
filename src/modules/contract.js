@@ -40,7 +40,7 @@ const toTable=obj=>{
                 valueObj.value=v;
             }
 
-            if(v%1 === 0)
+            if(v!=""&&v%1 === 0)
                 valueObj.dataType="int";
 
             result.push([{key:keyObj},valueObj]);
@@ -63,6 +63,7 @@ const formatValueList=valueList=>{
             if(dataType=="object"){
                 dataType="table"//JSON.stringify(v);
                 v=toTable(v);
+                console.info("v",v);
             }
             
             valueItem={

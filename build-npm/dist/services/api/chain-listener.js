@@ -147,6 +147,10 @@ var ChainListener = function () {
               var opCount = 0; //op counts
               //Traversing trx
               res.data.transactions.some(function (trx, trx_index) {
+                opCount += trx[1].operations.length;
+                if (opCount > _this2.sub_max_ops) {
+                  trx[1].operations.length = _this2.sub_max_ops;
+                }
                 //Traversing OP Account record
                 trx[1].operations.forEach(function (op, op_index) {
                   _this2._subscribers.forEach(function (subscriber) {
@@ -158,9 +162,7 @@ var ChainListener = function () {
                     });
                   });
                 });
-                opCount += trx[1].operations.length;
                 if (opCount > _this2.sub_max_ops) {
-                  trx[1].operations.length = _this2.sub_max_ops;
                   return true;
                 }
               });

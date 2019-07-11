@@ -1113,7 +1113,7 @@
                                 <div class="div_call_contract_function div_module">
                                     合约name或ID<input  type="text" class="nameOrId" value="contract.test02"><br><br>
                                     目标函数名<input  type="text" class="function_name" value="my_nht_describe_change"><br><br>
-                                    参数列表 <textarea rows="10" class="value_list">4.2.0,{"size":"large"}</textarea><br><br>
+                                    参数列表 <textarea rows="10" class="value_list"></textarea><br><br>
                                     <input type="button" id="btn_call_contract_function" value="确认执行合约函数" /><br><br>
                                 </div>
                             </div>
@@ -1412,10 +1412,10 @@
                 loadLeftNavs();
                 
                 var _configParams={
-                    default_ws_node:"ws://47.93.62.96:8049",
+                    // default_ws_node:"ws://47.93.62.96:8049",
                     ws_node_list:[
                         {url:"ws://39.97.110.222:8040",name:"Cocos - China - Beijing"},   
-			            {url:"ws://47.93.62.96:8049",name:"Cocos - China - Xiamen"} ,
+                        {url:"ws://47.93.62.96:8049",name:"Cocos - China - Xiamen"} 
                     ],
                     networks:[
                      {
@@ -1425,7 +1425,6 @@
                     ], 
                     faucet_url:"http://47.93.62.96:8041",
                     auto_reconnect:false,
-                    worker:false,
                     real_sub:true,
                     check_cached_nodes_data:false
                     //app_keys:["5HxzZncKDjx7NEaEv989Huh7yYY7RukcJLKBDQztXAmZYCHWPgd"]
@@ -2610,6 +2609,7 @@
                             password:gel(".div_importPrivateKey .pwd").value,
                             callback:function(res){
                                 console.info("res",res);
+                               _wallet.getAccounts();
                             }  
                         })
                     }
@@ -2774,7 +2774,8 @@
                     changePassword:function(){
                         bcx.changePassword({
                             oldPassword:gel(".div_changePassword .old_password").value,
-                            newPassword:gel(".div_changePassword .new_password").value
+                            newPassword:gel(".div_changePassword .new_password").value//,
+                            // onlyGetFee:true
                         }).then(res=>{
                             console.info("changePassword res",res);
                         })
@@ -3271,6 +3272,7 @@
              
                 var _contracts={
                     init:function(){
+                        gel(".div_call_contract_function .value_list").value=`4.2.0\n{"size":"large"}`;
                         gel("#btn_contract_create").onclick=this.createContract;
 
                         gel("#btn_get_update_contract_fee").onclick=()=>{
@@ -3347,11 +3349,12 @@
                         })
                     },
                     callContractFunction:function(){
+                        console.info(((gel(".div_call_contract_function .value_list").value).split(/\n/)));
                         //nameOrId=>合约名字或ID
                         bcx.callContractFunction({
                             nameOrId:gel(".div_call_contract_function .nameOrId").value,
                             functionName:gel(".div_call_contract_function .function_name").value,//["1",1000001,'COCOS']
-                            valueList:(gel(".div_call_contract_function .value_list").value).split(","),//['4.2.0',{"type":"Employee","employeeId":"551"}],////[{"level":1,"color":"red","clothes":{"size":7}}],//
+                            valueList:(gel(".div_call_contract_function .value_list").value).split(/\n/),//['4.2.0',{"type":"Employee","employeeId":"551"}],////[{"level":1,"color":"red","clothes":{"size":7}}],//
                             onlyGetFee:false,
                             callback:function(res){
                                 console.info("callContractFunction res",res);

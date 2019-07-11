@@ -125,7 +125,6 @@ let permissionUtils = {
     async unravel (accountPermission, type, recursive_count = 0){
         if (recursive_count < 3) {
             let account =Immutable.fromJS((await API.Account.getAccount(accountPermission.id,false)).data.account);
-            // console.info("account11111111",account.toJS());
             if (account && account.getIn([type, "account_auths"]).size) {
                 await Promise.all(account.getIn([type, "account_auths"]).map(async auth=>{
                     let nestedAccount =(await API.Account.getAccount(auth.get(0),false)).data.account;
@@ -136,7 +135,6 @@ let permissionUtils = {
                 }))
             }
         }
-        // console.info("accountPermission22222222222",JSON.parse(JSON.stringify(accountPermission)));
         return accountPermission;
     },
 

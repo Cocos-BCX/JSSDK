@@ -83,58 +83,58 @@ const process_transaction=(transaction,store)=>{
 }
 
 const transactionOpWorker = async (fromId,operations,fromAccount,propose_options,store) => {
-  if(true){
-      const opObjects=await buildOPObjects(operations,fromId,fromAccount,store);
-      if(opObjects.success==false){
-        return opObjects;
-      }
-      let keys=store.rootGetters["PrivateKeyStore/keys"];
-      let aes_private=store.rootGetters["WalletDb/aes_private"];
-      let _passwordKey=store.rootGetters["WalletDb/_passwordKey"]
-      let app_keys=store.rootGetters["PrivateKeyStore/app_keys"];
+  // if(true){
+  //     const opObjects=await buildOPObjects(operations,fromId,fromAccount,store);
+  //     if(opObjects.success==false){
+  //       return opObjects;
+  //     }
+  //     let keys=store.rootGetters["PrivateKeyStore/keys"];
+  //     let aes_private=store.rootGetters["WalletDb/aes_private"];
+  //     let _passwordKey=store.rootGetters["WalletDb/_passwordKey"]
+  //     let app_keys=store.rootGetters["PrivateKeyStore/app_keys"];
 
-      let core_asset=await API.Assets.fetch(["1.3.0"],true);;
+  //     let core_asset=await API.Assets.fetch(["1.3.0"],true);;
       
-      let $passwordKey={};
-      if(_passwordKey){
-        Object.keys(_passwordKey).forEach(pubkeyStr=>{
-          $passwordKey[pubkeyStr]= _passwordKey[pubkeyStr].toWif();
-        })
-      }else {
-        var getPrivateKeyPromises=[];
-        Object.keys(keys).forEach(pubkeyStr=>{
-          getPrivateKeyPromises.push(store.dispatch("WalletDb/getPrivateKey",pubkeyStr,{root:true}));
-        })
+  //     let $passwordKey={};
+  //     if(_passwordKey){
+  //       Object.keys(_passwordKey).forEach(pubkeyStr=>{
+  //         $passwordKey[pubkeyStr]= _passwordKey[pubkeyStr].toWif();
+  //       })
+  //     }else {
+  //       var getPrivateKeyPromises=[];
+  //       Object.keys(keys).forEach(pubkeyStr=>{
+  //         getPrivateKeyPromises.push(store.dispatch("WalletDb/getPrivateKey",pubkeyStr,{root:true}));
+  //       })
 
-        let privateKeys=await Promise.all(getPrivateKeyPromises);
-        privateKeys.forEach(key=>{
-          $passwordKey[key.toPublicKey().toString()]=key.toWif();
-        })
-      }
+  //       let privateKeys=await Promise.all(getPrivateKeyPromises);
+  //       privateKeys.forEach(key=>{
+  //         $passwordKey[key.toPublicKey().toString()]=key.toWif();
+  //       })
+  //     }
  
-      return  new Promise((resolve)=>{
-        var transactionWorker = require("bcl-worker-loader?name=bcxWorker.js!../workers/transactionWorker.js")
-        var worker = new transactionWorker;
-        // console.info("opObjects",opObjects);
-        worker.postMessage({
-          opObjects,
-          propose_options,
-          core_asset,
-          onlyGetOPFee:store.rootGetters["transactions/onlyGetOPFee"],
-          url:store.rootGetters["setting/SELECT_WS_NODE_URL"],
-          keys,
-          aes_private,
-          _passwordKey:$passwordKey,
-          app_keys,
-          networks:store.rootGetters["setting/networks"],
-          fromId
-        });
-        worker.onmessage = event => {
-          var res = event.data;
-          resolve(res);
-        }
-      })
-    }
+  //     return  new Promise((resolve)=>{
+  //       var transactionWorker = require("bcl-worker-loader?name=bcxWorker.js!../workers/transactionWorker.js")
+  //       var worker = new transactionWorker;
+  //       // console.info("opObjects",opObjects);
+  //       worker.postMessage({
+  //         opObjects,
+  //         propose_options,
+  //         core_asset,
+  //         onlyGetOPFee:store.rootGetters["transactions/onlyGetOPFee"],
+  //         url:store.rootGetters["setting/SELECT_WS_NODE_URL"],
+  //         keys,
+  //         aes_private,
+  //         _passwordKey:$passwordKey,
+  //         app_keys,
+  //         networks:store.rootGetters["setting/networks"],
+  //         fromId
+  //       });
+  //       worker.onmessage = event => {
+  //         var res = event.data;
+  //         resolve(res);
+  //       }
+  //     })
+  //   }
 };
 
 const transactionOp = async (fromId,operations,fromAccount,proposeAccountId="",store) => {

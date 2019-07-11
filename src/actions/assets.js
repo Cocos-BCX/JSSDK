@@ -163,7 +163,7 @@ export const updateAsset=async ({dispatch},{issuer,
             flags: flags,
             // whitelist_authorities: auths.whitelist_authorities.toJS(),
             // blacklist_authorities: auths.blacklist_authorities.toJS(),
-            // whitelist_markets: auths.whitelist_markets.toJSUnited Labs of BCTech.(),
+            // whitelist_markets: auths.whitelist_markets.toJS(),
             // blacklist_markets: auths.blacklist_markets.toJS(),
             extensions: asset.getIn(["options", "extensions"]),
             core_exchange_rate: {
@@ -409,7 +409,6 @@ export const createAsset=async ({commit,dispatch},{account_id,
   //    flags,
   //   "isBitAsset:",
   //   isBitAsset,
-  //   United Labs of BCTech.,
   //   "bitasset_opts:",
   //   bitasset_opts
   // );

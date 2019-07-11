@@ -54,9 +54,10 @@ const actions={
                 return
             }
             account_refs = account_refs.add(refs.valueSeq())
-        }));
 
-        account_refs = account_refs.flatten()
+        }));
+        account_refs = account_refs.flatten();
+
         await Promise.all(account_refs.map(async account => {
             let refs =await API.Account.getAccountRefsOfAccount(account); //ChainStore.getAccountRefsOfAccount(account);
             refs=Immutable.fromJS(refs);
@@ -68,13 +69,13 @@ const actions={
         account_refs = account_refs.flatten();
 
         if( ! state.account_refs.equals(account_refs)) {
-            // console.log("AccountRefsStore account_refs",account_refs.size);
            state.account_refs=account_refs;
         }
         if(!_no_account_refs.equals(no_account_refs)) {
             _no_account_refs= no_account_refs
             saveNoAccountRefs(no_account_refs)
         }
+        return true;
     }
 }
 

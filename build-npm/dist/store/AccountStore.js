@@ -63,7 +63,7 @@ var initialState = {
     currentAccount: null,
     linkedAccounts: _immutable2.default.Set(),
     myIgnoredAccounts: _immutable2.default.Set(),
-    unFollowedAccounts: _immutable2.default.Set(accountStorage.get("unfollowed_accounts", [])),
+    unFollowedAccounts: _immutable2.default.Set(process.browser ? accountStorage.get("unfollowed_accounts", []) : []),
     searchAccounts: _immutable2.default.Map(),
     searchTerm: "",
     initial_account_refs_load: true,
@@ -85,9 +85,9 @@ var actions = {
         var chainId = _bcxjsWs.Apis.instance().chain_id;
         return new _promise2.default(function (resolve, reject) {
             _idbInstance2.default.load_data("linked_accounts").then(function (data) {
-                if (data.length) {
+                if (!data.length) {
                     //config current account
-                    dispatch("tryToSetCurrentAccount", null);
+                    accountStorage.set("currentAccount", null);
                 }
                 var accountPromises = data.filter(function (a) {
                     if (a.chainId) {
@@ -100,14 +100,15 @@ var actions = {
                     dispatch("_addIgnoredAccount", a.name);
                     return (0, _bcxjsCores.FetchChain)("getAccount", a.name);
                 });
-
-                state.linkedAccounts = linkedAccounts.asImmutable();
                 _promise2.default.all(accountPromises).then(function (results) {
-                    _bcxjsCores.ChainStore.subscribe(function () {
-                        dispatch("chainStoreUpdate");
+                    state.linkedAccounts = linkedAccounts.asImmutable();
+                    dispatch("tryToSetCurrentAccount", null).then(function (acc_res) {
+                        _bcxjsCores.ChainStore.subscribe(function () {
+                            dispatch("chainStoreUpdate");
+                        });
+                        resolve();
+                        state.subbed = true;
                     });
-                    resolve();
-                    state.subbed = true;
                 }).catch(function (err) {
                     _bcxjsCores.ChainStore.subscribe(function () {
                         dispatch("chainStoreUpdate");
@@ -162,7 +163,6 @@ var actions = {
                 }
             });
         });
-
         state.initial_account_refs_load = pending;
         dispatch("tryToSetCurrentAccount");
     },
@@ -170,28 +170,26 @@ var actions = {
         var dispatch = _ref5.dispatch,
             state = _ref5.state;
 
-
         if (accountStorage.get("currentAccount", null)) {
             return dispatch("setCurrentAccount", accountStorage.get("currentAccount", null));
         }
-
-        // let {starredAccounts} = SettingsStore.getState();
-        // if (starredAccounts.size) {
-        //     return dispatch("setCurrentAccount",starredAccounts.first().name);
-        // }
-
         if (state.linkedAccounts.size) {
-            dispatch("setCurrentAccount", state.linkedAccounts.first());
+            return dispatch("setCurrentAccount", state.linkedAccounts.first());
         }
+        return true;
     },
     setCurrentAccount: function setCurrentAccount(_ref6, name) {
         var dispatch = _ref6.dispatch,
             state = _ref6.state;
+        var isCreateAccount;
         return _regenerator2.default.async(function setCurrentAccount$(_context) {
             while (1) {
                 switch (_context.prev = _context.next) {
                     case 0:
+                        isCreateAccount = false;
+
                         if (name && (typeof name === "undefined" ? "undefined" : (0, _typeof3.default)(name)) == "object") {
+                            isCreateAccount = !!name.isCreateAccount;
                             name = name.account;
                         }
                         if (!name) {
@@ -204,7 +202,7 @@ var actions = {
                         accountStorage.set("currentAccount", state.currentAccount);
 
                         if (!name) {
-                            _context.next = 7;
+                            _context.next = 8;
                             break;
                         }
 
@@ -214,13 +212,13 @@ var actions = {
                                     delete acc_res.success;
                                     resolve(acc_res);
                                 });
-                            }, 2000);
+                            }, isCreateAccount ? 2000 : 100);
                         }));
 
-                    case 7:
+                    case 8:
                         return _context.abrupt("return", { code: 0, message: "Name can not be empty" });
 
-                    case 8:
+                    case 9:
                     case "end":
                         return _context.stop();
                 }
@@ -250,27 +248,29 @@ var actions = {
             chainId: _bcxjsWs.Apis.instance().chain_id
         }).then(function () {
             //console.log("[AccountStore.js] ----- Added account to store: ----->", account.name);
-            return dispatch("AccountRefsStore/loadDbData", null, { root: true }).then(function () {
-                return dispatch("loadDbData").then(function () {
-                    state.linkedAccounts = state.linkedAccounts.add(account.name);
-                    if (state.linkedAccounts.size === 1) {
-                        return dispatch("setCurrentAccount", account.name).then(function () {
-                            if (owner_pubkey) {
-                                return _api2.default.Account.getAccountIdByOwnerPubkey(owner_pubkey).then(function (userId) {
-                                    var id = userId && userId[0];
-                                    if (id) {
-                                        id = userId[0];
-                                        return id;
-                                    }
-                                    dispatch("account/account_signup_complete", { userId: id }, { root: true });
-                                });
+            // return dispatch("AccountRefsStore/loadDbData",null,{root:true}).then(()=>{
+            //     return dispatch("loadDbData").then(()=>{
+
+            //     })  
+            // })  
+            state.linkedAccounts = state.linkedAccounts.add(account.name);
+
+            if (state.linkedAccounts.size === 1) {
+                return dispatch("setCurrentAccount", { account: account.name, isCreateAccount: true }).then(function (acc_res) {
+                    if (owner_pubkey) {
+                        return _api2.default.Account.getAccountIdByOwnerPubkey(owner_pubkey).then(function (userId) {
+                            var id = userId && userId[0];
+                            if (id) {
+                                id = userId[0];
+                                dispatch("account/account_signup_complete", { userId: id }, { root: true });
+                                return id;
                             }
                         });
-                    } else {
-                        return { code: 1 };
                     }
                 });
-            });
+            } else {
+                return { code: 1 };
+            }
         });
     }
 };

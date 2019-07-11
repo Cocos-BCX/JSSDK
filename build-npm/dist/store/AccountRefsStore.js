@@ -153,7 +153,6 @@ var actions = {
                     case 5:
 
                         account_refs = account_refs.flatten();
-
                         _context3.next = 8;
                         return _regenerator2.default.awrap(_promise2.default.all(account_refs.map(function _callee2(account) {
                             var refs;
@@ -198,6 +197,7 @@ var actions = {
                     case 8:
 
                         account_refs = account_refs.flatten();
+
                         if (!state.account_refs.equals(account_refs)) {
                             // console.log("AccountRefsStore account_refs",account_refs.size);
                             state.account_refs = account_refs;

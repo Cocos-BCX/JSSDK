@@ -5,7 +5,6 @@ import Immutable from "immutable";
 import * as types from '../mutations';
 import API from '../services/api';
 import PersistentStorage from '../services/persistent-storage';
-// import _dictionary from '../../test/brainkey_dictionary.js';United Labs of BCTech.
 import * as WalletDbS from '../store/WalletDb';
 import utils from '../lib/common/utils';
 import helper from '../lib/common/helper';
@@ -42,7 +41,7 @@ const createWallet = ({ password,wif }) => {
   return result;
 };
 
-/**United Labs of BCTech.
+/**
  * Unlocks user's wallet via provided password
  * @param {string} password - user password
  */
@@ -447,12 +446,13 @@ export const saveImport=({state,dispatch,rootGetters})=>{
 
       var import_count = private_key_objs.length;
       console.log(`Successfully imported ${import_count} keys.`)
-      // this.onCancel() // back to claim balances. United Labs of BCTech.
-
-      return dispatch("AccountStore/onCreateAccount",{name_or_account:private_key_objs[0].import_account_names[0]},{root:true}).then(()=>{
-          let names =rootGetters["AccountStore/linkedAccounts"].toArray().sort();
-          return dispatch("getAccountInfo");   
-      });                    
+      // this.onCancel() // back to claim balances.
+      return dispatch("AccountRefsStore/checkPrivateKeyStore",null,{root:true}).then(()=>{
+          return dispatch("AccountStore/onCreateAccount",{name_or_account:private_key_objs[0].import_account_names[0]},{root:true}).then(()=>{
+              let names =rootGetters["AccountStore/linkedAccounts"].toArray().sort();
+              return dispatch("getAccountInfo");   
+          }); 
+      });                 
   }).catch(error => {
       console.error("error:", error)
       var message = error
@@ -561,7 +561,7 @@ export const changePassword=async ({dispatch,rootGetters},params)=>{
     return {code:101,message:"Parameter is missing"};
   }
 
-  let {account,oldPassword,newPassword}=params;
+  let {account,oldPassword,newPassword,onlyGetFee=false}=params;
 
   let _passwordKey=rootGetters["WalletDb/_passwordKey"];
   let aes_private=rootGetters["WalletDb/aes_private"];
@@ -607,7 +607,8 @@ export const changePassword=async ({dispatch,rootGetters},params)=>{
                   activePubkey:activeKey.toPublicKey().toPublicKeyString(),
                   ownerPubkey:ownerKey.toPublicKey().toPublicKeyString()
                 }
-              }]
+              }],
+              onlyGetFee
           },{root:true})
 }
 
@@ -912,7 +913,7 @@ export const getAccountInfo=({rootGetters})=>{
     locked:rootGetters["WalletDb/isLocked"]
   } 
   res.account_name=accountObject?accountObject.name:"";
-  res.mode=rootGetters["AccountStore/linkedAccounts"].toJS().length?"wallet":"account";
+  res.mode=rootGetters["WalletDb/wallet"]?"wallet":"account";
   return {
     code:1,
     data:res

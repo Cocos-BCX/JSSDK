@@ -307,7 +307,7 @@ var global = module.exports = typeof window != 'undefined' && window.Math == Mat
           locked:getters["WalletDb/isLocked"]
         } 
         res.account_name=accountObject?accountObject.name:"";
-        res.mode=this.api.getters["AccountStore/linkedAccounts"].toJS().length?"wallet":"account";
+        res.mode=this.api.getters["WalletDb/wallet"]?"wallet":"account";
         return res;
       }
 
@@ -317,14 +317,14 @@ var global = module.exports = typeof window != 'undefined' && window.Math == Mat
               params.callback(init_res.code==1?{
                 code:1,
                 data:{
-                  accounts:this.api.getters["AccountStore/linkedAccounts"].toJS(),
+                  accounts:this.api.getters["WalletDb/wallet"]?this.api.getters["AccountStore/linkedAccounts"].toJS():[],
                   current_account:this.getAccountInfo()
                 }
               }:init_res)
           });
         }
         return {
-          accounts:this.api.getters["AccountStore/linkedAccounts"].toJS(),
+          accounts:this.api.getters["WalletDb/wallet"]?this.api.getters["AccountStore/linkedAccounts"].toJS():[],
           current_account:this.getAccountInfo()
         }
       }

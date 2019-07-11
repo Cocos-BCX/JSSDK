@@ -58,7 +58,7 @@ var publishVotes = exports.publishVotes = function publishVotes(store, witnesses
     var vote_ids = getters.getVotesState.vote_ids;
 
 
-    new_options.voting_account = new_proxy_id ? new_proxy_id : "1.2.5";
+    new_options.voting_account = new_proxy_id ? new_proxy_id : "1.2.2";
     new_options.num_witness = witnesses_ids.length;
     new_options.num_committee = committee_ids.length;
 
@@ -249,7 +249,7 @@ var updateAccountData = function _callee2(store, type) {
                     account = account.data.account;
                     account = _immutable2.default.fromJS(account);
                     proxyId = account.getIn(["options", "voting_account"]);
-                    proxy_account_id = proxyId === "1.2.5" ? "" : proxyId;
+                    proxy_account_id = proxyId === "1.2.2" ? "" : proxyId;
                     proxy = null;
 
                     if (!proxy_account_id) {
@@ -276,7 +276,7 @@ var updateAccountData = function _callee2(store, type) {
                     current_proxy_input = proxy ? proxy.get("name") : "";
 
 
-                    if (proxy_account_id === "1.2.5") {
+                    if (proxy_account_id === "1.2.2") {
                         proxy_account_id = "";
                         current_proxy_input = "";
                     }
@@ -288,7 +288,7 @@ var updateAccountData = function _callee2(store, type) {
                     });
                     vids = _immutable2.default.Set(vote_ids);
                     proxyPromise = null, proxy_vids = _immutable2.default.Set([]);
-                    hasProxy = proxy_account_id !== "1.2.5";
+                    hasProxy = proxy_account_id !== "1.2.2";
 
                     if (hasProxy && proxyOptions) {
                         proxy_votes = proxyOptions.get("votes");

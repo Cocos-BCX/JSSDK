@@ -125,7 +125,7 @@ var lockWallet = exports.lockWallet = function lockWallet(_ref3) {
  * @param {string} dictionary - string to generate brainkey from
  */
 var createAccountWithPassword = exports.createAccountWithPassword = function _callee(store, params) {
-  var account, password, _params$autoLogin, autoLogin, _params$onlyGetFee, onlyGetFee, commit, dispatch, rootGetters, getters, acc_res, _WalletDbS$generateKe, owner_private, _WalletDbS$generateKe2, active_private, result, exist_account_id, settingsAPIs, userId, id, wallet;
+  var account, password, _params$autoLogin, autoLogin, _params$onlyGetFee, onlyGetFee, commit, dispatch, rootGetters, getters, acc_res, _WalletDbS$generateKe, owner_private, _WalletDbS$generateKe2, active_private, result, exist_account_id, settingsAPIs, userId, id;
 
   return _regenerator2.default.async(function _callee$(_context) {
     while (1) {
@@ -213,7 +213,7 @@ var createAccountWithPassword = exports.createAccountWithPassword = function _ca
           console.log('Account created : ', result.success);
 
           if (!result.success) {
-            _context.next = 39;
+            _context.next = 35;
             break;
           }
 
@@ -225,30 +225,25 @@ var createAccountWithPassword = exports.createAccountWithPassword = function _ca
           id = userId && userId[0];
 
           if (id) id = userId[0];
-
-          if (!autoLogin) {
-            _context.next = 38;
-            break;
-          }
-
           return _context.abrupt("return", new _promise2.default(function (resolve) {
             setTimeout(function () {
-              resolve(dispatch("account/passwordLogin", {
-                account: account,
-                password: password
-              }, { root: true }));
+              if (autoLogin) {
+                resolve(dispatch("account/passwordLogin", {
+                  account: account,
+                  password: password
+                }, { root: true }));
+              } else {
+                resolve({ code: 1, data: { account_id: id, account_name: account } });
+              }
             }, 2000);
           }));
 
-        case 38:
-          return _context.abrupt("return", dispatch("getAccountInfo"));
-
-        case 39:
+        case 35:
 
           commit(types.ACCOUNT_SIGNUP_ERROR, { error: result.error });
           return _context.abrupt("return", { code: 0, message: result.error, error: result.error });
 
-        case 41:
+        case 37:
         case "end":
           return _context.stop();
       }
@@ -1003,7 +998,7 @@ var passwordLogin = exports.passwordLogin = function _callee7(store, params) {
             break;
           }
 
-          if (!rootGetters["AccountStore/linkedAccounts"].size) {
+          if (!rootGetters["WalletDb/wallet"]) {
             _context7.next = 24;
             break;
           }
@@ -1480,44 +1475,44 @@ var _accountOpt = exports._accountOpt = function _callee16(_ref29, _ref30) {
         case 0:
 
           _helper2.default.trimParams(params);
-          params.crontab = params.crontab || null;
-          dispatch("crontab/setCrontab", params.crontab, { root: true });
+          // params.crontab=params.crontab||null;
+          // dispatch("crontab/setCrontab",params.crontab,{root:true});
 
           account = rootGetters["user/getAccountObject"];
 
           if (account) {
-            _context16.next = 11;
+            _context16.next = 9;
             break;
           }
 
           userId = rootGetters["account/getAccountUserId"];
 
           if (!userId) {
-            _context16.next = 11;
+            _context16.next = 9;
             break;
           }
 
-          _context16.next = 9;
+          _context16.next = 7;
           return _regenerator2.default.awrap(dispatch("user/fetchUser", userId, { root: true }));
 
-        case 9:
+        case 7:
           user_result = _context16.sent;
 
           if (user_result.success) account = user_result.data.account;
 
-        case 11:
+        case 9:
           if (!account) {
-            _context16.next = 16;
+            _context16.next = 14;
             break;
           }
 
           if (!params.account) params.account = account;
           return _context16.abrupt("return", dispatch(method, params, { root: true }));
 
-        case 16:
+        case 14:
           return _context16.abrupt("return", { code: -11, message: "Please login first" });
 
-        case 17:
+        case 15:
         case "end":
           return _context16.stop();
       }
@@ -1821,7 +1816,7 @@ var getAccountInfo = exports.getAccountInfo = function getAccountInfo(_ref38) {
     locked: rootGetters["WalletDb/isLocked"]
   };
   res.account_name = accountObject ? accountObject.name : "";
-  res.mode = rootGetters["AccountStore/linkedAccounts"].toJS().length ? "wallet" : "account";
+  res.mode = rootGetters["WalletDb/wallet"] ? "wallet" : "account";
   return {
     code: 1,
     data: res

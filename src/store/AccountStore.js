@@ -60,7 +60,7 @@ const actions={
                         ChainStore.subscribe(()=>{
                             dispatch("chainStoreUpdate");
                         });
-                        resolve();
+                        resolve(true);
                         state.subbed=true;
                     });
                 }).catch(err => {
@@ -109,7 +109,7 @@ const actions={
             })
         })
         state.initial_account_refs_load = pending;
-        dispatch("tryToSetCurrentAccount")
+        return dispatch("tryToSetCurrentAccount")
     },
     tryToSetCurrentAccount:({dispatch,state})=>{
         if (accountStorage.get("currentAccount", null)) {

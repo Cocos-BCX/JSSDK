@@ -116,7 +116,7 @@ class UserOperations extends Subscription {
 
   notify(operation) {
     if(operation&&operation.op){
-      const _userOperationsCodes =[0, 1, 2,3,4,5,6,8,10,11,14,15,16,21,22,42,44,47,49,50,51,52,53,54,55,56,57,58,59,63];
+      const _userOperationsCodes = [0, 1, 2,3,4,5,6,7,8,9,10,11,13,14,15,18,21,22,32,39,43,44,46,47,48,49,50,51,52,53,54,59,60,61,62];
       const _opCode = operation.op[0];
       if (_userOperationsCodes.indexOf(_opCode) > -1) {
         const usersIds = this._getOperationUserIds(operation);
@@ -137,7 +137,7 @@ class AllOperations extends Subscription {
 
   notify(operation) {
     if(operation&&operation.op){
-      const _userOperationsCodes =[0, 1, 2,3,4,5,6,8,9,10,11,13,14,15,21,22,32,39,43,44,46,47,48,49,50,51,52,53,54,55,60,300,301,303,3010,3011,3012];
+      const _userOperationsCodes = [0, 1, 2,3,4,5,6,7,8,9,10,11,13,14,15,18,21,22,32,39,43,44,46,47,48,49,50,51,52,53,54,59,60,61,62];
       const _opCode = operation.op[0];
       if (_userOperationsCodes.indexOf(_opCode) > -1) {
         this._callback(operation);

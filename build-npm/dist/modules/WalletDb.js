@@ -753,7 +753,6 @@ var actions = {
                                 name_or_account: account_name,
                                 owner_pubkey: owner_pubkey
                             }, { root: true }).then(function (account_id) {
-                                console.info("account_id", account_id);
                                 if (registrar) {
                                     return result;
                                 } else {

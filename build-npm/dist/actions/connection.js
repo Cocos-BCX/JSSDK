@@ -197,7 +197,7 @@ var initConnection = exports.initConnection = function initConnection(store, par
             store_autoReconnect = rootGetters["setting/autoReconnect"];
 
             if (!(status === 'error' || status === 'closed')) {
-              _context3.next = 12;
+              _context3.next = 13;
               break;
             }
 
@@ -209,7 +209,7 @@ var initConnection = exports.initConnection = function initConnection(store, par
             _bcxjsCores.ChainStore.subscribed = false;
 
             if (!(_new_node_connecting == false && store_autoReconnect)) {
-              _context3.next = 12;
+              _context3.next = 13;
               break;
             }
 
@@ -220,8 +220,9 @@ var initConnection = exports.initConnection = function initConnection(store, par
             _startConnectTimer = setTimeout(function () {
               startConnect(selectedNodeUrl);
             }, 3000);
+            return _context3.abrupt('return');
 
-          case 12:
+          case 13:
 
             //RPC connected
             if (status === 'realopen') {
@@ -247,7 +248,7 @@ var initConnection = exports.initConnection = function initConnection(store, par
               });
             }
 
-          case 13:
+          case 14:
           case 'end':
             return _context3.stop();
         }

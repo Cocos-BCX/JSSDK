@@ -96,10 +96,6 @@ var _explorer = require('./modules/explorer.js');
 
 var _explorer2 = _interopRequireDefault(_explorer);
 
-var _crontab = require('./modules/crontab.js');
-
-var _crontab2 = _interopRequireDefault(_crontab);
-
 var _AddressIndex = require('./store/AddressIndex.js');
 
 var _AddressIndex2 = _interopRequireDefault(_AddressIndex);
@@ -133,13 +129,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // require('babel-polyfill');
-// if(process.browser){
 require('bcxjs-indexeddbshim');
-//}
-
-// var global = module.exports = typeof window != 'undefined' && window.Math == Math
-//   ? window : typeof self != 'undefined' && self.Math == Math ? self
-//   : Function('return this')();
 
 var BCX = function () {
   function BCX(params) {
@@ -157,7 +147,7 @@ var BCX = function () {
         connection: _connection2.default,
         user: _user2.default,
         assets: _assets2.default
-      }, (0, _defineProperty3.default)(_modules, 'setting', _setting2.default), (0, _defineProperty3.default)(_modules, 'market', _market2.default), (0, _defineProperty3.default)(_modules, 'history', _history2.default), (0, _defineProperty3.default)(_modules, 'operations', _operations2.default), (0, _defineProperty3.default)(_modules, 'PrivateKeyStore', _PrivateKeyStore2.default), (0, _defineProperty3.default)(_modules, 'WalletDb', _WalletDb2.default), (0, _defineProperty3.default)(_modules, 'contract', _contract2.default), (0, _defineProperty3.default)(_modules, 'vote', _vote2.default), (0, _defineProperty3.default)(_modules, 'NHAssets', _NHAssets2.default), (0, _defineProperty3.default)(_modules, 'proposals', _proposals2.default), (0, _defineProperty3.default)(_modules, 'explorer', _explorer2.default), (0, _defineProperty3.default)(_modules, 'crontab', _crontab2.default), (0, _defineProperty3.default)(_modules, 'AddressIndex', _AddressIndex2.default), (0, _defineProperty3.default)(_modules, 'AccountRefsStore', _AccountRefsStore2.default), (0, _defineProperty3.default)(_modules, 'WalletManagerStore', _WalletManagerStore2.default), (0, _defineProperty3.default)(_modules, 'CachedPropertyStore', _CachedPropertyStore2.default), (0, _defineProperty3.default)(_modules, 'BackupStore', _BackupStore2.default), (0, _defineProperty3.default)(_modules, 'AccountStore', _AccountStore2.default), _modules)
+      }, (0, _defineProperty3.default)(_modules, 'setting', _setting2.default), (0, _defineProperty3.default)(_modules, 'market', _market2.default), (0, _defineProperty3.default)(_modules, 'history', _history2.default), (0, _defineProperty3.default)(_modules, 'operations', _operations2.default), (0, _defineProperty3.default)(_modules, 'PrivateKeyStore', _PrivateKeyStore2.default), (0, _defineProperty3.default)(_modules, 'WalletDb', _WalletDb2.default), (0, _defineProperty3.default)(_modules, 'contract', _contract2.default), (0, _defineProperty3.default)(_modules, 'vote', _vote2.default), (0, _defineProperty3.default)(_modules, 'NHAssets', _NHAssets2.default), (0, _defineProperty3.default)(_modules, 'proposals', _proposals2.default), (0, _defineProperty3.default)(_modules, 'explorer', _explorer2.default), (0, _defineProperty3.default)(_modules, 'AddressIndex', _AddressIndex2.default), (0, _defineProperty3.default)(_modules, 'AccountRefsStore', _AccountRefsStore2.default), (0, _defineProperty3.default)(_modules, 'WalletManagerStore', _WalletManagerStore2.default), (0, _defineProperty3.default)(_modules, 'CachedPropertyStore', _CachedPropertyStore2.default), (0, _defineProperty3.default)(_modules, 'BackupStore', _BackupStore2.default), (0, _defineProperty3.default)(_modules, 'AccountStore', _AccountStore2.default), _modules)
     });
 
     this.apiMethodsInt();
@@ -288,9 +278,7 @@ var BCX = function () {
 
         transferAsset: "transactions/transferAsset",
         setCurrentAccount: "AccountStore/setCurrentAccount",
-        proposeRelateWorldView: "NHAssets/proposeRelateWorldView",
-        cancelCrontabs: "crontab/cancelCrontabs",
-        crontabRecover: "crontab/crontabRecover"
+        proposeRelateWorldView: "NHAssets/proposeRelateWorldView"
       };
 
       var use_validateAccount_methods = {
@@ -300,8 +288,7 @@ var BCX = function () {
         queryAccountNHAssets: "NHAssets/queryAccountNHAssets",
         queryAccountNHAssetOrders: "NHAssets/queryAccountNHAssetOrders",
         queryNHAssetsByCreator: "NHAssets/queryNHAssetsByCreator",
-        getAccountProposals: "proposals/loadAccountProposals",
-        queryCrontabs: "crontab/queryCrontabs"
+        getAccountProposals: "proposals/loadAccountProposals"
       };
 
       var _loop = function _loop(key) {
@@ -453,7 +440,7 @@ var BCX = function () {
         locked: getters["WalletDb/isLocked"]
       };
       res.account_name = accountObject ? accountObject.name : "";
-      res.mode = this.api.getters["AccountStore/linkedAccounts"].toJS().length ? "wallet" : "account";
+      res.mode = this.api.getters["WalletDb/wallet"] ? "wallet" : "account";
       return res;
     }
   }, {
@@ -462,18 +449,18 @@ var BCX = function () {
       var _this5 = this;
 
       if (params && params.callback) {
-        setTimeout(function () {
-          params.callback({
+        this.init().then(function (init_res) {
+          params.callback(init_res.code == 1 ? {
             code: 1,
             data: {
-              accounts: _this5.api.getters["AccountStore/linkedAccounts"].toJS(),
+              accounts: _this5.api.getters["WalletDb/wallet"] ? _this5.api.getters["AccountStore/linkedAccounts"].toJS() : [],
               current_account: _this5.getAccountInfo()
             }
-          });
-        }, 500);
+          } : init_res);
+        });
       }
       return {
-        accounts: this.api.getters["AccountStore/linkedAccounts"].toJS(),
+        accounts: this.api.getters["WalletDb/wallet"] ? this.api.getters["AccountStore/linkedAccounts"].toJS() : [],
         current_account: this.getAccountInfo()
       };
     }
@@ -663,4 +650,3 @@ var BCX = function () {
 }();
 
 exports.default = BCX;
-// global.BCX=BCX;

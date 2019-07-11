@@ -273,62 +273,67 @@ var transactionOpWorker = function _callee4(fromId, operations, fromAccount, pro
     while (1) {
       switch (_context4.prev = _context4.next) {
         case 0:
-          _context4.next = 2;
+          if (!true) {
+            _context4.next = 26;
+            break;
+          }
+
+          _context4.next = 3;
           return _regenerator2.default.awrap(buildOPObjects(operations, fromId, fromAccount, store));
 
-        case 2:
+        case 3:
           opObjects = _context4.sent;
 
           if (!(opObjects.success == false)) {
-            _context4.next = 5;
+            _context4.next = 6;
             break;
           }
 
           return _context4.abrupt('return', opObjects);
 
-        case 5:
+        case 6:
           keys = store.rootGetters["PrivateKeyStore/keys"];
           aes_private = store.rootGetters["WalletDb/aes_private"];
           _passwordKey = store.rootGetters["WalletDb/_passwordKey"];
           app_keys = store.rootGetters["PrivateKeyStore/app_keys"];
-          _context4.next = 11;
+          _context4.next = 12;
           return _regenerator2.default.awrap(_api2.default.Assets.fetch(["1.3.0"], true));
 
-        case 11:
+        case 12:
           core_asset = _context4.sent;
           ;
 
           $passwordKey = {};
 
           if (!_passwordKey) {
-            _context4.next = 18;
+            _context4.next = 19;
             break;
           }
 
           (0, _keys2.default)(_passwordKey).forEach(function (pubkeyStr) {
             $passwordKey[pubkeyStr] = _passwordKey[pubkeyStr].toWif();
           });
-          _context4.next = 24;
+          _context4.next = 25;
           break;
 
-        case 18:
+        case 19:
           getPrivateKeyPromises = [];
 
           (0, _keys2.default)(keys).forEach(function (pubkeyStr) {
             getPrivateKeyPromises.push(store.dispatch("WalletDb/getPrivateKey", pubkeyStr, { root: true }));
           });
 
-          _context4.next = 22;
+          _context4.next = 23;
           return _regenerator2.default.awrap(_promise2.default.all(getPrivateKeyPromises));
 
-        case 22:
+        case 23:
           privateKeys = _context4.sent;
 
           privateKeys.forEach(function (key) {
             $passwordKey[key.toPublicKey().toString()] = key.toWif();
           });
 
-        case 24:
+        case 25:
           return _context4.abrupt('return', new _promise2.default(function (resolve) {
             var transactionWorker = require("bcl-worker-loader?name=bcxWorker.js!../workers/transactionWorker.js");
             var worker = new transactionWorker();
@@ -352,7 +357,7 @@ var transactionOpWorker = function _callee4(fromId, operations, fromAccount, pro
             };
           }));
 
-        case 25:
+        case 26:
         case 'end':
           return _context4.stop();
       }
@@ -363,7 +368,7 @@ var transactionOpWorker = function _callee4(fromId, operations, fromAccount, pro
 var transactionOp = function _callee5(fromId, operations, fromAccount) {
   var proposeAccountId = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : "";
   var store = arguments[4];
-  var opObjects, transaction, crontab, startTime, executeInterval, executeTimes, res, now_time, crontab_options, propose_options;
+  var opObjects, transaction, propose_options;
   return _regenerator2.default.async(function _callee5$(_context5) {
     while (1) {
       switch (_context5.prev = _context5.next) {
@@ -391,90 +396,61 @@ var transactionOp = function _callee5(fromId, operations, fromAccount) {
             transaction.add_type_operation(op.type, op.opObject);
           });
 
-          crontab = store.rootState.crontab.crontab;
+          // let {crontab}=store.rootState.crontab;
 
-          if (!crontab) {
-            _context5.next = 29;
-            break;
-          }
+          // if(crontab){
+          //   await transaction.set_required_fees();
+          //   await  transaction.update_head_block();
+          //   let {startTime,executeInterval,executeTimes}=crontab;
 
-          _context5.next = 11;
-          return _regenerator2.default.awrap(transaction.set_required_fees());
+          //   if(startTime==undefined||executeInterval==undefined||executeTimes==undefined){
+          //     return {code:101,message:"Crontab parameter is missing"};
+          //   }
+          //   startTime=parseInt(startTime);
+          //   executeInterval=parseInt(executeInterval);
+          //   executeTimes=parseInt(executeTimes);
+          //   if(isNaN(startTime)||isNaN(executeInterval)||isNaN(executeTimes)){
+          //     return {code:1011,message:"Parameter error"};
+          //   }
 
-        case 11:
-          _context5.next = 13;
-          return _regenerator2.default.awrap(transaction.update_head_block());
+          //   if(startTime<=0||executeInterval<=0||executeTimes<=0){
+          //       return {code:176,message:"Crontab must have parameters greater than 0"}
+          //   }
 
-        case 13:
-          startTime = crontab.startTime, executeInterval = crontab.executeInterval, executeTimes = crontab.executeTimes;
+          //   let res=await Apis.instance().db_api().exec("get_objects", [["2.1.0"]]);
+          //   let now_time=new Date(res[0].time+"Z").getTime();
+          //   let crontab_options={
+          //     crontab_creator:fromId,
+          //     start_time:Math.floor((now_time+startTime)/1000),//+Number(startTime),
+          //     execute_interval:executeInterval,
+          //     scheduled_execute_times:executeTimes
+          //   }
+          //   transaction.crontab(crontab_options)   
+          // }
 
-          if (!(startTime == undefined || executeInterval == undefined || executeTimes == undefined)) {
-            _context5.next = 16;
-            break;
-          }
-
-          return _context5.abrupt('return', { code: 101, message: "Crontab parameter is missing" });
-
-        case 16:
-          startTime = parseInt(startTime);
-          executeInterval = parseInt(executeInterval);
-          executeTimes = parseInt(executeTimes);
-
-          if (!(isNaN(startTime) || isNaN(executeInterval) || isNaN(executeTimes))) {
-            _context5.next = 21;
-            break;
-          }
-
-          return _context5.abrupt('return', { code: 1011, message: "Parameter error" });
-
-        case 21:
-          if (!(startTime <= 0 || executeInterval <= 0 || executeTimes <= 0)) {
-            _context5.next = 23;
-            break;
-          }
-
-          return _context5.abrupt('return', { code: 176, message: "Crontab must have parameters greater than 0" });
-
-        case 23:
-          _context5.next = 25;
-          return _regenerator2.default.awrap(_bcxjsWs.Apis.instance().db_api().exec("get_objects", [["2.1.0"]]));
-
-        case 25:
-          res = _context5.sent;
-          now_time = new Date(res[0].time + "Z").getTime();
-          crontab_options = {
-            crontab_creator: fromId,
-            start_time: Math.floor((now_time + startTime) / 1000), //+Number(startTime),
-            execute_interval: executeInterval,
-            scheduled_execute_times: executeTimes
-          };
-
-          transaction.crontab(crontab_options);
-
-        case 29:
           if (!proposeAccountId) {
-            _context5.next = 36;
+            _context5.next = 14;
             break;
           }
 
-          _context5.next = 32;
+          _context5.next = 10;
           return _regenerator2.default.awrap(transaction.set_required_fees());
 
-        case 32:
-          _context5.next = 34;
+        case 10:
+          _context5.next = 12;
           return _regenerator2.default.awrap(transaction.update_head_block());
 
-        case 34:
+        case 12:
           propose_options = {
             fee_paying_account: fromId
           };
 
           transaction.propose(propose_options);
 
-        case 36:
+        case 14:
           return _context5.abrupt('return', process_transaction(transaction, store));
 
-        case 37:
+        case 15:
         case 'end':
           return _context5.stop();
       }

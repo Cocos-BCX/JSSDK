@@ -126,6 +126,11 @@ const Operations = {
           store:_store,
           isContract:true
         });
+        let additional_cost=res.result.additional_cost
+        if(additional_cost){
+          let {amount,asset_id}=additional_cost;
+          res.result.additional_cost_text=await Operations.FormattedAsset(amount,asset_id,0);
+        }
       }
     }
     return res
@@ -139,7 +144,7 @@ const Operations = {
     const ApiObject =[(await API.Explorer.getGlobalObject()).data];
     const ApiObjectDyn =[(await API.Explorer.getDynGlobalObject(false)).data];
     // console.info('operations',JSON.parse(JSON.stringify(operations)));
-    const operationTypes = [0, 1, 2,3,4,5,6,7,8,9,10,11,13,14,15,18,21,22,32,39,43,44,46,47,48,49,50,51,52,53,54,55,60,61,62,300,301,303,3010,3011,3012];//,53,54.55,56,57,58
+    const operationTypes = [0, 1, 2,3,4,5,6,7,8,9,10,11,13,14,15,18,21,22,32,39,43,44,46,47,48,49,50,51,52,53,54,59,60,61,62,300,301,303,3010,3011,3012];//,53,54.55,56,57,58
     const filteredOperations = operations.filter(op => {
       return operationTypes.includes(op.op[0])
     });
