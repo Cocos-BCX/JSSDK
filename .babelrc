@@ -1,0 +1,16 @@
+{
+  "presets": [
+    [
+      "env", {
+        "targets": {
+          "node": "current"
+        },
+        "debug":true
+      }
+    ],
+    [
+      "es2015"
+    ]
+  ],
+  "plugins": ["transform-runtime","babel-plugin-transform-regenerator","transform-object-rest-spread"]
+}
