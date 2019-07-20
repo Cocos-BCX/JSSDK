@@ -601,7 +601,7 @@ export const assetUpdateRestricted=async ({dispatch,rootGetters},params)=>{
   if(isNaN(restrictedType)){
     return {code:173,message:"restrictedType must be a number"};
   }
-  if(!(restrictedList instanceof Array)){
+  if(!(Array.isArray(restrictedList))){
     return {code:174,message:"restricted_list must be a array"};
   }
 

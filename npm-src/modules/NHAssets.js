@@ -55,8 +55,8 @@ const actions={
             }]
           },{root:true});
     },
-    lookupNHAssets:async (store,{NHAssetIds})=>{
-        if(!(NHAssetIds instanceof Array)){
+    lookupNHAssets:async (store,{NHAssetIds,owner=false})=>{
+        if(!(Array.isArray(NHAssetIds))){
             return {code:141,message:"Please check the data in parameter 'NHAssetIds'"}
         }
         if(!NHAssetIds.length){
@@ -66,7 +66,7 @@ const actions={
             return id?id.trim():"";
         });
 
-        return await API.NHAssets.lookupNHAssets(NHAssetIds);
+        return await API.NHAssets.lookupNHAssets(NHAssetIds,owner,store.rootGetters["account/getAccountUserId"]);
     },
     queryAccountNHAssets:async ({dispatch},params) => {
         let result=await API.NHAssets.listAccountNHAssets(params);
@@ -162,7 +162,7 @@ const actions={
 
 
       }else if(type==1){
-          if(NHAssets&&NHAssets instanceof Array&&NHAssets.length){
+          if(NHAssets&&Array.isArray(NHAssets)&&NHAssets.length){
             let overLimit1=_isOverLimit(rootGetters,NHAssets.length,"create NHAsset");
             if(overLimit1.code!=1){
                 return overLimit1;
@@ -202,11 +202,11 @@ const actions={
     },
     deleteNHAsset:async ({dispatch,rootGetters},params) =>{
         helper.trimParams(params);
-        let {callback,itemId,NHAssetIds,onlyGetFee=false}=params;
+        let {callback,itemId,NHAssetIds,onlyGetFee=false,owner=false}=params;
         if(!NHAssetIds){
             return{code:101,message:"Parameter is missing"}
         }
-        if(!(NHAssetIds instanceof Array)){
+        if(!(Array.isArray(NHAssetIds))){
             return {code:135,message:"Please check parameter data type	"};
         }
 
@@ -215,8 +215,11 @@ const actions={
             return overLimit;
         }
 
-        let nhs_res=await API.NHAssets.lookupNHAssets(NHAssetIds);
+        let nhs_res=await API.NHAssets.lookupNHAssets(NHAssetIds,owner,rootGetters['account/getAccountUserId']);
         if(nhs_res.code==1){
+            if(!nhs_res.data.length){
+                return {code:176,message:"You are not the owner of "+NHAssetIds}
+            }
             let operations=nhs_res.data.map(({id})=>{
                 return {
                     op_type:50,
@@ -241,7 +244,7 @@ const actions={
             return {code:101,message:"Parameter is missing"}
         }  
 
-        if(!(NHAssetIds instanceof Array)){
+        if(!(Array.isArray(NHAssetIds))){
             return {code:135,message:"Please check parameter data type	"};
         }
 

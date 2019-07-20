@@ -166,7 +166,7 @@ const actions = {
   },
   unsubscribe:async (store,params)=>{
      let methods=[];
-     if(params&&params.methods&&params.methods instanceof Array){
+     if(params&&params.methods&&Array.isArray(params.methods)){
         methods=params.methods;
      }
      if(!methods.length){

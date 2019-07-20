@@ -320,14 +320,16 @@ const Operations = {
 
         let value_list_jsons={};//use parameters as keyname and merge values into a Json string
         let v="";
-
         if(action){
           action.arglist.forEach((arg,index)=>{
-            v=op.payload.value_list[index][1].v;
-            if(v instanceof Array){
-              v=helper.formatTable(v)
+            let v_l_item=op.payload.value_list[index];
+            if(v_l_item){
+              v=v_l_item[1].v;
+              if(Array.isArray(v)){
+                v=helper.formatTable(v)
+              }
+              value_list_jsons[arg]= v;
             }
-            value_list_jsons[arg]= v;
           })
         }else{
           value_list_jsons=op.payload.value_list.map(item=>{

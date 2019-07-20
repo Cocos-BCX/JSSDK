@@ -62,9 +62,9 @@ const formatItems=async (items,total)=>{
             return result;
 }
 
-export const listAccountNHAssets= async ({account_id,worldViews=[],account,page=1,pageSize=10}) => {
+export const listAccountNHAssets= async ({account_id,worldViews=[],page=1,pageSize=10,type=4}) => {
     try {
-      const response = await Apis.instance().db_api().exec('list_account_nh_asset', [account_id,worldViews,pageSize,page,4]);
+      const response = await Apis.instance().db_api().exec('list_account_nh_asset', [account_id,worldViews,pageSize,page,type]);
       if (response) {
         return await formatItems(response[0],response[1]);
       }
@@ -82,16 +82,25 @@ export const listAccountNHAssets= async ({account_id,worldViews=[],account,page=
     }
 };
   
-export const lookupNHAssets=async (nh_asset_hash_or_ids)=>{
+export const lookupNHAssets=async (nh_asset_hash_or_ids,owner=false,account_id)=>{
     try{
         let response= await Apis.instance().db_api().exec('lookup_nh_asset', [nh_asset_hash_or_ids]);
        
-        if(response&&response[0]&&response.length){
-            return await formatItems(response);
+        if(response){
+            response=response.filter(item=>item!=null);
+            if(owner&&response.length){
+                response=response.filter(item=>item.nh_asset_owner==account_id);
+                if(!response.length){
+                    return {code:176,message:"You are not the owner of "+nh_asset_hash_or_ids}
+                }
+            };
+            if(response.length){
+                return await formatItems(response);
+            }
         }
         return {
             code:147,
-            message:nh_asset_hash_or_ids+' NHAsset do not exist'
+            message:nh_asset_hash_or_ids+'NHAsset do not exist'
         };
     } catch(error){
         let message=error.message;

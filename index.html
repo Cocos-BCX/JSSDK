@@ -3209,6 +3209,7 @@
                     queryNHAssets:function(){
                         bcx.queryNHAssets({
                             NHAssetIds:gel(".div_queryNHAssets .NHAssetHashOrIds").value.split(","),
+                            owner:true,
                             callback:function(res){
                                 console.info("div_queryNHAssets res",res);
                                 $(".div_queryNHAssets .res").JSONView(res);

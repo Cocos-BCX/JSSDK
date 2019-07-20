@@ -319,7 +319,7 @@ const Operations = {
         if(action){
           action.arglist.forEach((arg,index)=>{
             v=op.payload.value_list[index][1].v;
-            if(v instanceof Array){
+            if(Array.isArray(v)){
               v=helper.formatTable(v)
             }
             value_list_jsons[arg]= v;

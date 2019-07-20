@@ -336,9 +336,9 @@ export const formatVotes=async (store,proxy_account_id)=>{
             let link = url && url.length > 0 && url.indexOf("http") === -1
                 ? "http://" + url
                 : url;
-            let isActive =getters["globalObject"].get(
+            let isActive =getters["globalObject"]?getters["globalObject"].get(
                 "active_"+type+(type=="committee"?"_members":"")
-            ).includes(id);
+            ).includes(id):false;
             
         
             votes=helper.getFullNum(votes/Math.pow(10,core_asset.precision));
@@ -381,17 +381,20 @@ function getWitnessOrCommittee(type, acct) {
     let url = "",
         votes = 0,
         account;
-    if (type === "witnesses") {
-        account = ChainStore.getWitnessById(acct.get("id"));
-    } else if (type === "committee") {
-        account = ChainStore.getCommitteeMemberById(acct.get("id"));
+    if(Apis.instance().db_api()){
+        if (type === "witnesses") {
+            account = ChainStore.getWitnessById(acct.get("id"));
+        } else if (type === "committee") {
+            account = ChainStore.getCommitteeMemberById(acct.get("id"));
+        }
     }
+    
     url = account ? account.get("url") : url;
     votes = account ? account.get("total_votes") : votes;
     return {
         url,
         votes,
-        id: account.get("id")
+        id:account?account.get("id"):""
     };
   }
 

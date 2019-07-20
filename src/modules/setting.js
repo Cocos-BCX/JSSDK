@@ -6,7 +6,7 @@ import { ChainConfig } from 'bcxjs-ws';
 import PersistentStorage from '../services/persistent-storage';
 
 const initialState = {
-    versions:"1.4.33",
+    versions:"1.4.37",
     ops_limit:100,
     autoReconnect:true,
     defaultSettings:{
@@ -76,7 +76,7 @@ const actions={
     setSettingsAPIS:({commit,dispatch},params)=>{
         let {app_keys,check_cached_account_data}=params;
         //contract authorization app_keys configuration
-        if(app_keys&&app_keys instanceof Array) 
+        if(app_keys&&Array.isArray(app_keys)) 
           dispatch("PrivateKeyStore/setAppkeys",app_keys,{root:true});
        
        //whether check and use the local cache of accounts info
