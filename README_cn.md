@@ -1,3 +1,5 @@
+[English](https://github.com/Cocos-BCX/JSSDK "English")
+
 # Part 1. Cocos-BCX链系统互操作API -- BCXJS
 
 Javascript API，用于使用COCOS-BCX RPC API与基于COCOS-BCX的区块链集成。
