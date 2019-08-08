@@ -1,4 +1,4 @@
-[English](https://github.com/Cocos-BCX/JSSDK "English")
+[English](https://github.com/Cocos-BCX/JSSDK/blob/master/README.md "English")
 
 # Part 1. Cocos-BCX链系统互操作API -- BCXJS
 
