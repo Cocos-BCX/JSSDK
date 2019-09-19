@@ -68,14 +68,17 @@ var bcx=new BCX({
 ### 调用实例-转账
 
 ```JavaScript
-bcx.transferAsset({
-     to:"test2",
-     amount:1,
-     assetId:"COCOS",
-     memo:""
-}).then(res=>{
-     console.log('transferAsset res',res);
-})
+	bcx.transferAsset({
+            fromAccount: 'test1',
+            toAccount: 'test2',
+            amount: amount,
+            assetId: 'COCOS',
+            feeAssetId: 'COCOS',
+            memo: memo,
+            onlyGetFee: false,
+        }).then(function (res) {
+             console.log('transferAsset res',res);
+        })
 ```  
 
 
