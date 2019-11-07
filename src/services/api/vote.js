@@ -11,88 +11,60 @@ let _state={
     all_committee: Immutable.List()
 };
 
-export const publishVotes=(store,witnesses_ids,committee_ids,new_proxy_id,callback,onlyGetFee,feeAssetId)=>{
-    let {rootGetters,getters,dispatch}=store;
-    let updated_account = rootGetters["user/getAccountObject"];
-        let updateObject = {account: updated_account.id};
+export const publishVotes=async (store,ids,votes,type,callback)=>{
+        let {rootGetters,getters,dispatch}=store;
+        let updated_account = rootGetters["user/getAccountObject"];
+        let core_asset=await API.Assets.fetch(["1.3.0"],true);
+        let updateObject = {
+            account: updated_account.id,
+            lock_with_vote:[type=="witnesses"?1:0,(await helper.toOpAmount(votes,core_asset)).data]
+        };
+
         let new_options = {memo_key: updated_account.options.memo_key};
-
-        let {vote_ids}=getters.getVotesState;
-
-        new_options.voting_account = new_proxy_id ? new_proxy_id : "1.2.2";
-        new_options.num_witness = witnesses_ids.length;
-        new_options.num_committee = committee_ids.length;
 
         updateObject.new_options = new_options;
         // Set fee asset
-        updateObject.fee = { 
-            amount: 0,
-            asset_id:"1.3.0"
-        };
 
-  
         // Submit votes
         FetchChainObjects(
-            ChainStore.getWitnessById,
-            witnesses_ids,
-            //witnesses.toArray(),
+            type=="witnesses"?ChainStore.getWitnessById:ChainStore.getCommitteeMemberById,
+            ids,
             4000
-        ).then(res => {
-                let witnesses_vote_ids = res.map(o => o.get("vote_id"));
-                return Promise.all([
-                    Promise.resolve(witnesses_vote_ids),
-                    FetchChainObjects(
-                        ChainStore.getCommitteeMemberById,
-                        committee_ids,
-                        4000
-                    )
-                ]);
-            })
-            .then(res => {
-                updateObject.new_options.votes = res[0]
-                    .concat(res[1].map(o => o.get("vote_id")))
-                    .concat(
-                        vote_ids.toArray()
-                            .filter(id => {
-                                return id.split(":")[0] === "2";
-                            })     
-                    )
-                    .sort((a, b) => {
-                        let a_split = a.split(":");
-                        let b_split = b.split(":");
-
-                        return (
-                            parseInt(a_split[1], 10) - parseInt(b_split[1], 10)
-                        );
-                    });
-
-
-                    dispatch("transactions/_transactionOperations",{
-                        operations:[{
-                          type:"account_update",
-                          params:{
-                              updateObject,
-                              fee_asset_id:feeAssetId
-                          }
-                        }],
-                        callback,
-                        onlyGetFee
-                    },{root:true}).then(res=>{
-                        callback&&callback(res);
-                    })
-            });
+        )
+        .then(res => {
+            updateObject.new_options.votes = res.map(o => o.get("vote_id"))
+                .sort((a, b) => {
+                    let a_split = a.split(":");
+                    let b_split = b.split(":");
+                    return (
+                        parseInt(a_split[1], 10) - parseInt(b_split[1], 10)
+                    );
+                });
+                dispatch("transactions/_transactionOperations",{
+                    operations:[{
+                        op_type:6,
+                        type:"account_update",
+                        params:{
+                            updateObject
+                        }
+                    }],
+                    callback
+                },{root:true}).then(res=>{
+                    callback&&callback(res);
+                })
+        });
 }
 
 
-export const _getVoteObjects= async (store,type = "witnesses", vote_ids) => {
+export const _getVoteObjects= async (store,type = "witnesses", vote_ids,isCache) => {
     let current = _state[`all_${type}`]=Immutable.List();
     const isWitness = type === "witnesses";
     let lastIdx;
     if (!vote_ids) {
         vote_ids = [];
         let globalObject=store.rootGetters["vote/globalObject"];
-        if(!globalObject){
-            globalObject=await API.Explorer.getGlobalObject();
+        if(!globalObject||isCache==false){
+            globalObject=await API.Explorer.getGlobalObject(isCache);
             if(globalObject.code!=1){
                 let {getVoteObjects_callback}=store.state;
                 getVoteObjects_callback&&getVoteObjects_callback(globalObject);
@@ -122,7 +94,7 @@ export const _getVoteObjects= async (store,type = "witnesses", vote_ids) => {
     } else {
         lastIdx = parseInt(vote_ids[vote_ids.length - 1].split(".")[2], 10);
     }
-    FetchChainObjects(ChainStore.getObject, vote_ids, 5000, {}).then(
+    FetchChainObjects(ChainStore.getObject, vote_ids, 5000, {},isCache).then(
         vote_objs => {
             let vote_ids_obj={};
             vote_objs=vote_objs.filter(a=>{
@@ -159,7 +131,7 @@ export const _getVoteObjects= async (store,type = "witnesses", vote_ids) => {
                 for (var i = lastIdx + 11; i <= lastIdx + 20; i++) {
                     vote_ids.push(`1.${isWitness ? "6" : "5"}.${i}`);
                 }
-                return _getVoteObjects(store,type,vote_ids);
+                return _getVoteObjects(store,type,vote_ids,false);
             }else{
                 updateAccountData(store,type)
             }
@@ -230,7 +202,7 @@ const updateAccountData=async (store,type)=>{
     }
 
     Promise.all([
-        FetchChainObjects(ChainStore.getObjectByVoteID, vote_ids, 10000),
+        FetchChainObjects(ChainStore.getObjectByVoteID, vote_ids, 10000,{},false),
         // proxyPromise
     ]).then(res => {  
         const [vote_objs, proxy_vote_objs] = res;
@@ -296,7 +268,7 @@ export const formatVotes=async (store,proxy_account_id)=>{
         return true;
     })
     items=items.map(account=>{
-        return store.dispatch("user/getUserInfo",{account,isCache:true},{root:true});
+        return store.dispatch("user/getUserInfo",{account,isCache:true,isSubscribe:true},{root:true});
     })
     Promise.all(items).then(function(respDataArr) {
 
@@ -332,7 +304,7 @@ export const formatVotes=async (store,proxy_account_id)=>{
             let action =supporteds &&supporteds.includes(account.get("id"));
                     // ? "remove"
                     // : "add";
-            let {url, votes,id} = getWitnessOrCommittee(type, account);
+            let {url, votes,id,supporters,work_status} = getWitnessOrCommittee(type, account,core_asset);
             let link = url && url.length > 0 && url.indexOf("http") === -1
                 ? "http://" + url
                 : url;
@@ -348,16 +320,17 @@ export const formatVotes=async (store,proxy_account_id)=>{
 
             let vote_obj=vote_ids_obj[account_id];
             let {vote_id,total_missed,last_confirmed_block_num,last_aslot}=vote_obj.toJS();
-
             let vote_account={
                 account_name:account.get("name"),
                 url,
                 votes,
                 active:isActive,
                 supported:!!action,
+                supporters,
                 account_id,
                 type,
-                vote_id
+                vote_id,
+                work_status
             }
             if(type=="witnesses"){
                 vote_account.total_missed=total_missed;
@@ -377,10 +350,12 @@ export const formatVotes=async (store,proxy_account_id)=>{
    
 }
 
-function getWitnessOrCommittee(type, acct) {
+function getWitnessOrCommittee(type, acct,c_asset) {
     let url = "",
         votes = 0,
-        account;
+        supporters=[],
+        account,
+        work_status=false;
     if(Apis.instance().db_api()){
         if (type === "witnesses") {
             account = ChainStore.getWitnessById(acct.get("id"));
@@ -388,12 +363,31 @@ function getWitnessOrCommittee(type, acct) {
             account = ChainStore.getCommitteeMemberById(acct.get("id"));
         }
     }
-    
+    // console.info("account",JSON.parse(JSON.stringify(account)));
     url = account ? account.get("url") : url;
     votes = account ? account.get("total_votes") : votes;
+    work_status = account ? account.get("work_status") : work_status;
+
+    // console.info("account",JSON.parse(JSON.stringify(account)));
+    if(c_asset){
+        supporters=account?account.get("supporters"):supporters;
+        if(supporters)
+        supporters=supporters.map(item=>{
+            item=item.toArray();
+            return {
+                account_id:item[0],
+                amount_raw:item[1],
+                amount_text:item[1].toJS().amount/Math.pow(10,c_asset.precision)+" "+c_asset.symbol
+            }
+        });
+    }
+    if(supporters)
+    supporters=JSON.parse(JSON.stringify(supporters));
     return {
         url,
         votes,
+        supporters,
+        work_status,
         id:account?account.get("id"):""
     };
   }

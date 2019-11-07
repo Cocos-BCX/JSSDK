@@ -1,5 +1,4 @@
-import { ChainTypes } from 'bcxjs-cores';
-import {ChainStore} from "bcxjs-cores";
+import { ChainTypes,ChainStore } from 'bcxjs-cores';
 
 import { Apis } from 'bcxjs-ws';
 import API from '../api';
@@ -90,10 +89,10 @@ const Operations = {
     if(op_id){
       res.id=op_id;
     }
-    if (operationType === 'fill_order' || operationType === 'limit_order_create') {
-      isBid = await Operations._checkIfBidOperation(operation);
-      res.buyer=isBid;
-    }
+    // if (operationType === 'fill_order' || operationType === 'limit_order_create') {
+    //   isBid = await Operations._checkIfBidOperation(operation);
+    //   res.buyer=isBid;
+    // }
 
     if (operationType === 'transfer'&&userId) {
       otherUserName = await Operations._getOperationOtherUserName(userId, payload);
@@ -102,10 +101,10 @@ const Operations = {
     if(operation.result){
       res.result=operation.result[1];
       res.result.type=_store.rootGetters["setting/trx_results"][operation.result[0]];
-      if(operationType=="creat_nh_asset"){
+      if(operationType=="create_nh_asset"){
         res.payload.item_id=operation.result[1].result;
       }
-      if(operationType=="creat_world_view"){
+      if(operationType=="create_world_view"){
         res.payload.version_id=operation.result[1];
       }
       if(operationType=="call_contract_function"){
@@ -126,6 +125,11 @@ const Operations = {
           store:_store,
           isContract:true
         });
+        let additional_cost=res.result.additional_cost
+        if(additional_cost){
+          let {amount,asset_id}=additional_cost;
+          res.result.additional_cost_text=await Operations.FormattedAsset(amount,asset_id,0);
+        }
       }
     }
     return res
@@ -139,7 +143,7 @@ const Operations = {
     const ApiObject =[(await API.Explorer.getGlobalObject()).data];
     const ApiObjectDyn =[(await API.Explorer.getDynGlobalObject(false)).data];
     // console.info('operations',JSON.parse(JSON.stringify(operations)));
-    const operationTypes = [0, 1, 2,3,4,5,6,7,8,9,10,11,13,14,15,18,21,22,32,39,43,44,46,47,48,49,50,51,52,53,54,55,60,61,62,300,301,303,3010,3011,3012];//,53,54.55,56,57,58
+    const operationTypes = [0, 1, 2,3,4,5,6,7,8,9,10,12,13,14,15,16,17,18,19,20,21,23,24,27,31,34,35,37,38,39,40,41,42,43,44,45,50,54,300,301,303,3010,3011,3012];//,53,54.55,56,57,58
     const filteredOperations = operations.filter(op => {
       return operationTypes.includes(op.op[0])
     });
@@ -160,12 +164,25 @@ const Operations = {
       let parseOpObj=await Operations.getParseOperations(item);
       item.parseOperationsText=parseOpObj.opText.join("");
       item.parseOperations=parseOpObj.opObj;
-      let feeObj=item.payload.fee;
-      if(feeObj){
-        let feeAsset=await API.Assets.fetch([feeObj.asset_id],true);
-        if(feeAsset)
-        item.parseOperations.fee=helper.getFullNum(feeObj.amount/Math.pow(10,feeAsset.precision))+" "+feeAsset.symbol;
+      item.parseOperations.fees=[];
+      if(item.result){
+        let fees=item.result.fees;
+        if(fees){
+          for(let i=0;i<fees.length;i++){
+            let feeObj=fees[i];
+            let feeAsset=await API.Assets.fetch([feeObj.asset_id],true);
+            if(feeAsset)
+              item.parseOperations.fees.push(helper.getFullNum(feeObj.amount/Math.pow(10,feeAsset.precision))+" "+feeAsset.symbol)
+          }
+        }
       }
+      
+      // let feeObj=item.payload.fee;
+      // if(feeObj){
+      //   let feeAsset=await API.Assets.fetch([feeObj.asset_id],true);
+      //   if(feeAsset)
+      //   item.parseOperations.fee=helper.getFullNum(feeObj.amount/Math.pow(10,feeAsset.precision))+" "+feeAsset.symbol;
+      // }
 
       let trxType="trxTypes_"+item.type;
       if(trxType in  zh_CN){
@@ -248,40 +265,86 @@ const Operations = {
                 [{type: "account", value: op.payload.account_to_upgrade, arg: "account"}]
             );
             break;
+      case "witness_create":
+            return await Operations.getTranslateInfo(
+                "operation_witness_create",
+                [{type: "account", value: op.payload.witness_account, arg: "account"}]
+            );
+            break;
+      case "committee_member_create":
+            return await Operations.getTranslateInfo(
+                "operation_committee_member_create",
+                [{type: "account", value: op.payload.committee_member_account, arg: "account"}]
+            );
+            break;
+      case "witness_update":
+            return await Operations.getTranslateInfo(
+                "operation_witness_update",
+                [{type: "account", value: op.payload.witness_account, arg: "account"}]
+            );
+            break;
+      case "committee_member_update":
+            return await Operations.getTranslateInfo(
+                "operation_committee_member_update",
+                [{type: "account", value: op.payload.committee_member_account, arg: "account"}]
+            );
+            break;
       case "fill_order":
          o=op.payload;
-        let receivedAmount = o.fee.asset_id === o.receives.asset_id ? o.receives.amount - o.fee.amount : o.receives.amount;
-        return await Operations.getTranslateInfo(
+        // let receivedAmount = o.fee.asset_id === o.receives.asset_id ? o.receives.amount - o.fee.amount : o.receives.amount;
+          let base2=o.receives.asset_id;
+          let quote2=o.pays.asset_id;
+          const {
+            first2,
+            second2
+          } = market_utils.getMarketName(base2, quote2);
+          const isBid2 =o.pays.asset_id === second2;
+
+          let priceBase = isBid2 ? o.receives : o.pays;
+          let priceQuote = isBid2 ? o.pays : o.receives;
+          let amount = isBid2 ? o.pays :  o.receives;
+          let receivedAmount =amount.amount;
+          // o.fee.asset_id === amount.asset_id
+          //     ? amount.amount - o.fee.amount
+          //     : amount.amount;
+          return await Operations.getTranslateInfo(
           "operation_fill_order",
           [
               {type: "account", value: o.account_id, arg: "account"},
               {
                   type: "amount",
-                  value: {amount: receivedAmount, asset_id: o.receives.asset_id},
+                  value: {amount: receivedAmount, asset_id: amount.asset_id},
                   arg: "received",
                   decimalOffset: o.receives.asset_id === "1.3.0" ? 3 : null
               },
-              {type: "price", value: {base: o.pays, quote: o.receives}, arg: "price"}
+              {type: "price", value: {base: priceBase, quote: priceQuote}, arg: "price"}
           ]
         );
         break;
       case "limit_order_create":
          o=op.payload;
-        let isAsk = market_utils.isAskOp(o);
+        // let isAsk = market_utils.isAskOp(o);
+         let base=o.min_to_receive.asset_id;
+         let quote=o.amount_to_sell.asset_id;
+        const {
+          first,
+          second
+        } = market_utils.getMarketName(base, quote);
+        const isBid =o.amount_to_sell.asset_id === second;
         return await Operations.getTranslateInfo(
-          isAsk ? "operation_limit_order_sell" : "operation_limit_order_buy",
+          isBid ? "operation_limit_order_buy" : "operation_limit_order_sell",
           [
               {type: "account", value: o.seller, arg: "account"},
               {
                   type: "amount",
-                  value: isAsk ? o.amount_to_sell :o.min_to_receive,
+                  value: isBid ?o.min_to_receive:o.amount_to_sell,
                   arg: "amount"
               },
               {
                   type: "price",
                   value: {
-                      base: isAsk ? o.min_to_receive : o.amount_to_sell,
-                      quote: isAsk ? o.amount_to_sell : o.min_to_receive
+                      base: isBid ? o.amount_to_sell:o.min_to_receive,
+                      quote: isBid ?  o.min_to_receive :o.amount_to_sell
                   },
                   arg: "price"
               }
@@ -289,20 +352,31 @@ const Operations = {
         );
         break;
      case "limit_order_cancel":
-     return await Operations.getTranslateInfo(
-          "operation_limit_order_cancel",
-          [
-            {type: "account", value:op.payload.fee_paying_account, arg: "account"},
-            {type:'order',value:op.payload.order.substring(4),arg:'order'}
-          ]
-       );
+        return await Operations.getTranslateInfo(
+              "operation_limit_order_cancel",
+              [
+                {type: "account", value:op.payload.fee_paying_account, arg: "account"},
+                {type:'order',value:op.payload.order.substring(4),arg:'order'}
+              ]
+          );
         break;
+      case "call_order_update":
+        return await Operations.getTranslateInfo(
+             "operation_call_order_update",
+             [
+               {type: "account", value:op.payload.funding_account, arg: "account"},
+               {type: "asset", value: op.payload.delta_debt.asset_id, arg: "debtSymbol"},
+               {type: "amount", value: op.payload.delta_debt, arg: "debt"},
+               {type: "amount", value: op.payload.delta_collateral, arg: "collateral"}            ]
+         );
+         break;
       case "vesting_balance_withdraw":
         return await Operations.getTranslateInfo(
               "operation_vesting_balance_withdraw",
               [
                 {type: "account", value: op.payload.owner, arg: "account"},
                 {type: "amount", value: op.payload.amount, arg: "amount"},
+                {type: "vesting_balance", value: op.payload.vesting_balance, arg: "vesting_balance_id"},
               ]
           );
         break;
@@ -315,14 +389,16 @@ const Operations = {
 
         let value_list_jsons={};//use parameters as keyname and merge values into a Json string
         let v="";
-
         if(action){
           action.arglist.forEach((arg,index)=>{
-            v=op.payload.value_list[index][1].v;
-            if(Array.isArray(v)){
-              v=helper.formatTable(v)
+            let v_l_item=op.payload.value_list[index];
+            if(v_l_item){
+              v=v_l_item[1].v;
+              if(Array.isArray(v)){
+                v=helper.formatTable(v)
+              }
+              value_list_jsons[arg]= v;
             }
-            value_list_jsons[arg]= v;
           })
         }else{
           value_list_jsons=op.payload.value_list.map(item=>{
@@ -370,16 +446,16 @@ const Operations = {
                 ]
             );
         break;
-        case "creat_world_view":
+        case "create_world_view":
           return await Operations.getTranslateInfo(
-                "operation_creat_world_view",
+                "operation_create_world_view",
                 [
                   {type: "account", value: op.payload.fee_paying_account, arg: "fee_paying_account"},
                   {type: "world_view", value: op.payload.world_view, arg: "world_view"}
                 ]
             );
         break;
-        case "creat_nh_asset":
+        case "create_nh_asset":
             let types=  [
               {type: "account", value: op.payload.fee_paying_account, arg: "fee_paying_account"},
               {type: "account", value: op.payload.owner, arg: "owner"}
@@ -388,7 +464,7 @@ const Operations = {
               types.push({type: "nh_asset", value: op.result.result, arg: "nh_asset"});
             }
            return await Operations.getTranslateInfo(
-                "operation_creat_nh_asset",
+                "operation_create_nh_asset",
                 types
             );
         break;
@@ -423,9 +499,9 @@ const Operations = {
             );
            break;
          
-        case "creat_nh_asset_order":
+        case "create_nh_asset_order":
           return await Operations.getTranslateInfo(
-                  "operation_creat_nh_asset_order",
+                  "operation_create_nh_asset_order",
                   [
                     {type: "account", value: op.payload.seller, arg: "seller"},
                     {type: "nh_asset", value: op.payload.nh_asset, arg: "nh_asset"},
@@ -433,6 +509,11 @@ const Operations = {
                         type: "amount",
                         value: op.payload.price,
                         arg: "amount"
+                    },
+                    {
+                        type: "amount",
+                        value: op.payload.pending_orders_fee,
+                        arg: "pending_orders_fee"
                     }
                   ]
               );
@@ -480,6 +561,7 @@ const Operations = {
 
           let proposalOp=op.payload.proposed_ops[0].op;
           proposalOp={
+            account:op.payload.fee_paying_account,
             payload:proposalOp[1],
             type:Operations._operationTypes[proposalOp[0]]
           };
@@ -494,6 +576,14 @@ const Operations = {
              }
           }
           break;
+        case "committee_member_update_global_parameters":
+          return await Operations.getTranslateInfo(
+              "operation_committee_member_update_global_parameters",
+              [
+                {type: "account", value: op.account, arg: "account"},
+              ]
+          );
+           break;
         case "proposal_update":
           return await Operations.getTranslateInfo(
               "operation_proposal_update",
@@ -638,6 +728,15 @@ const Operations = {
                       ]
                   )
                 break;
+        case "asset_update_feed_producers":
+          return await Operations.getTranslateInfo(
+                      "operation_asset_update_feed_producers",
+                      [
+                          {type: "account", value: op.payload.issuer, arg: "account"},
+                          {type: "asset", value: op.payload.asset_to_update, arg: "asset"}
+                      ]
+                  )
+                break;    
        case "asset_claim_fees":
           return await Operations.getTranslateInfo(
                     "operation_asset_claim_fees",
@@ -713,12 +812,29 @@ const Operations = {
                     ]
                 )
             break;
+        case "update_collateral_for_gas":
+          return await Operations.getTranslateInfo(
+                    "operation_update_collateral_for_gas",
+                    [
+                        {type: "account", value: op.payload.mortgager, arg: "mortgager"},
+                        {type: "account", value: op.payload.beneficiary, arg: "beneficiary"},
+                        {
+                            type: "amount",
+                            value:{
+                              amount: op.payload.collateral,
+                              asset_id:"1.3.0"
+                            },
+                            arg: "collateral"
+                        }
+                    ]
+                )
+              break;
     }
   },
   getTranslateInfo:async (localId, keys)=>{
       let lang=_store.rootGetters["setting/defaultSettings"].locale;
       let text = _locales[lang][localId];
-      if(localId=="operation_creat_nh_asset"&&keys.length==2){
+      if(localId=="operation_create_nh_asset"&&keys.length==2){
         text=lang=='en'?'(fee_paying_account) Create NH assets with ownership account (owner)':"(fee_paying_account) 创建NH资产，所有权账户为 (owner)";
       }
       let splitText = utils.get_translation_parts(text);
@@ -770,7 +886,7 @@ const Operations = {
                     }   
                     break;
 
-              case "modified":
+                case "modified":
                     let item_data={};
                     value=[value];
                     value.forEach(keyValue=>{

@@ -34,7 +34,7 @@ const actions={
     registerCreator:({dispatch})=>{
       return  dispatch('transactions/_transactionOperations',{
                 operations:[{
-                    op_type:46,
+                    op_type:37,
                     type:"register_nh_asset_creator",
                     params:{}
                 }]
@@ -47,8 +47,8 @@ const actions={
         worldView=worldView.trim();
         return dispatch('transactions/_transactionOperations', {
             operations:[{
-              op_type:47,
-              type:"creat_world_view",
+              op_type:38,
+              type:"create_world_view",
               params:{
                 world_view:worldView
               }
@@ -146,8 +146,8 @@ const actions={
             ownerAccount=rootGetters["account/getAccountUserId"];
         }
         let operation={
-            op_type:49,
-            type:"creat_nh_asset",
+            op_type:40,
+            type:"create_nh_asset",
             params:{
                 asset_id:assetId,
                 world_view:worldView,
@@ -179,8 +179,8 @@ const actions={
                     return acc_res;
                 } 
                 operations.push({
-                    op_type:49,
-                    type:"creat_nh_asset",
+                    op_type:40,
+                    type:"create_nh_asset",
                     params:{
                         asset_id:NHAssets[j].assetId,
                         world_view:NHAssets[j].worldView,
@@ -222,7 +222,7 @@ const actions={
             }
             let operations=nhs_res.data.map(({id})=>{
                 return {
-                    op_type:50,
+                    op_type:41,
                     type:"delete_nh_asset",
                     params:{
                         nh_asset:id
@@ -257,7 +257,7 @@ const actions={
         if(nhs_res.code==1){ 
             let operations=nhs_res.data.map(({id})=>{
                 return {
-                    op_type:51,
+                    op_type:42,
                     type:"transfer_nh_asset",
                     params:{
                         to:to_account_id,
@@ -284,13 +284,21 @@ const actions={
             return {code:135,message:"Please check parameter data type"};
         }
 
+        let priceAssetRes=await dispatch("assets/queryAssets",{assetId:priceAssetId},{root:true});
+        if(priceAssetRes.code!=1){
+            return priceAssetRes;
+        }
+        let {precision,dynamic}=priceAssetRes.data[0];
+        if(price*Math.pow(10,precision)>dynamic.current_supply){
+            return {code:177,message:"Prices exceed current supply"};
+        }
         let  nhs_res=await API.NHAssets.lookupNHAssets([NHAssetId]);
         if(nhs_res.code==1){
             NHAssetId=nhs_res.data[0].id;
             return dispatch('transactions/_transactionOperations', {
                     operations:[{
-                        op_type:52,
-                        type:"creat_nh_asset_order",
+                        op_type:43,
+                        type:"create_nh_asset_order",
                         params:{
                             otcaccount:otc_account_id,
                             pending_orders_fee:orderFee,
@@ -314,7 +322,7 @@ const actions={
         orderId=orderId.trim();
         return dispatch('transactions/_transactionOperations', {
             operations:[{
-                op_type:53,
+                op_type:44,
                 type:"cancel_nh_asset_order",
                 params:{
                     order:orderId,
@@ -336,7 +344,7 @@ const actions={
         let {nh_asset_id,seller,price_amount,price_asset_id,price_asset_symbol}=order_res.data;
         return dispatch('transactions/_transactionOperations', {
             operations:[{
-                op_type:54,
+                op_type:45,
                 type:"fill_nh_asset_order",
                 params:{
                     order:orderId,
@@ -359,7 +367,7 @@ const actions={
        let view_owner_id=wv_detail.data[0].creators[0].creator;
        return dispatch('transactions/_transactionOperations', {
             operations:[{
-                op_type:48,
+                op_type:39,
                 type:"relate_world_view",
                 params:{
                     world_view:worldView,

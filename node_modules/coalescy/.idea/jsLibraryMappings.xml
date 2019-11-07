@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JavaScriptLibraryMappings">
+    <file url="PROJECT" libraries="{Modernizr-2.6.2, jQuery UI-1.10.2, jQuery-2.0.0, jasmine, jasmine-DefinitelyTyped}" />
+    <includedPredefinedLibrary name="Node.js Globals" />
+  </component>
+</project>
+

@@ -170,6 +170,27 @@ const list_asset_restricted_objects=async (asset_id,restricted_type)=>{
       }
   }
 }
+
+
+const estimation_gas=async (amountObj)=>{
+//   console.info("amountObj",amountObj);
+  try{
+      const response=await Apis.instance().db_api().exec('estimation_gas', [amountObj]);
+      if(response){
+          return {code:1,data:response};
+      }
+      return {
+          code: 104,
+          message:'not found'
+      };
+  } catch(error){
+      return {
+          code:0,
+          message:error.message,
+          error
+      }
+  }
+}
 export default {
   fetch,
   fetch_asset_one,
@@ -177,5 +198,6 @@ export default {
   fetch_all_assets,
   list_asset_restricted_objects,
   fetchPriceHistory,
-  getAssetList
+  getAssetList,
+  estimation_gas
 };

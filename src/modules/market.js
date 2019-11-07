@@ -10,10 +10,12 @@ import utils from "../lib/common/utils";
 import {Asset, Price, LimitOrderCreate} from "../lib/common/MarketClasses";
 import {ChainStore} from "bcxjs-cores";
 
+
 // const GphMarket = API.Market['1.3.0'];
 import listener from '../services/api/chain-listener';
 import Subscriptions from '../services/api/subscriptions';
 import { Apis } from 'bcxjs-ws';
+import helper from '../lib/common/helper';
 
 
 const actions = {
@@ -32,6 +34,120 @@ const actions = {
             }]
           },{root:true});
   },
+  queryDebt:async ({rootGetters,dispatch},params)=>{
+     let {account_id,debtAssetId,collateralAssetId}=params;
+     let debt_asset=await API.Assets.fetch_asset_one(debtAssetId);
+     if(debt_asset.code!=1) return debt_asset;
+     debtAssetId=debt_asset.data.id
+     let user_result=await dispatch("user/fetchUser",account_id,{root:true})
+     if(user_result.success){
+        let currentPosition=user_result.data.call_orders.filter(item=>!!item).find(item=>{
+            return item.call_price.quote.asset_id===debtAssetId;
+        });
+        if(currentPosition){
+            let base_asset=await API.Assets.fetch_asset_one(currentPosition.call_price.base.asset_id);
+            let base_asset_precision=base_asset.data.precision;
+
+            currentPosition.call_price_text=utils.format_price(
+                currentPosition.call_price.quote.amount,
+                debt_asset.data,
+                currentPosition.call_price.base.amount,
+                base_asset.data,
+                false,
+                true,
+                false
+            );
+
+            // currentPosition.call_price_text=(helper.getFullNum(currentPosition.call_price.base.amount,
+            //     base_asset_precision)/helper.getFullNum(currentPosition.call_price.quote.amount,
+            //         debt_asset.data.precision)).toFixed(base_asset_precision)+" "+base_asset.data.symbol+"/"+debt_asset.data.symbol;
+            //Call Price
+            currentPosition.collateral_value=helper.getFullNum(currentPosition.collateral,base_asset_precision)
+            currentPosition.debt_value=helper.getFullNum(currentPosition.debt,debt_asset.data.precision);
+            currentPosition.collateral_symbol=base_asset.data.symbol;
+            currentPosition.debt_symbol=debt_asset.data.symbol;
+          }else{
+            if(!collateralAssetId){
+                return {code:178,message:"collateralAssetId Can not be empty"}
+            }
+            let base_asset=await API.Assets.fetch_asset_one(collateralAssetId);
+            // console.info("collateralAssetId",collateralAssetId,base_asset);
+            currentPosition={
+                call_price_text:"无",
+                collateral_value:0,
+                debt_value:0,
+                collateral_symbol:base_asset.data.symbol,
+                debt_symbol:debt_asset.data.symbol
+            }
+          }
+       
+            let smart_asset_res=await dispatch("assets/queryAssets",{assetId:debt_asset.data.symbol},{root:true});
+            if(smart_asset_res.code!=1){
+                return smart_asset_res;
+            }
+            let {format_feed_price,format_feed_price_text,current_feed}=smart_asset_res.data[0].bitasset_data;
+            currentPosition.format_feed_price=format_feed_price;
+            currentPosition.format_feed_price_text=format_feed_price_text;
+            currentPosition.maintenance_collateral_ratio=current_feed.maintenance_collateral_ratio/1000;
+            return {code:1,data:currentPosition};
+        // }else{
+        //     return {code:178,message:"No debt"};
+        // }
+      
+      }else{
+          return user_result;
+      }
+  },
+  callOrderUpdate:async ({commit,rootGetters,dispatch},params)=>{
+    if(!helper.trimParams(params)||!params.collateralAmount||!params.debtAmount){
+        return {code:101,message:"Parameter is missing"};
+      }
+      let {collateralAmount,collateralAssetId,debtAmount,debtAssetId,account}=params;
+      collateralAmount=Number(collateralAmount);
+      debtAmount=Number(debtAmount);
+      collateralAmount=isNaN(collateralAmount)?0:collateralAmount;
+      debtAmount=isNaN(debtAmount)?0:debtAmount;
+
+      let collateral_asset=await API.Assets.fetch_asset_one(collateralAssetId);
+      let debt_asset=await API.Assets.fetch_asset_one(debtAssetId);
+      if(collateral_asset.code!=1)   return collateral_asset;      
+      if(debt_asset.code!=1) return debt_asset;
+      
+      let delta_collateral=(await helper.toOpAmount(collateralAmount,collateral_asset.data)).data;
+      let delta_debt=(await helper.toOpAmount(debtAmount,debt_asset.data)).data;
+      
+      let user_result=await dispatch("user/fetchUser",account.id,{root:true})
+      let currentPosition={
+        collateral: null,
+        debt: null
+      }
+      if(user_result.success){
+        let _currentPosition=user_result.data.call_orders.filter(item=>!!item).find(item=>{
+            return item.call_price.quote.asset_id===debtAssetId;
+        });
+        if(_currentPosition) currentPosition=_currentPosition;
+      }else{
+          return user_result;
+      }
+
+
+      delta_collateral.amount=parseInt(delta_collateral.amount-currentPosition.collateral,10);
+      delta_debt.amount=parseInt(delta_debt.amount-currentPosition.debt,10)
+      
+
+      return dispatch('transactions/_transactionOperations', {
+        operations:[{
+            op_type:3,
+            type:"call_order_update",
+            params:{
+              funding_account:rootGetters["account/getAccountUserId"],
+              delta_collateral,
+              delta_debt
+            }
+        }]
+       },{root:true});
+       
+  },
   createLimitOrder:async ({dispatch,rootGetters},{price,amount,transactionPair,type=0,callback,isAsk=true,onlyGetFee=false})=>{
 
     transactionPair=transactionPair.split("_");
@@ -40,11 +156,11 @@ const actions = {
     let coreAsset=await dispatch("assets/fetchAssets",{assets:["1.3.0"],isOne:true},{root:true})
    
     let currentAccount=rootGetters["user/getAllAccountObject"];
-    let {
-      sellFeeAsset,
-      sellFeeAssets,
-      sellFee
-     } = getFeeAssets(quoteAsset, baseAsset, coreAsset,currentAccount);
+    // let {
+    //   sellFeeAsset,
+    //   sellFeeAssets,
+    //   sellFee
+    //  } = getFeeAssets(quoteAsset, baseAsset, coreAsset,currentAccount);
 
     let _amount = new Asset({
         asset_id: quoteAsset.id,
@@ -74,7 +190,7 @@ const actions = {
       price,
       amount,
       turnover,
-      chargefee:sellFee
+    //   chargefee:sellFee
     }
     let accountBalance = currentAccount.balances;
     let quoteBalance,baseBalance,coreBalance;
@@ -96,21 +212,21 @@ const actions = {
         amount: coreBalance ? parseInt(coreBalance, 10) : 0
     });
 
-    let fee = utils.getFee("limit_order_create",sellFeeAsset,coreAsset);
+    // let fee = utils.getFee("limit_order_create",sellFeeAsset,coreAsset);
 
-    let feeID = verifyFee(fee, current.amount.getAmount(), quoteBalance.getAmount(), coreBalance.getAmount());
-    if(!feeID){
-      return {code:1,message:"Insufficient funds to pay fees"};
-    }
+    // let feeID = verifyFee(fee, current.amount.getAmount(), quoteBalance.getAmount(), coreBalance.getAmount());
+    // if(!feeID){
+    //   return {code:1,message:"Insufficient funds to pay fees"};
+    // }
     type=Number(type);
     let order = new LimitOrderCreate({
         for_sale:type?current.turnover:current.amount,
         to_receive:type?current.amount:current.turnover,
         seller: currentAccount.account.id,
-        fee: {
-            asset_id: feeID,
-            amount: 0
-        }
+        // fee: {
+        //     asset_id: feeID,
+        //     amount: 0
+        // }
     });
 
     order.setExpiration();
@@ -196,10 +312,9 @@ const actions = {
         }
         // console.info("result",result,marketStats);
 
-        dispatch("setMarketStats",marketStats);
         let stats = _calcMarketStats(marketStats.history, marketStats.base, marketStats.quote, marketStats.last);
-        
         let price = utils.convertPrice(Immutable.fromJS(marketStats.quote), Immutable.fromJS(marketStats.base));
+
         stats.latestPrice= stats && stats.latestPrice ?
         stats.latestPrice :
         stats && stats.close && (stats.close.quote.amount && stats.close.base.amount) ?
@@ -217,6 +332,7 @@ const actions = {
         stats.volume_quote=stats.volumeQuote;
         delete stats.volumeBase
         delete stats.volumeQuote
+
 
         return stats; 
       })).then(results=>{
@@ -364,12 +480,12 @@ const getFeeAssets=(quote, base, coreAsset,currentAccount)=>{
       sellFeeAsset = sellFeeAssets[Math.min(sellFeeAssets.length - 1, 0)];//sellFeeAssetIdx
   }
 
-  let sellFee = utils.getFee("limit_order_create",sellFeeAsset);
+//   let sellFee = utils.getFee("limit_order_create",sellFeeAsset);
 
   return {
       sellFeeAsset,
       sellFeeAssets,
-      sellFee
+      //sellFee
   };
 }
 

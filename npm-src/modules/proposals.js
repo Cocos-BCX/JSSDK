@@ -116,7 +116,7 @@ const actions={
 
         return dispatch('transactions/_transactionOperations', {
             operations:[{
-                op_type:22,
+                op_type:21,
                 type:"proposal_update",
                 params:proposal
             }],

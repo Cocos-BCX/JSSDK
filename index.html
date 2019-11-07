@@ -32,7 +32,7 @@
                 margin: 30px 0;
             }
             .div_module{
-                width:60%;
+                width:80%;
                 margin: 20px auto;
             }
             .div_module input,.div_module select,.div_module textarea{
@@ -118,6 +118,9 @@
             .listCard .row{
                 display: flex;
                 margin-bottom:6px;
+            }
+            .listCard .row:last-child{
+                display: block;
             }
             .listCard .row .field{
                 width: 160px;
@@ -242,6 +245,9 @@
             }
             .div_loadAccountProposals input[type=checkbox]{
                 width: auto;
+            }
+            .div_bitassetOpts{
+                display:none;
             }
 /* 
             .scroll{
@@ -457,13 +463,50 @@
                             <h2>升级成为终身会员账户</h2>
                             <div class="div_upgradeAccount div_module">
                                 <p>此操作需消耗一定的手续费</p>
-                                <p>手续费：<span class="fee"></span></p>
-                                <input type="button" id="btn_get_upgradeAccount_fee" value="获取本次操作所需手续费"  /><br><br>
                                 <input type="button" id="btn_upgradeAccount" value="确认升级"  /><br><br>
                                 <p class="res"></p>
                             </div>
                         </div>
-
+                        <div class="div_module_c" id="div_witnessCreate" pclass="class_11" >
+                            <h2>升级成为见证人账户</h2>
+                            <div class="div_witnessCreate div_module">
+                                url<input type="text" class="url"  value="http://cocos-terminal.com"><br><br>
+                                区块签名公钥<input type="text" class="block_signing_key"  value=""><br><br>
+                                <input type="button" id="btn_witnessCreate" value="确认升级"  /><br><br>
+                                <p class="res"></p>
+                            </div>
+                        </div>
+                        <div class="div_module_c" id="div_committeeMemberCreate" pclass="class_11" >
+                            <h2>升级成为理事会账户</h2>
+                            <div class="div_committeeMemberCreate div_module">
+                                url<input type="text" class="url"  value="http://cocos-terminal.com"><br><br>
+                                <input type="button" id="btn_committeeMemberCreate" value="确认升级"  /><br><br>
+                                <p class="res"></p>
+                            </div>
+                        </div>
+                        <div class="div_module_c" id="div_witnessUpdate" pclass="class_11" >
+                            <h2>更新见证人信息</h2>
+                            <div class="div_witnessUpdate div_module">
+                                url<input type="text" class="new_url"  value="http://cocos-terminal.com"><br><br>
+                                区块签名公钥<input type="text" class="new_signing_key"  value=""><br>
+                                <div class="checkbox">
+                                    工作状态:<input type="checkbox" class="work_status" style="width:auto;">          
+                                </div>
+                                <input type="button" id="btn_witnessUpdate" value="确认更新"  /><br>
+                                <p class="res"></p>
+                            </div>
+                        </div>
+                        <div class="div_module_c" id="div_committeeMemberUpdate" pclass="class_11" >
+                            <h2>更新理事会信息</h2>
+                            <div class="div_committeeMemberUpdate div_module">
+                                url<input type="text" class="new_url"  value="http://cocos-terminal.com"><br>
+                                <div class="checkbox">
+                                    工作状态:<input type="checkbox" class="work_status" style="width:auto;">          
+                                </div>
+                                <input type="button" id="btn_committeeMemberUpdate" value="确认更新"  /><br>
+                                <p class="res"></p>
+                            </div>
+                        </div>
                         <div class="div_module_c" id="div_getPrivateKey" pclass="class_11" >
                             <h2>获取私钥</h2>
                             <div class="div_getPrivateKey div_module">
@@ -509,14 +552,12 @@
                                 发往<input  type="text" class="to_account" value="test2"><br><br>
                                 数量<input type="number" class="transfer_amount"  value="1"><br><br>
                                 资产id<input type="text" class="asset_id"  value="COCOS"><br><br>
-                                支付手续费资产类型<input type="text" class="feeAssetId"  value="COCOS"><br><br>
                                 备注消息<input class="transfer_memo" type="text" value="">
                                 <div class="checkbox">
                                     是否发起提议: <input type="checkbox"  class="isPropose" style="width:auto;" />          
                                 </div>
-                                <p>手续费：<span class="fee"></span></p>
-                                <input type="button" id="btn_get_transferAsset_fee" value="获取本次转账所需手续费"  /><br><br>
-                                <input type="button" id="btn_transferAsset" value="转账"  />
+                                <input type="button" id="btn_transferAsset" value="转账"  /><br /><br />
+                                <p class="res"></p>
                             </div>
                         </div>
 
@@ -525,33 +566,39 @@
                             <div class="div_createAsset div_module">
                                 资产符号<input  type="text" class="symbol" value="TEST"><br><br>
                                 最大资产总量<input type="number" class="max_supply"  value="100000"><br><br>
-                                精度(小数位数)<input type="number" class="precision"  value="8"><br><br>
-                                <fieldset>
-                                    <legend>手续费汇率</legend>
-                                    基准资产数量：<input type="number" class="base" value="1" onKeyUp="_assets.c_priceChange()" />
-                                    标价资产数量(COCOS)：<input type="number" class="quote" value="1" onKeyUp="_assets.c_priceChange()" />
-                                    <p>单价：<span class="price">1 COCOS/TEST</span></p>
-                                </fieldset>
-                                <!-- <div class="checkbox">
-                                        收取交易手续费:<input type="checkbox" class="is_charge_market_fee" style="width:auto;" />          
+                                精度(小数位数)<input type="number" class="precision"  value="5"><br><br>
+                                <div class="checkbox">
+                                     收取市场交易手续费:<input type="checkbox" class="is_charge_market_fee" style="width:auto;" />          
                                 </div>
                                
                                 <fieldset style="display:none" class="fieldset_charge_market_fee">
                                     <legend>交易手续费率 </legend>
                                     交易手续费率 (%)：<input type="text" class="market_fee_percent" value="1" />
                                     最大交易手续费：<input type="text" class="max_market_fee" value="1" />
-                                </fieldset> -->
+                                </fieldset>
                                 <br>
                                 描述<textarea rows="6" class="description"></textarea>
                                 <div class="checkbox">
                                     智能币 SmartCoin: <input type="checkbox" class="isBitAsset" style="width:auto;"  />          
                                 </div>
-                                <!-- <div class="checkbox is_prediction_market" style="display:none">
-                                    二元预测市场:: <input type="checkbox" class="is_prediction_market" style="width:auto;"  />          
-                                </div> -->
-                                <p>创建资产手续费：<span class="fee"></span></p>
-                                <input type="button" id="btn_get_createAsset_fee" value="获取创建资产费用预估"  /><br><br>
+                                <div class="div_bitassetOpts" >
+                                    喂价有效时间（分钟）
+                                    <input  type="text" class="feedLifetimeSec" value="1440"><br><br>
+                                    最少喂价数量
+                                    <input  type="text" class="minimumFeeds" value="1"><br><br>
+                                    强制清算发生前延迟时间（分钟）
+                                    <input  type="text" class="forceSettlementDelaySec" value="1440"><br><br>
+                                    强制清算价格偏离百分比
+                                    <input  type="text" class="forceSettlementOffsetPercent" value="1"><br><br>
+                                    强制清算最大数量(百分比)
+                                    <input  type="text" class="maximumForceSettlementVolume" value="20"><br><br>
+                                    做空时可抵押的资产类型
+                                    <input  type="text" class="shortBackingAsset" value="1.3.0"><br><br>                   
+                                </div>
+                               
+
                                 <input type="button" id="btn_createAsset" value="确认创建"  />
+                                <p class="res"></p>
                             </div>
                         </div>
                         <div class="div_module_c" id="div_updateAsset" pclass="class_2"  >
@@ -567,16 +614,41 @@
                                   限制交易: <input type="checkbox" class="transfer_restricted" style="width:auto;"  />          
                                 </div>
                                 <fieldset>
-                                    <legend>手续费汇率</legend>
+                                    <legend>GAS手续费汇率(只有GAS设置此项才有效)</legend>
                                     基准资产数量：<input type="text" class="base" value="" onKeyUp="_assets.u_priceChange()" />
                                     标价资产数量(COCOS)：<input type="text" class="quote" value="" onKeyUp="_assets.u_priceChange()" />
                                     <p>单价：<span class="price"></span></p>
                                 </fieldset>
                                 <br>
-                                描述<textarea rows="6" class="description"></textarea>
-                                <p>更新资产手续费：<span class="fee"></span></p>
-                                <input type="button" id="btn_get_updateAsset_fee" value="获取更新资产费用预估"  /><br><br>
-                                <input type="button" id="btn_updateAsset" value="确认更新"  />
+                                <div class="checkbox">
+                                        收取市场交易手续费:<input type="checkbox" class="is_charge_market_fee" style="width:auto;" />          
+                                </div>
+                                <fieldset style="display:none" class="fieldset_charge_market_fee">
+                                    <legend>交易手续费率 </legend>
+                                    交易手续费率 (%)：<input type="text" class="market_fee_percent" value="1" />
+                                    最大交易手续费：<input type="text" class="max_market_fee" value="1" />
+                                </fieldset>
+                                <br>
+                                描述<textarea rows="6" class="description"></textarea><br><br>
+                                <div class="checkbox">
+                                    智能币 SmartCoin: <input type="checkbox" class="isBitAsset" style="width:auto;">          
+                                </div>
+                                <div class="div_bitassetOpts" >
+                                    喂价有效时间（分钟）
+                                    <input type="text" class="feedLifetimeSec" value="1440"><br><br>
+                                    最少喂价数量
+                                    <input type="text" class="minimumFeeds" value="1"><br><br>
+                                    强制清算发生前延迟时间（分钟）
+                                    <input type="text" class="forceSettlementDelaySec" value="1440"><br><br>
+                                    强制清算价格偏离百分比
+                                    <input type="text" class="forceSettlementOffsetPercent" value="1"><br><br>
+                                    强制清算最大数量(百分比)
+                                    <input type="text" class="maximumForceSettlementVolume" value="20"><br><br>
+                                    做空时可抵押的资产类型
+                                    <input type="text" class="shortBackingAsset" value="1.3.0"><br><br>                   
+                                </div>
+                                <input type="button" id="btn_updateAsset" value="确认更新"  /><br><br>
+                                <p  class="res" ></p>
                             </div>
                         </div>
                         <div class="div_module_c" id="div_issueAsset" pclass="class_2"  >
@@ -586,8 +658,7 @@
                                 发行数量<input type="number" class="amount"  value="10"><br><br>
                                 资产符号<input type="text" class="asset_id"  value="TEST"><br><br>
                                 备注消息<input class="memo" type="text" value="">
-                                <p>手续费：<span class="fee"></span></p>
-                                <input type="button" id="btn_get_issueAsset_fee" value="获取本次资产发行所需手续费"  /><br><br>
+                                <p class="res"></p>
                                 <input type="button" id="btn_issueAsset" value="确认发行"  />
                             </div>
                         </div>
@@ -596,19 +667,8 @@
                             <div class="div_reserveAsset div_module">
                                 资产符号<input  type="text" class="asset_id" value="TEST"><br><br>
                                 销毁数量<input type="number" class="amount"  value="1"><br><br>
-                                <p>销毁资产手续费：<span class="fee"></span></p>
-                                <input type="button" id="btn_get_reserveAsset_fee" value="获取资产销毁费用预估"  /><br><br>
-                                <input type="button" id="btn_reserveAsset" value="确认销毁"  />
-                            </div>
-                        </div>
-                        <div class="div_module_c" id="div_assetFundFeePool" pclass="class_2"  >
-                            <h2>资产手续费池注资</h2>
-                            <div class="div_assetFundFeePool div_module">
-                                资产符号<input  type="text" class="asset_id" value="TEST"><br><br>
-                                数量<input type="number" class="amount"  value="1"><br><br>
-                                <p>手续费：<span class="fee"></span></p>
-                                <input type="button" id="btn_get_assetFundFeePool_fee" value="获取手续费费用预估"  /><br><br>
-                                <input type="button" id="btn_assetFundFeePool" value="确认注资"  />
+                                <input type="button" id="btn_reserveAsset" value="确认销毁"  /><br><br>
+                                <p class="res"></p>
                             </div>
                         </div>
                         <div class="div_module_c" id="div_assetClaimFees" pclass="class_2"  >
@@ -616,18 +676,20 @@
                             <div class="div_assetClaimFees div_module">
                                 资产符号<input  type="text" class="asset_id" value="TEST"><br><br>
                                 数量<input type="number" class="amount"  value="1"><br><br>
-                                <p>手续费：<span class="fee"></span></p>
-                                <input type="button" id="btn_get_assetClaimFees_fee" value="获取手续费费用预估"  /><br><br>
                                 <input type="button" id="btn_assetClaimFees" value="确认领取"  />
+                                <p class="res"></p>
+
                             </div>
                         </div>
                         <div class="div_module_c" id="div_assetUpdateRestricted" pclass="class_2"  >
                             <h2>资产受限名单更新</h2>
                             <div class="div_assetUpdateRestricted div_module">
+                                <p class="red">若是发行人与黑名单中的账户进行交易则不受限制</p>
                                 资产符号<input  type="text" class="asset_id" value="TEST"><br><br>
                                 <div class="checkbox">
                                  是否添加(否则移除,Boolean): <input type="checkbox" class="isadd" style="width:auto;" checked />          
                                 </div>
+
                                 限制类型(Number)<select class="restricted_type" >
                                     <option value ="1">资产权限账户白名单</option>
                                     <option value ="2">资产权限账户黑名单</option>
@@ -635,11 +697,27 @@
                                     <option value ="4">市场交易资产黑名单</option>
                                 </select><br><br>
                                 限制列表(Array)<textarea rows="10" class="restricted_list">test3</textarea><br><br>
-                                <input type="button" id="btn_get_assetUpdateRestricted_fee" value="获取手续费费用预估"  /><br><br>
+
                                 <input type="button" id="btn_assetUpdateRestricted" value="确认更新"  />
                                 <p class="res"></p>
                             </div>
                         </div>
+
+                        <div class="div_module_c" id="div_updateCollateralForGas" pclass="class_2"  >
+                            <h2>为gas调整质押物</h2>
+                            <div class="div_updateCollateralForGas div_module">
+                                抵押人<input  type="text" class="mortgager" value="test1"><br><br>
+                                受益人<input type="text" class="beneficiary"  value="test1"><br><br>
+                                抵押数量<input type="number" class="collateral"  value="10"><br><br>
+                                <div class="checkbox">
+                                    是否发起提议: <input type="checkbox"  class="isPropose" style="width:auto;" />          
+                                </div>
+                                <p>预估获得gas：<span class="gas"></span></p>
+                                <input type="button" id="btn_queryGas" value="确认获取预估gas"  /><br><br>
+                                <input type="button" id="btn_updateCollateralForGas" value="确认"  />
+                            </div>
+                        </div>
+
                         <div class="div_module_c" id="div_queryAssetRestricted" pclass="class_2"  >
                             <h2>查询资产受限名单</h2>
                             <div class="div_queryAssetRestricted div_module">
@@ -792,8 +870,7 @@
                                             </select>
                                 <br><br><br>
                                 
-                                <p>手续费：<span class="fee"></span></p>
-                                <input type="button" id="btn_get_creatNHAssetOrder_fee" value="获取本次交易所需手续费"  /><br><br>
+                                <p class="res"></p>
                                 <input type="button" id="btn_creatNHAssetOrder" value="确认卖出NH资产"  />
                             </div>
                         </div>
@@ -919,6 +996,7 @@
                                                 <th>账户名</th>
                                                 <th>得票</th>
                                                 <th>状态</th>
+                                                <th>工作状态</th>
                                                 <th style="text-align:center;">已支持</th>
                                             </tr>
                                         </thead>
@@ -926,7 +1004,7 @@
                                         </tbody>
                                     </table>
                                     <br><br>
-                                    代理投票账户<input  type="text" class="proxy_account" value=""><br><br>
+                                    票数<input  type="text" class="votes" value=""><br><br>
                                     <input type="button" id="btn_publishVotes" value="保存修改" />
                                 </div>
                             </div>
@@ -1024,11 +1102,11 @@
                                 </div>
                             </div>
 
-                            <div class="div_module_c" id="div_lookupBlockRewards"  pclass="class_7" >
-                                <h2>查看节点出块奖励并领取</h2>
-                                <div class="div_lookupBlockRewards div_module" >
-                                    <p>查看当前登录账户且是节点账户的出块奖励</p>
-                                    <input type="button" id="btn_lookupBlockRewards" value="立即查看" /><br><br>
+                            <div class="div_module_c" id="div_queryVestingBalance"  pclass="class_7" >
+                                <h2>查询可领取的解冻资产</h2>
+                                <div class="div_queryVestingBalance div_module" >
+                                    查询账户<input  type="text" class="account" value="" placeholder="查询账户"><br><br>
+                                    <input type="button" id="btn_queryVestingBalance" value="立即查看" /><br><br>
                                     <div class="mainInfo">
     
                                     </div>
@@ -1102,7 +1180,6 @@
                                     合约名字name((规则/^[a-z][a-z0-9\.-]{4,63}$/))<input  type="text" class="name" value="contract.test02"><br><br>
                                     合约代码data<textarea rows="20" class="data"></textarea><br><br><br>
 
-                                    <input type="button" id="btn_get_update_contract_fee" value="获取费用预估"  /><br><br>
                                     <input type="button" id="btn_update_contract" value="确认更新合约" /><br><br>
                                     <p class="res"></p>
                                 </div>
@@ -1158,7 +1235,6 @@
                                 <div class="div_assetSettle div_module">
                                     资产符号<input  type="text" class="assetId" value="TEST"><br><br>
                                     金额 <input  type="text" class="amount" value="2"><br><br>
-                                    <input type="button" id="btn_get_assetSettle_fee" value="获取手续费费用预估"  /><br><br>
                                     <input type="button" id="btn_assetSettle" value="确认清算" /><br><br>
                                     <p class="res"></p>
                                 </div>
@@ -1169,7 +1245,6 @@
                                     <p>全局清算根据当前提供的价格立即清算，个人清算是以资产设定的延迟清算时间到来时的喂价价格执行清算</p>
                                     资产符号<input  type="text" class="assetId" value="TEST"><br><br>
                                     价格(Number) <input  type="text" class="price" value="2"><br><br>
-                                    <input type="button" id="btn_get_assetGlobalSettle_fee" value="获取手续费费用预估"  /><br><br>
                                     <input type="button" id="btn_assetGlobalSettle" value="确认清算" /><br><br>
                                     <p class="res"></p>
                                 </div>
@@ -1179,7 +1254,6 @@
                                 <div class="div_assetUpdateFeedProducers div_module">
                                     资产符号<input  type="text" class="assetId" value="TEST"><br><br>
                                     喂价提供者账户(Array) <textarea rows="10" class="new_feed_producers">1.2.5</textarea><br><br>
-                                    <input type="button" id="btn_get_assetUpdateFeedProducers_fee" value="获取手续费费用预估"  /><br><br>
                                     <input type="button" id="btn_assetUpdateFeedProducers" value="确认喂价" /><br><br>
                                     <p class="res"></p>
                                 </div>
@@ -1191,19 +1265,36 @@
                                     价格(Number)<input  type="text" class="price" value="1"><br><br>
                                     维持抵押率(Number)<input  type="text" class="maintenance_collateral_ratio" value="1.75"><br><br>
                                     强制平仓比例上限(Number)<input  type="text" class="maximum_short_squeeze_ratio" value="1.5"><br><br>
-
-                                    <fieldset>
-                                        <legend>手续费汇率</legend>
-                                        基准资产数量：<input type="number" class="base" value="" onKeyUp="_market.c_feedfeePriceChange()" />
-                                        标价资产数量(COCOS)：<input type="number" class="quote" value="" onKeyUp="_market.c_feedfeePriceChange()" />
-                                        <p>单价：<span class="fee_price">1 COCOS/TEST</span></p>
-                                    </fieldset><br><br>
-
-                                    <input type="button" id="btn_get_assetPublishFeed_fee" value="获取手续费费用预估"  /><br><br>
                                     <input type="button" id="btn_assetPublishFeed" value="确认喂价" /><br><br>
                                     <p class="res"></p>
                                 </div>
                             </div> 
+
+                            <div class="div_module_c" id="div_callOrderUpdate"  pclass="class_10" >
+                                <h2>抵押债仓</h2>
+                                <div class="div_callOrderUpdate div_module">
+                                    <p class="red">如果结算价格没有被清空,则不能进行借贷，要想清空结算价格，需要发布结算价格低"维持抵押率"倍数的价格</p>
+                                    债务金额<input  type="text" class="debtAmount" value="100"><br><br>
+                                    债务资产id<input  type="text" class="debtAssetId" value="STEST"><br><br>
+                                    抵押物金额<input  type="text" class="collateralAmount" value="100"><br><br>
+                                    抵押物资产id<input  type="text" class="collateralAssetId" value="1.3.0"><br><br>
+
+                                    抵押率:<span class="span_ratio">1</span>&nbsp;&nbsp;&nbsp;最低抵押率：<span class="min_ratio"></span>
+                                    <input type="range"  style="display:none;" class="ratio" step="0.1" min="0" max="6" value="1"><br><br>
+                                    <span class="radio_msg"></span>
+                                    <input type="button" id="btn_callOrderUpdate" value="调整债仓" /><br><br>
+
+                                    账户<input  type="text" class="account" value="test1"><br><br>
+                                    <input type="button" id="btn_queryDebt" value="查询当前债务" /><br><br>
+                                    <p>喂价：<span class="feed_price"></span></p>
+                                    <p>你的强平触发价：<span class="call_price"></span></p>
+                                    <p>债务：<span class="debt"></span></p>
+                                    <p>抵押物：<span class="collateral"></span></p>
+
+                                    <p class="res"></p>
+                                </div>
+                            </div> 
+
                             <div class="div_module_c" id="div_createLimitOrder"  pclass="class_10" >
                                 <h2>代币资产“限价单”交易</h2>
                                 <div class="div_createLimitOrder div_module">
@@ -1219,7 +1310,7 @@
                                     <h2>查询&订阅市场交易对相关数据</h2>
                                     <div class="div_subscribeToTransactionPair div_module" style="width:96%;">
                                         交易对transactionPair(TEST_COCOS为买卖COCOS交易市场的TEST)
-                                        <input  type="text" class="transactionPair" value="COCOS_USDT"><br>
+                                        <input  type="text" class="transactionPair" value="TEST_COCOS"><br>
                                         <div class="checkbox">
                                                 是否订阅:<input type="checkbox" class="subscribe" style="width:auto;" />          
                                         </div>
@@ -1359,6 +1450,13 @@
                                     <p class="res"></p>
                                 </div>
                             </div> 
+                            <div class="div_module_c" id="div_queryFees"  pclass="class_12" >
+                                <h2>查询手续费集合</h2>
+                                <div class="div_queryFees div_module">
+                                    <input type="button" id="btn_queryFees" value="立即获取" /><br><br>
+                                    <p class="res"></p>
+                                </div>
+                            </div> 
                             <div class="div_module_c" id="div_unsubscribe"  pclass="class_12" >
                                 <h2>取消订阅</h2>
                                 <div class="div_unsubscribe div_module">
@@ -1386,8 +1484,7 @@
        
     </div>
 
-        <!-- <script src="./build/assets/bcx.min.js"></script> -->
-        <script src="assets/bcx.js"></script>
+        <script src="assets/bcx.js?v=7"></script>
         <script type="text/javascript" src="./build/FELib/jquery-1.8.3.min.js" charset="utf-8"></script>
         <script type="text/javascript" src="./build/FELib/jsonview/jquery.jsonview.min.js" charset="utf-8"></script>
 
@@ -1412,24 +1509,25 @@
 
                 loadLeftNavs();
                 
-                var _configParams={
-                    // default_ws_node:"ws://47.93.62.96:8049",
+                var _configParams={ 
                     ws_node_list:[
-                        // {url:"ws://39.97.110.222:8040",name:"Cocos - China - Beijing"},   
-                        {url:"ws://47.93.62.96:8049",name:"Cocos - China - Xiamen"} 
-                    ],
-                    networks:[
-                     {
-                        core_asset:"COCOS",
-                        chain_id:"7d89b84f22af0b150780a2b121aa6c715b19261c8b7fe0fda3a564574ed7d3e9" 
-                      }
-                    ], 
-                    faucet_url:"http://47.93.62.96:8041",
-                    auto_reconnect:false,
+                         {url:"ws://123.57.19.148:9049",name:"Cocos - China - Beijing"}, 
+                        //  {url:"ws://182.92.164.121:8021",name:"Cocos - China - Beijing"},    
+                        
+                     ],
+                     networks:[
+                        {
+                            core_asset:"COCOS",
+                            chain_id:"9e0ef9444fc780fa91aaef2e63c18532634ad67dcc436a4b4915d3adeef62c62" 
+                        }
+                     ], 
+                    faucet_url:"",
+                    auto_reconnect:true,
                     real_sub:true,
                     check_cached_nodes_data:false
                     //app_keys:["5HxzZncKDjx7NEaEv989Huh7yYY7RukcJLKBDQztXAmZYCHWPgd"]
                 };
+
                 var bcx=new BCX(_configParams);
                 //可以不用初始化，直接调用，API会自动判断是否初始化，热没有初始化则自动初始化
                 bcx.init({
@@ -1460,15 +1558,13 @@
                         gel("#btn_publishVotes").onclick=this.publishVotes;
 
                         gel("#btn_getTransactionBaseFee").onclick=this.getTransactionBaseFee;
+                        gel("#btn_queryFees").onclick=this.queryFees;
+
+                        
                         gel("#btn_unsubscribe").onclick=this.unsubscribe;
 
                         gel("#btn_apiConfig").onclick=()=>{
                             bcx.apiConfig({
-                                ws_node_list:[
-                                    {url:"ws://39.96.33.61:8050",name:"COCOS - China - Shanghai"},
-                                    {url:"ws://39.96.29.40:8050",name:"COCOS - China - Chengdu"},
-                                    {url:"ws://39.106.126.54:8050",name:"COCOS - China - Hong Kong"}
-                                ],
                                 check_cached_nodes_data:false,
                                 // worker:gel(".div_apiConfig .worker").value,
                                 locale:gel(".div_apiConfig .lang").value,
@@ -1485,6 +1581,11 @@
                         }
 
                     },
+                    queryFees(){
+                        bcx.queryFees().then(res=>{
+                            $(".div_queryFees .res").JSONView(res);
+                        })
+                    },
                     queryVotes(){
                         bcx.queryVotes({
                             queryAccount:gel(".div_getVotes .query_account").value,
@@ -1500,6 +1601,7 @@
                                                     <td >${item.account_name}</td>
                                                     <td>${item.votes}</td>
                                                     <td>${item.active?"活跃":"不活跃"}</td>
+                                                    <td>${item.work_status?"是":"否"}</td>
                                                     <td><input type="checkbox" ${item.supported?"checked":""} value="${item.account_id}" ></td>
                                                 </tr>`
                                 })
@@ -1518,13 +1620,11 @@
                         let type=gel(".div_getVotes .type").value;
                         console.info("vote_ids",vote_ids,type);
                         bcx.publishVotes({
-                            witnessesIds:type=="witnesses"?vote_ids:null,
-                            committee_ids:type=="committee"?vote_ids:null,
-                            proxyAccount:gel(".div_getVotes .proxy_account").value,
-                            onlyGetFee:false,
-                            callback:function(res){
-                                console.info("publishVotes res",res);
-                            }
+                            type,
+                            vote_ids,
+                            votes:gel(".div_getVotes .votes").value
+                        }).then(res=>{
+                            console.info("publishVotes res",res);
                         })
                     },
                     getTransactionBaseFee(){
@@ -1570,62 +1670,100 @@
                         }
                         gel("#btn_queryPriceHistory").onclick=this.queryPriceHistory;
 
-                        // 资产喂价
-                        gel("#btn_assetPublishFeed").onclick=function(){
-                            _market.assetPublishFeed(false);
-                        }
-                        gel("#btn_get_assetPublishFeed_fee").onclick=function(){
-                            _market.assetPublishFeed(true);
-                        }
+                        gel("#btn_assetPublishFeed").onclick=this.assetPublishFeed
 
-                        // 喂价提供者更新
-                        gel("#btn_assetUpdateFeedProducers").onclick=function(){
-                            _market.assetUpdateFeedProducers(false);
-                        }
-                        gel("#btn_get_assetUpdateFeedProducers_fee").onclick=function(){
-                            _market.assetUpdateFeedProducers(true);
-                        }
+                        gel("#btn_callOrderUpdate").onclick=this.callOrderUpdate;
 
-                        // 全局资产清算
-                        gel("#btn_assetGlobalSettle").onclick=function(){
-                            _market.assetGlobalSettle(false);
+                        gel("#btn_queryDebt").onclick=this.queryDebt;
+
+                        gel(".ratio").onchange=(e)=>{
+                            gel(".span_ratio").innerText=e.target.value;
+                            gel(".collateralAmount").value=(gel(".debtAmount").value*
+                            _market.debt_data.format_feed_price*e.target.value).toFixed(5);
                         }
-                        gel("#btn_get_assetGlobalSettle_fee").onclick=function(){
-                            _market.assetGlobalSettle(true);
-                        }
-                        // 个人资产清算
-                        gel("#btn_assetSettle").onclick=function(){
-                            _market.assetSettle(false);
-                        }
-                        gel("#btn_get_assetSettle_fee").onclick=function(){
-                            _market.assetSettle(true);
-                        }                      
+                        
+                        gel("#btn_assetUpdateFeedProducers").onclick=this.assetUpdateFeedProducers;
+
+                        gel("#btn_assetGlobalSettle").onclick=this.assetGlobalSettle;
+
+                        gel("#btn_assetSettle").onclick=this.assetSettle;  
                     },
-                    assetSettle(onlyGetFee){
+                    debt_data:null,
+                    queryDebt(){
+                        bcx.queryDebt({
+                            account:gel(".div_callOrderUpdate .account").value,
+                            debtAssetId:gel(".div_callOrderUpdate .debtAssetId").value,
+                            collateralAssetId:gel(".div_callOrderUpdate .collateralAssetId").value
+                        }).then(res=>{
+                            console.info("queryDebt res",res);
+                            $(".div_callOrderUpdate .res").JSONView(res);
+
+                            if(res.code==1){
+                                let {call_price_text,collateral_value,debt_value,collateral_symbol,
+                                    debt_symbol,format_feed_price_text,format_feed_price,maintenance_collateral_ratio}=res.data;
+                                _market.debt_data=res.data;
+                                gel(".div_callOrderUpdate .call_price").innerText=call_price_text;
+                                gel(".div_callOrderUpdate .debt").innerText=debt_value+" "+debt_symbol;
+                                gel(".div_callOrderUpdate .collateral").innerText=collateral_value+" "+collateral_symbol;
+                                gel(".div_callOrderUpdate .feed_price").innerText=format_feed_price_text;
+
+                                gel(".div_callOrderUpdate .collateralAmount").value=collateral_value;
+                                gel(".div_callOrderUpdate .debtAmount").value=debt_value;
+                                gel(".div_callOrderUpdate .debtAssetId").value=debt_symbol;
+                                gel(".div_callOrderUpdate .collateralAssetId").value=collateral_symbol;
+                                
+                                gel(".min_ratio").innerText=maintenance_collateral_ratio;
+                               if(Number(format_feed_price)){
+                                gel(".div_callOrderUpdate .ratio").style.display="block";
+                                let ratio=collateral_value/(debt_value*format_feed_price);
+                                ratio=isNaN(Number(ratio))?0:ratio;
+                                gel(".div_callOrderUpdate .ratio").value=ratio;
+                                gel(".div_callOrderUpdate .span_ratio").innerText=ratio;
+                               }else{
+                                gel(".div_callOrderUpdate .ratio").style.display="none";
+                                gel(".div_callOrderUpdate .span_ratio").innerText="无有"+debt_symbol+"效喂价"; 
+                               }
+                               
+                            }
+                        })
+                    },
+                    callOrderUpdate(){
+                        if(gel(".collateralAmount").value/(_market.debt_data.format_feed_price*gel(".debtAmount").value)<1.75){
+                            alert("抵押率低于要求的 1.75，不允许操作");
+                            return;
+                        }
+                        bcx.callOrderUpdate({
+                            collateralAmount:gel(".collateralAmount").value,
+                            collateralAssetId:gel(".collateralAssetId").value,
+                            debtAmount:gel(".debtAmount").value,
+                            debtAssetId:gel(".debtAssetId").value
+                        }).then(res=>{
+                            console.info("callOrderUpdate res",res);
+                            $(".div_callOrderUpdate .res").JSONView(res);
+                        })
+                    },
+                    assetSettle(){
                         bcx.assetSettle({
                             assetId:gel(".div_assetSettle .assetId").value,
-                            amount:gel(".div_assetSettle .amount").value,
-                            onlyGetFee
+                            amount:gel(".div_assetSettle .amount").value
                         }).then(res=>{
                             console.info("assetSettle res",res);
                             $(".div_assetSettle .res").JSONView(res);
                         })
                     },
-                    assetGlobalSettle(onlyGetFee){
+                    assetGlobalSettle(){
                         bcx.assetGlobalSettle({
                             assetId:gel(".div_assetGlobalSettle .assetId").value,
-                            price:gel(".div_assetGlobalSettle .price").value,
-                            onlyGetFee
+                            price:gel(".div_assetGlobalSettle .price").value
                         }).then(res=>{
                             console.info("assetGlobalSettle res",res);
                             $(".div_assetGlobalSettle .res").JSONView(res);
                         })
                     },
-                    assetUpdateFeedProducers(onlyGetFee){
+                    assetUpdateFeedProducers(){
                         bcx.assetUpdateFeedProducers({
                             assetId:gel(".div_assetUpdateFeedProducers .assetId").value,
-                            newFeedProducers:(gel(".div_assetUpdateFeedProducers .new_feed_producers").value).split(","),
-                            onlyGetFee
+                            newFeedProducers:(gel(".div_assetUpdateFeedProducers .new_feed_producers").value).split(",")
                         }).then(res=>{
                             console.info("assetUpdateFeedProducers res",res);
                             $(".div_assetUpdateFeedProducers .res").JSONView(res);
@@ -1636,18 +1774,12 @@
                         (gel(".div_assetPublishFeed .base").value||1)).toFixed(8)
                          +" COCOS/ "+gel(".div_assetPublishFeed .assetId").value
                     },
-                    // 资产喂价
-                    assetPublishFeed(onlyGetFee){
+                    assetPublishFeed(){
                         bcx.assetPublishFeed({
                             assetId:gel(".div_assetPublishFeed .assetId").value,
                             price:gel(".div_assetPublishFeed .price").value,
                             maintenanceCollateralRatio:gel(".div_assetPublishFeed .maintenance_collateral_ratio").value,
-                            maximumShortSqueezeRatio:gel(".div_assetPublishFeed .maximum_short_squeeze_ratio").value,
-                            coreExchangeRate:{
-                                quoteAmount:gel(".div_assetPublishFeed .quote").value,
-                                baseAmount:gel(".div_assetPublishFeed .base").value
-                            },
-                            onlyGetFee
+                            maximumShortSqueezeRatio:gel(".div_assetPublishFeed .maximum_short_squeeze_ratio").value
                         }).then(res=>{
                             console.info("assetPublishFeed res",res);
                             $(".div_assetPublishFeed .res").JSONView(res);
@@ -1839,7 +1971,7 @@
                         gel("#btn_subscribeToChainTranscation").onclick=this.subscribeToChainTranscation;
                         gel("#btn_subscribeBlocks").onclick=this.subscribeBlocks;
                         gel("#btn_getWitnessesForExplorer").onclick=this.getWitnessesForExplorer;
-                        gel("#btn_lookupBlockRewards").onclick=this.lookupBlockRewards;
+                        gel("#btn_queryVestingBalance").onclick=this.queryVestingBalance;
 
 
                     },
@@ -2140,45 +2272,62 @@
                         });
                    },
                    claimVestingBalance(id,amount,asset_id){
-                        bcx.claimVestingBalance({
-                            id,
-                            callback:res=>{
-                                console.info("claimVestingBalance res",res);
-                            }
+                        bcx.claimVestingBalance({id}).then(res=>{
+                            console.info("claimVestingBalance res",res);
                         })
                    },
-                   lookupBlockRewards(){
-                        bcx.lookupBlockRewards({
+                   queryVestingBalance(){
+                        bcx.queryVestingBalance({
+                            account:gel(".div_queryVestingBalance .account").value,
                             callback:function(res){
-                                console.info("lookupBlockRewards res",res);
+                                console.info("queryVestingBalance res",res);
                                 if(res.code==1){
-                                    var mainInfoHtmls="";
-                                    let {id,return_cash,earned_coindays,require_coindays,remaining_days,available_percent,available_balance}=res.data;
-                                    let {amount,symbol,asset_id}=available_balance;
-                                    mainInfoHtmls+=`<div class="listCard">
-                                        <div class="row">
-                                            <div class="field">返现：</div><div class="value">${return_cash} ${symbol}</div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="field">已完成币天：</div><div class="value">${earned_coindays} 币天</div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="field">要求的币天：</div><div class="value">${require_coindays} 币天</div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="field">剩余解冻天数：</div><div class="value">${remaining_days} 天</div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="field">可领取数量：</div><div class="value">${available_percent}% / ${amount} ${symbol}</div>
-                                        </div>
+                                    let types={
+                                        "cashback_gas":"gas领取",
+                                        "cashback_block":"出块奖励领取",
+                                        "cashback_vb":"gas抵押赎回",
+                                        "cashback_vote":"投票抵押赎回"
+                                    }
+                                    let return_cashs={
+                                        "cashback_gas":"恢复量",
+                                        "cashback_block":"解冻奖励",
+                                        "cashback_vb":"赎回量",
+                                        "cashback_vote":"赎回量"
+                                    }
 
-                                        <div class="row">
-                                            <input type="button" onClick="_explorer.claimVestingBalance('${id}',${amount},'${asset_id}')" value="立即领取" /><br><br>  
+                                    let available_balances={
+                                        "cashback_gas":"剩余恢复时间",
+                                        "cashback_block":"剩余解冻时间",
+                                        "cashback_vb":"剩余赎回时间",
+                                        "cashback_vote":"剩余赎回时间"
+                                    }
+
+                                    var mainInfoHtmls="";
+                                    res.data.forEach(item=>{
+                                        let {id,type,return_cash,earned_coindays,require_coindays,remaining_hours,available_percent,available_balance}=item;
+                                        let {amount,symbol,asset_id}=available_balance;
+                                        mainInfoHtmls+=`<div class="listCard">
+                                            <div class="row">
+                                                <div class="field">类型：</div><div class="value">${types[type]}</div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="field">${return_cashs[type]}：</div><div class="value">${return_cash} ${symbol}</div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="field">${available_balances[type]}：</div><div class="value">${remaining_hours} 小时</div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="field">可领取数量：</div><div class="value">${available_percent}% / ${amount} ${symbol}</div>
+                                            </div>
+
+                                            <div class="row" dis>
+                                                <input type="button" onClick="_explorer.claimVestingBalance('${id}')" value="立即领取" /><br><br>  
+                                            </div>
                                         </div>
-                                    </div>
-                                    `;
-                            
-                                    gel(".div_lookupBlockRewards .mainInfo").innerHTML=mainInfoHtmls;
+                                        `;
+                                    })
+                                    
+                                    gel(".div_queryVestingBalance .mainInfo").innerHTML=mainInfoHtmls;
                                 }
                             }
                         })
@@ -2187,21 +2336,23 @@
 
                var _assets={
                     init:function(){
-                        // gel(".is_charge_market_fee").onclick=this.charge_market_fee_change;
-                        gel(".isBitAsset").onclick=this.isBitAssetChange;
+                        gel(".div_createAsset .is_charge_market_fee").onclick=this.charge_market_fee_change;
+                      
+                        gel(".div_updateAsset .is_charge_market_fee").onclick=this.updateAsset_charge_market_fee_change;
+
+                        gel(".div_createAsset .isBitAsset").onclick=this.isBitAssetChange;
                         
-                        gel("#btn_get_createAsset_fee").onclick=function(){
-                            _assets.createAsset(true);
-                        }
+                        gel(".div_updateAsset .isBitAsset").onclick=(e)=>{
+                            gel(".div_updateAsset .div_bitassetOpts").style.display=e.target.checked?"block":"none";
+                        };
+
+
                         gel("#btn_createAsset").onclick=function(){
                             _assets.createAsset(false);
                         }
 
-                        gel("#btn_get_updateAsset_fee").onclick=function(){
-                            _assets.updateAsset(true);
-                        }
                         gel("#btn_updateAsset").onclick=function(){
-                            _assets.updateAsset(false);
+                            _assets.updateAsset();
                         }
 
                         
@@ -2212,37 +2363,20 @@
                             _assets.queryAssets(gel(".div_getAssets .symbol").value);
                         }
 
-                        gel("#btn_get_transferAsset_fee").onclick=function(){
-                            _assets.transferAsset(true);
-                        };
                         gel("#btn_transferAsset").onclick=function(){
                             _assets.transferAsset();
                         };
                    
-                        gel("#btn_get_issueAsset_fee").onclick=function(){
-                            _assets.issueAsset(true);
-                        }
                         gel("#btn_issueAsset").onclick=function(){
                             _assets.issueAsset(false);
                         }
 
-                        gel("#btn_get_reserveAsset_fee").onclick=function(){
-                            _assets.reserveAsset(true);
-                        }
+
                         gel("#btn_reserveAsset").onclick=function(){
-                            _assets.reserveAsset(false);
+                            _assets.reserveAsset();
                         }
 
-                        gel("#btn_get_assetFundFeePool_fee").onclick=function(){
-                            _assets.assetFundFeePool(true);
-                        }
-                        gel("#btn_assetFundFeePool").onclick=function(){
-                            _assets.assetFundFeePool(false);
-                        }
 
-                        gel("#btn_get_assetClaimFees_fee").onclick=function(){
-                            _assets.assetClaimFees(true);
-                        }
                         gel("#btn_assetClaimFees").onclick=function(){
                             _assets.assetClaimFees(false);
                         }
@@ -2261,14 +2395,36 @@
                         }
 
 
-                        gel("#btn_get_assetUpdateRestricted_fee").onclick=function(){
-                            _assets.assetUpdateRestricted(true);
-                        }
-                        gel("#btn_assetUpdateRestricted").onclick=function(){
-                            _assets.assetUpdateRestricted(false);
-                        }
+                        gel("#btn_assetUpdateRestricted").onclick=_assets.assetUpdateRestricted
 
                         gel("#btn_queryAssetRestricted").onclick=this.queryAssetRestricted;
+
+                        gel("#btn_queryGas").onclick=this.queryGas;
+                        gel("#btn_updateCollateralForGas").onclick=this.updateCollateralForGas;
+                    },
+                    queryGas(){
+                        bcx.queryGas({
+                            amount:gel(".div_updateCollateralForGas .collateral").value
+                        }).then(res=>{
+                            console.info("queryGas res",res);
+                            if(res.code==1){
+                                let {amount,amount_symbol}=res.data;
+                                gel(".div_updateCollateralForGas .gas").innerText=amount+" "+amount_symbol;
+                            }
+                        })
+                    },
+                    updateCollateralForGas(){
+                        bcx.updateCollateralForGas({
+                            mortgager:gel(".div_updateCollateralForGas .mortgager").value,
+                            beneficiary:gel(".div_updateCollateralForGas .beneficiary").value,
+                            amount:gel(".div_updateCollateralForGas .collateral").value,
+                            isPropose:gel(".div_updateCollateralForGas .isPropose").checked
+                        }).then(res=>{
+                            console.info("updateCollateralForGas res",res);
+                            if(res.code==1){
+
+                            }
+                        })
                     },
                     queryAssetRestricted(){
                         bcx.queryAssetRestricted({
@@ -2310,107 +2466,61 @@
                             }
                         });
                     },
-                    assetUpdateRestricted:function(isOnlyGetFee){
+                    assetUpdateRestricted:function(){
                         bcx.assetUpdateRestricted({
                             assetId:gel(".div_assetUpdateRestricted .asset_id").value,
                             isadd:gel(".div_assetUpdateRestricted .isadd").checked,
                             restrictedType:gel(".div_assetUpdateRestricted .restricted_type").value,
                             restrictedList:(gel(".div_assetUpdateRestricted .restricted_list").value).split(","),
-                            onlyGetFee:!!isOnlyGetFee
                         }).then(res=>{
                             console.info('div_assetUpdateRestricted res',res);
                             $(".div_assetUpdateRestricted .res").JSONView(res);
                         })
                     },
-                    assetClaimFees:function(isOnlyGetFee){
+                    assetClaimFees:function(){
                         bcx.assetClaimFees({
                             assetId:gel(".div_assetClaimFees .asset_id").value,
-                            amount:Number(gel(".div_assetClaimFees .amount").value),
-                            onlyGetFee:!!isOnlyGetFee,
-                            callback:function(res){
-                                console.info('div_assetClaimFees res',res);
-                                if(res.code==1){
-                                    if(isOnlyGetFee)
-                                    gel(".div_assetClaimFees .fee").innerText=res.data.fee_amount+" "+res.data.fee_symbol;
-                                }else{
-                                    alert(res.message);
-                                }
-                            }
+                            amount:Number(gel(".div_assetClaimFees .amount").value)
+                        }).then(res=>{
+                            console.info('div_assetClaimFees res',res);
+                            $(".div_assetClaimFees .res").JSONView(res);
                         })
                     },
 
-                    assetFundFeePool:function(isOnlyGetFee){
-                        bcx.assetFundFeePool({
-                            assetId:gel(".div_assetFundFeePool .asset_id").value,
-                            amount:Number(gel(".div_assetFundFeePool .amount").value),
-                            onlyGetFee:!!isOnlyGetFee,
-                            callback:function(res){
-                                console.info('div_assetFundFeePool res',res);
-                                if(res.code==1){
-                                    if(isOnlyGetFee)
-                                    gel(".div_assetFundFeePool .fee").innerText=res.data.fee_amount+" "+res.data.fee_symbol;
-                                }else{
-                                    alert(res.message);
-                                }
-                            }
-                        })
-                    },
-                    reserveAsset:function(isOnlyGetFee){
+                    reserveAsset:function(){
                         bcx.reserveAsset({
                             assetId:gel(".div_reserveAsset .asset_id").value,
-                            amount:Number(gel(".div_reserveAsset .amount").value),
-                            onlyGetFee:!!isOnlyGetFee,
-                            callback:function(res){
-                                console.info('div_reserveAsset res',res);
-                                if(res.code==1){
-                                    if(isOnlyGetFee)
-                                    gel(".div_reserveAsset .fee").innerText=res.data.fee_amount+" "+res.data.fee_symbol;
-                                }else{
-                                    alert(res.message);
-                                }
-                            }
+                            amount:Number(gel(".div_reserveAsset .amount").value)
+                        }).then(res=>{
+                            console.info('div_reserveAsset res',res);
+                            $(".div_reserveAsset .res").JSONView(res);
                         })
                     },
-                    issueAsset:function(isOnlyGetFee){
+                    issueAsset:function(){
                         bcx.issueAsset({
                                 toAccount:gel(".div_issueAsset .to_account").value,
                                 amount:Number(gel(".div_issueAsset .amount").value),
                                 assetId:gel(".div_issueAsset .asset_id").value,
-                                memo:gel(".div_issueAsset .memo").value,
-                                onlyGetFee:!!isOnlyGetFee,
-                                callback:function(res){
-                                    console.info('issueAsset res',res);
-                                    if(res.code==1){
-                                        if(isOnlyGetFee)
-                                        gel(".div_issueAsset .fee").innerText=res.data.fee_amount+" "+res.data.fee_symbol;
-                                    }else{
-                                        alert(res.message);
-                                    }
-                                }
+                                memo:gel(".div_issueAsset .memo").value
+                        }).then(res=>{
+                            console.info('issueAsset res',res);
+                            $(".div_issueAsset .res").JSONView(res);
                         })
                     },
-                    transferAsset:function(isOnlyGetFee){
+                    transferAsset:function(){
                         var amount=Number(gel(".div_transferAsset .transfer_amount").value);
-                
                         let trxData={
                             fromAccount:gel(".div_transferAsset .from_account").value,
                             toAccount:gel(".div_transferAsset .to_account").value,
                             amount:amount,
                             assetId:gel(".div_transferAsset .asset_id").value,
                             memo:gel(".div_transferAsset .transfer_memo").value,
-                            feeAssetId:gel(".div_transferAsset .feeAssetId").value,
-                            isPropose:gel(".div_transferAsset .isPropose").checked,
-                            onlyGetFee:!!isOnlyGetFee
+                            isPropose:gel(".div_transferAsset .isPropose").checked
                         };
 
                         bcx.transferAsset(trxData).then(res=>{
                             console.info('transferAsset res',res);
-                            if(res.code==1){
-                                if(isOnlyGetFee)
-                                gel(".div_transferAsset .fee").innerText=res.data.fee_amount+" "+res.data.fee_symbol;
-                            }else{
-                                alert(res.message);
-                            }
+                            $(".div_transferAsset .res").JSONView(res);
                         })
                     },
                     queryAssets:function(symbol){
@@ -2430,17 +2540,17 @@
                                     <p>当前供应量：<span class="current_supply">${dynamic.current_supply} ${symbol}</span></p>
                                     <p>最大供应量：<span class="max_supply">${options.max_supply} ${symbol}</span></p>
                                     <fieldset  class="fieldset_charge_market_fee">
-                                        <legend>手续费资金池 </legend>
-                                        <p>手续费汇率：<span class="fee_pool">${options.core_exchange_rate.text}</span></p>
-                                        <p>资金池余额：<span class="fee_pool">${dynamic.fee_pool} ${dynamic.fee_pool_symbol}</span></p>
-                                        <p>发行人未申领收入：<span class="accumulated_fees">${dynamic.accumulated_fees} ${symbol}</span></p>
+                                        <legend>手续费 </legend>
+                                        <p>手续费汇率：<span class="fee_pool">${options.core_exchange_rate?options.core_exchange_rate.text:'无'}</span></p>
+                                        <p>市场手续费：<span class="market_fee_percent">${options.market_fee_percent} %</span></p>
+                                        <p>市场手续费上限：<span class="max_market_fee">${options.max_market_fee} ${symbol}</span></p>
+                                        <p>累积手续费池：<span >${dynamic.accumulated_fees} ${symbol}</span></p>
                                     </fieldset>
                                   `;
                                     return;
                                 }
 
-                                // <p>市场手续费：<span class="market_fee_percent">${options.market_fee_percent} %</span></p>
-                                // <p>市场手续费上限：<span class="max_market_fee">${options.max_market_fee} ${symbol}</span></p>
+                               
                                
 
                                 var assets_html=""
@@ -2460,38 +2570,40 @@
                         })
                     },
                     charge_market_fee_change:function(e){
-                        gel(".fieldset_charge_market_fee").style.display=e.target.checked?"block":"none";
+                        gel(".div_createAsset .fieldset_charge_market_fee").style.display=e.target.checked?"block":"none";
+                    },
+                    updateAsset_charge_market_fee_change(e){
+                        gel(".div_updateAsset .fieldset_charge_market_fee").style.display=e.target.checked?"block":"none";
                     },
                     isBitAssetChange:function(e){
-                        // gel("div.is_prediction_market").style.display=e.target.checked?"block":"none";
+                        gel(".div_createAsset .div_bitassetOpts").style.display=e.target.checked?"block":"none";
                     },
-                    createAsset:function(isOnlyGetFee){
+                    createAsset:function(){
                         bcx.createAsset({
                             assetId:gel(".div_createAsset .symbol").value,
                             maxSupply:gel(".div_createAsset .max_supply").value,
                             precision:gel(".div_createAsset .precision").value,
-                            coreExchangeRate:{
-                                quoteAmount:gel(".div_createAsset .quote").value,
-                                baseAmount:gel(".div_createAsset .base").value
-                            },
                             // chargeMarketFee:{//是否收取交易手续费,不传该参数说明不收取交易手续费
                             //     marketFeePercent:gel(".div_createAsset .market_fee_percent").value,
                             //     maxMarketFee:gel(".div_createAsset .max_market_fee").value
                             // },
                             description:gel(".div_createAsset .description").value,
                             isBitAsset:gel(".div_createAsset .isBitAsset").checked,
-                            // is_prediction_market:gel(".div_createAsset input.is_prediction_market").checked,
-                            onlyGetFee:isOnlyGetFee,
-                            callback:function(res){
-                                console.info("createAsset res",res);
-                                if(res.code==1&&isOnlyGetFee){
-                                    gel(".div_createAsset .fee").innerText=res.data.fee_amount+" "+res.data.fee_symbol;
-                                }
+                            bitassetOpts:{
+                                feedLifetimeSec:gel(".feedLifetimeSec").value,
+                                minimumFeeds:gel(".minimumFeeds").value,
+                                forceSettlementDelaySec:gel(".forceSettlementDelaySec").value,
+                                forceSettlementOffsetPercent:gel(".forceSettlementOffsetPercent").value,
+                                maximumForceSettlementVolume:gel(".maximumForceSettlementVolume").value,
+                                // shortBackingAsset:gel(".shortBackingAsset").value,
                             }
+                        }).then(res=>{
+                            console.info("createAsset res",res);
+                            $(".div_createAsset .res").JSONView(res);
                         })
                     },
-                    updateAsset:function(isOnlyGetFee){
-                        bcx.updateAsset({
+                    updateAsset:function(){
+                        let trxData={
                             assetId:gel(".div_updateAsset .symbol").value,
                             maxSupply:gel(".div_updateAsset .max_supply").value,
                             newIssuer:gel(".div_updateAsset .new_issuer").value,
@@ -2501,14 +2613,30 @@
                             },
                             whiteList:gel(".div_updateAsset .white_list").checked,
                             transferRestricted:gel(".div_updateAsset .transfer_restricted").checked,
-                            description:gel(".div_updateAsset .description").value,
-                            onlyGetFee:isOnlyGetFee,
-                            callback:function(res){
-                                console.info("updateAsset res",res);
-                                if(res.code==1&&isOnlyGetFee){
-                                    gel(".div_updateAsset .fee").innerText=res.data.fee_amount+" "+res.data.fee_symbol;
-                                }
+                            description:gel(".div_updateAsset .description").value
+                        }
+                        if(gel(".div_updateAsset .is_charge_market_fee").checked){
+                            trxData.chargeMarketFee={//是否收取交易手续费,不传该参数说明不收取交易手续费
+                                marketFeePercent:gel(".div_updateAsset .market_fee_percent").value,
+                                maxMarketFee:gel(".div_updateAsset .max_market_fee").value
                             }
+                        }
+                        if(gel(".div_updateAsset .isBitAsset").checked){
+                            trxData.bitassetOpts={
+                                feedLifetimeSec:gel(".div_updateAsset .feedLifetimeSec").value,
+                                minimumFeeds:gel(".div_updateAsset .minimumFeeds").value,
+                                forceSettlementDelaySec:gel(".div_updateAsset .forceSettlementDelaySec").value,
+                                forceSettlementOffsetPercent:gel(".div_updateAsset .forceSettlementOffsetPercent").value,
+                                maximumForceSettlementVolume:gel(".div_updateAsset .maximumForceSettlementVolume").value
+
+                                // ,
+                                // shortBackingAsset:gel(".shortBackingAsset").value
+                            }
+                        }
+                        console.info("trxData",trxData);
+                        bcx.updateAsset(trxData).then(res=>{
+                            console.info("updateAsset res",res);
+                            $(".div_updateAsset .res").JSONView(res);
                         })
                     }
                 }
@@ -2636,13 +2764,15 @@
 
                         gel("#btn_changePassword").onclick=this.changePassword;
 
-                        gel("#btn_get_upgradeAccount_fee").onclick=function(){
-                            _user.upgradeAccount(true);
-                        }
-                        gel("#btn_upgradeAccount").onclick=function(){
-                            _user.upgradeAccount(false);
-                        };
 
+                        gel("#btn_upgradeAccount").onclick=this.upgradeAccount;
+                        gel("#btn_witnessCreate").onclick=this.witnessCreate;
+                        gel("#btn_committeeMemberCreate").onclick=this.committeeMemberCreate;
+
+                        gel("#btn_witnessUpdate").onclick=this.witnessUpdate;
+                        gel("#btn_committeeMemberUpdate").onclick=this.committeeMemberUpdate;
+
+                        
                         gel("#btn_queryUserInfo").onclick=this.queryUserInfo;
                         gel("#btn_getPrivateKey").onclick=this.getPrivateKey;
                         gel("#btn_getOperations").onclick=this.fetchAndSubscribe
@@ -2670,13 +2800,13 @@
                     operations:[],
                     
                     fetchAndSubscribe:function(){
-                        bcx.queryUserOperations({
+                        bcx.queryAccountOperations({
                             account: gel(".div_getOperations .account").value,
                             startId:"1.11.0",
                             endId:"1.11.0",
                             limit:gel(".div_getOperations .limit").value
                         }).then(res=>{
-                            console.info("queryUserOperations res",res);
+                            console.info("queryAccountOperations res",res);
                             if(res.code==1){
                                 _user.operations=res.data;
                                 renderOp(res.data,".div_getOperations tbody")
@@ -2713,16 +2843,47 @@
                             }
                         });
                     },
-                    upgradeAccount:function(isOnlyGetFee){
-                        bcx.upgradeAccount({
-                            onlyGetFee:isOnlyGetFee,
-                            callback:function(res){
-                                console.info("upgradeAccount res",res);
-                                $(".div_upgradeAccount .res").JSONView(res);
-                                if(res.code==1&&isOnlyGetFee){
-                                    gel(".div_upgradeAccount .fee").innerText=res.data.fee_amount+" "+res.data.fee_symbol;
-                                }
-                            }
+                    upgradeAccount:function(){
+                        bcx.upgradeAccount().then(res=>{
+                            console.info("upgradeAccount res",res);
+                            $(".div_upgradeAccount .res").JSONView(res);
+                        })
+                    },
+                    witnessCreate:function(){
+                        bcx.witnessCreate({
+                            url:gel(".div_witnessCreate .url").value,
+                            blockSigningKey:gel(".div_witnessCreate .block_signing_key").value
+                        }).then(res=>{
+                            console.info("witnessCreate res",res);
+                            $(".div_witnessCreate .res").JSONView(res);
+                        })
+                    },
+                    committeeMemberCreate:function(){
+                        bcx.committeeMemberCreate({
+                            url:gel(".div_committeeMemberCreate .url").value,
+                        }).then(res=>{
+                            console.info("committeeMemberCreate res",res);
+                            $(".div_committeeMemberCreate .res").JSONView(res);
+                        })
+                    },
+                    
+                    witnessUpdate:function(){
+                        bcx.witnessUpdate({
+                            newUrl:gel(".div_witnessUpdate .new_url").value,
+                            newSigningKey:gel(".div_witnessUpdate .new_signing_key").value,
+                            workStatus:gel(".div_witnessUpdate .work_status").checked
+                        }).then(res=>{
+                            console.info("witnessUpdate res",res);
+                            $(".div_witnessUpdate .res").JSONView(res);
+                        })
+                    },
+                    committeeMemberUpdate:function(){
+                        bcx.committeeMemberUpdate({
+                            newUrl:gel(".div_committeeMemberUpdate .new_url").value,
+                            workStatus:gel(".div_committeeMemberUpdate .work_status").checked
+                        }).then(res=>{
+                            console.info("committeeMemberUpdate res",res);
+                            $(".div_committeeMemberUpdate .res").JSONView(res);
                         })
                     },
                     getUserInfo:function(){                        
@@ -2747,8 +2908,6 @@
                                 console.info("passwordLogin res",res)
                                 if(res.code==1){
                                     gel(".current_account").innerText=bcx.getAccountInfo().account_name;
-                                    // 直接获取个人清算手续费
-                                    // _market.assetSettle();
                                 }
                             }
                         })
@@ -2783,7 +2942,6 @@
                         bcx.changePassword({
                             oldPassword:gel(".div_changePassword .old_password").value,
                             newPassword:gel(".div_changePassword .new_password").value//,
-                            // onlyGetFee:true
                         }).then(res=>{
                             console.info("changePassword res",res);
                         })
@@ -2817,6 +2975,7 @@
                         });
                     }
                 }
+
                 var _nodes={
                     init:function(){
                         gel("#btn_getWSNodeList").onclick=_nodes.lookupWSNodeList;
@@ -2944,13 +3103,7 @@
 
                         gel("#btn_transferNHAsset").onclick=this.transferNHAsset;
 
-                        gel("#btn_get_creatNHAssetOrder_fee").onclick=()=>{
-                            this.creatNHAssetOrder(true);
-                        };
-
-                        gel("#btn_creatNHAssetOrder").onclick=()=>{
-                            this.creatNHAssetOrder(false);
-                        };
+                        gel("#btn_creatNHAssetOrder").onclick=this.creatNHAssetOrder
 
                         gel("#btn_queryNHAssetOrders").onclick=this.queryNHAssetOrders;
 
@@ -3011,26 +3164,22 @@
                     },
                     //核心NH资产相关函数
                     registerCreator:function(){
-                        bcx.registerCreator({
-                            callback:function(res){
-                                console.info("registerCreator res",res);
-                            }
+                        bcx.registerCreator().then(res=>{
+                            console.info("registerCreator res",res);
                         })
                     },
                     creatWorldView:function(){
                         bcx.creatWorldView({
-                            worldView:gel(".div_creatWorldView .world_view").value,
-                            callback:function(res){
-                                console.info('creatWorldView res',res);
-                            }
+                            worldView:gel(".div_creatWorldView .world_view").value
+                        }).then(res=>{
+                            console.info('creatWorldView res',res);
                         })
                     },
                     proposeRelateWorldView:function(){
                         bcx.proposeRelateWorldView({
-                            worldView:gel(".div_proposeRelateWorldView .world_view").value,
-                            callback:function(res){
-                                console.info('proposeRelateWorldView res',res);
-                            }
+                            worldView:gel(".div_proposeRelateWorldView .world_view").value
+                        }).then(res=>{
+                            console.info('proposeRelateWorldView res',res); 
                         })     
                     },
                     creatNHAsset:function(){
@@ -3064,7 +3213,7 @@
                             }
                         })
                     },
-                    creatNHAssetOrder:function(onlyGetFee){
+                    creatNHAssetOrder:function(){
                         var selData= gel("#div_sell .sel_goods");
                         bcx.creatNHAssetOrder(
                             {
@@ -3074,19 +3223,11 @@
                                 price:gel(".div_creatNHAssetOrder .price").value,
                                 priceAssetId:gel(".div_creatNHAssetOrder .priceAssetSymbol").value,
                                 expiration:gel(".div_creatNHAssetOrder .expiration").value,
-                                memo:gel(".div_creatNHAssetOrder .memo").value,
-                                onlyGetFee
+                                memo:gel(".div_creatNHAssetOrder .memo").value
                             }
                         ).then(res=>{
                             console.info('creatNHAssetOrder result',res);
-                            if(res.code!=1){
-                                alert(res.message);
-                                return;
-                            }
-                            if(onlyGetFee){
-                                let {fee_amount,fee_symbol}=res.data;
-                                gel(".div_creatNHAssetOrder .fee").innerText=fee_amount+" "+fee_symbol;
-                            }
+                            $(".div_creatNHAssetOrder .res").JSONView(res);
                         })
                     },
                     cancelNHAssetOrder:function(nh_orders_index){
@@ -3105,7 +3246,6 @@
                         // let {id,seller_name,game_item_id,price_amount,price_asset_id,price_asset_symbol}=this.sell_nh_orders[item_orders_index];
                         bcx.fillNHAssetOrder({
                             orderId:this.sell_nh_orders[item_orders_index].id,
-                            onlyGetFee:false,
                             callback:function(res){
                                 console.info("fillNHAssetOrder res",res)
                                 _NHAssets.queryNHAssetOrders();
@@ -3283,12 +3423,8 @@
                         gel(".div_call_contract_function .value_list").value=`4.2.0\n{"size":"large"}`;
                         gel("#btn_contract_create").onclick=this.createContract;
 
-                        gel("#btn_get_update_contract_fee").onclick=()=>{
-                            this.updateContract(true);
-                        }
-
                         gel("#btn_update_contract").onclick=()=>{
-                            this.updateContract(false);
+                            this.updateContract();
                         }
 
                         gel("#btn_call_contract_function").onclick=this.callContractFunction;
@@ -3300,11 +3436,10 @@
                         gel("#btn_generateKeys").onclick=this.generateKeys;
                         
                     },
-                    updateContract(onlyGetFee){
+                    updateContract(){
                         bcx.updateContract({
                             nameOrId:gel(".div_updateContract .name").value,
                             data:gel(".div_updateContract .data").value,
-                            onlyGetFee,
                         }).then(res=>{
                             console.info("div_updateContract res",res);
                             $(".div_updateContract .res").JSONView(res);
@@ -3363,7 +3498,6 @@
                             nameOrId:gel(".div_call_contract_function .nameOrId").value,
                             functionName:gel(".div_call_contract_function .function_name").value,//["1",1000001,'COCOS']
                             valueList:(gel(".div_call_contract_function .value_list").value).split(/\n/),//['4.2.0',{"type":"Employee","employeeId":"551"}],////[{"level":1,"color":"red","clothes":{"size":7}}],//
-                            onlyGetFee:false,
                             callback:function(res){
                                 console.info("callContractFunction res",res);
                             }
@@ -3437,11 +3571,11 @@
                                 ${more}
                                 ${new_options_html}
                             </td>
-                            <td>${item.parse_operations.fee}</td>
+                            <td>${item.parse_operations.fees}</td>
                             <td>${item.date}</td>`
 
                         gel(selector).appendChild(tr);
-                        if(item.raw_data.new_options) $("."+op_class+" .new_options div").JSONView(item.raw_data.new_options,{ collapsed: true })
+                        if(item.raw_data.new_options) $("."+op_class+" .new_options div").JSONView(item.raw_data,{ collapsed: true })
                     })
                     //gel(selector).innerHTML=operations_html;
                 }
@@ -3509,9 +3643,7 @@
                         else { return dateTimeStr; }
                     }
                 }
-                
-                // 自动登录
-                // _user.passwordLogin();
+     
         </script>
     </body>
 </html>

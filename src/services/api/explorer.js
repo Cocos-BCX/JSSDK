@@ -3,10 +3,10 @@ import {ChainStore} from "bcxjs-cores";
 import API from '../api';
 
 
-export const getGlobalObject= async () => {
+export const getGlobalObject= async (isCache=false) => {
     try{
         let response= ChainStore.getObject("2.0.0");
-        if(response){
+        if(response&&isCache){
            response=response.toJS();
         }else{
             response=await Apis.instance().db_api().exec('get_objects',[["2.0.0"]]);

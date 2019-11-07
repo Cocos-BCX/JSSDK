@@ -75,7 +75,7 @@ class UserOperations extends Subscription {
       contract_create:'owner',
       call_contract_function: 'caller',
       transfer_nh_asset:"from",
-      creat_nh_asset_order:"seller",   
+      create_nh_asset_order:"seller",   
       account_update:"account",
 
       account_create:"registrar",
@@ -86,13 +86,13 @@ class UserOperations extends Subscription {
       asset_claim_fees:"issuer",
       asset_reserve:"payer",
       asset_fund_fee_pool:"from_account",
-      revise_contract:"reviser"
-
+      revise_contract:"reviser",
+      update_collateral_for_gas:"mortgager"
       //,
-      // creat_world_view: 'fee_paying_account',
+      // create_world_view: 'fee_paying_account',
       // register_nh_asset_creator_operation:"fee_paying_account",
       // propose_relate_world_view_operation:"fee_paying_account",
-      // creat_nh_asset_operation:"fee_paying_account"
+      // create_nh_asset_operation:"fee_paying_account"
     };
   }
 
@@ -105,18 +105,20 @@ class UserOperations extends Subscription {
     // if (operationType === 'transfer') usersIds.push(payload.from);
     if (operationType === 'transfer') usersIds.push(payload.to);
     if (operationType === 'transfer_nh_asset') usersIds.push(payload.to);
-    if (operationType === 'propose_relate_world_view') usersIds.push(payload.version_owner);
+    if (operationType === 'relate_world_view') usersIds.push(payload.version_owner);
     if (operationType === 'fill_nh_asset_order') usersIds.push(payload.seller);
 
-    if(operationType=="creat_nh_asset") usersIds.push(payload.owner);
+    if(operationType=="create_nh_asset") usersIds.push(payload.owner);
     if(operationType=="asset_issue") usersIds.push(payload.issue_to_account)
+    if(operationType=="proposal_create") usersIds.push(payload.proposed_ops[0].op[1].fee_paying_account)
+    if(operationType=="update_collateral_for_gas") usersIds.push(payload.beneficiary)
 
     return usersIds;
   }
 
   notify(operation) {
     if(operation&&operation.op){
-      const _userOperationsCodes =[0, 1, 2,3,4,5,6,8,10,11,14,15,16,21,22,42,44,47,49,50,51,52,53,54,55,56,57,58,59,63];
+      const _userOperationsCodes =[0, 1, 2,4,5,6,7,8,9,10,12,13,14,15,16,17,20,21,27,31,34,35,37,38,39,40,41,42,43,44,45,50,54,300,301,303,3010,3011,3012];
       const _opCode = operation.op[0];
       if (_userOperationsCodes.indexOf(_opCode) > -1) {
         const usersIds = this._getOperationUserIds(operation);
@@ -137,7 +139,7 @@ class AllOperations extends Subscription {
 
   notify(operation) {
     if(operation&&operation.op){
-      const _userOperationsCodes =[0, 1, 2,3,4,5,6,8,9,10,11,13,14,15,21,22,32,39,43,44,46,47,48,49,50,51,52,53,54,55,60,300,301,303,3010,3011,3012];
+      const _userOperationsCodes = [0, 1, 2,4,5,6,7,8,9,10,12,13,14,15,16,17,20,21,27,31,34,35,37,38,39,40,41,42,43,44,45,50,54,300,301,303,3010,3011,3012];
       const _opCode = operation.op[0];
       if (_userOperationsCodes.indexOf(_opCode) > -1) {
         this._callback(operation);

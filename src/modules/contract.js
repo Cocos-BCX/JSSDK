@@ -63,7 +63,7 @@ const formatValueList=valueList=>{
             if(dataType=="object"){
                 dataType="table"//JSON.stringify(v);
                 v=toTable(v);
-                console.info("v",v);
+                // console.info("v",v);
             }
             
             valueItem={

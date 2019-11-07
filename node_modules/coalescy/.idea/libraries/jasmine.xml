@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="jasmine" type="javaScript">
+    <properties>
+      <option name="frameworkName" value="node_modules" />
+      <sourceFilesUrls>
+        <item url="file://$USER_HOME$/gitworkspace/cloud/kno-web-lib/src/node_modules/karma-jasmine/lib/jasmine.js" />
+      </sourceFilesUrls>
+    </properties>
+    <CLASSES>
+      <root url="file://$USER_HOME$/gitworkspace/cloud/kno-web-lib/src/node_modules/karma-jasmine/lib/jasmine.js" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

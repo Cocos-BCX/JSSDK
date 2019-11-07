@@ -154,6 +154,7 @@ export const get_translation_parts=str=> {
 
 
 Date.prototype.format = function (format) {
+  if(!format) return "";
   var o = {
       "M+": this.getMonth() + 1, // month
       "d+": this.getDate(), // day

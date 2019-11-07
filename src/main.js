@@ -110,6 +110,7 @@ var global = module.exports = typeof window != 'undefined' && window.Math == Mat
               queryAccountBalances:"user/getAccountBalances",//query account's specified asset
               queryAccountAllBalances:"user/getUserAllBalance", //query account's owned assets
               queryTransactionBaseFee:"assets/getTransactionBaseFee",//get transaction base fee
+              queryFees:"assets/queryFees",
               createAccountWithPassword:"account/createAccountWithPassword",
               createAccountWithPublicKey:"account/createAccountWithPublicKey",
               passwordLogin:"account/passwordLogin",
@@ -129,7 +130,6 @@ var global = module.exports = typeof window != 'undefined' && window.Math == Mat
               queryBlock:"explorer/queryBlock",
               queryTransaction:"explorer/queryTransaction",
               lookupWitnessesForExplorer:"explorer/getExplorerWitnesses",//query blocks production info
-              claimVestingBalance:"account/claimVestingBalance",
               lookupWSNodeList:"connection/lookupWSNodeList",//get API server list
               deleteAPINode:"connection/deleteAPINode",//delete an API server address
               addAPINode:"setting/addAPINode",//add an API server address
@@ -138,14 +138,19 @@ var global = module.exports = typeof window != 'undefined' && window.Math == Mat
               unsubscribe:"operations/unsubscribe",
               queryDataByIds:"explorer/getDataByIds",
               queryPriceHistory:"market/queryPriceHistory",
-              queryAssetRestricted:"assets/queryAssetRestricted"
+              queryAssetRestricted:"assets/queryAssetRestricted",
+              queryGas:"assets/estimationGas"
           }
           const use_accountOpt_methods={
             getPrivateKey:"account/_getPrivateKey", 
             changePassword:"account/changePassword",
             upgradeAccount:"account/upgradeAccount",
-            lookupBlockRewards:"account/getVestingBalances",
 
+            witnessCreate:"vote/witnessCreate",
+            committeeMemberCreate:"vote/committeeMemberCreate",
+            witnessUpdate:"vote/witnessUpdate",
+            committeeMemberUpdate:"vote/committeeMemberUpdate",
+            
             registerCreator:"NHAssets/registerCreator",
             creatWorldView:"NHAssets/creatWorldView",
             creatNHAsset:"NHAssets/creatNHAsset",
@@ -169,6 +174,7 @@ var global = module.exports = typeof window != 'undefined' && window.Math == Mat
 
             createLimitOrder:"market/createLimitOrder",
             cancelLimitOrder:"market/cancelLimitOrder",
+            callOrderUpdate:"market/callOrderUpdate",
 
             createContract:"contract/createContract",
             updateContract:"contract/updateContract",
@@ -177,6 +183,8 @@ var global = module.exports = typeof window != 'undefined' && window.Math == Mat
             transferAsset:"transactions/transferAsset",
             setCurrentAccount:"AccountStore/setCurrentAccount",
             proposeRelateWorldView:"NHAssets/proposeRelateWorldView",
+            updateCollateralForGas:"assets/updateCollateralForGas",
+            claimVestingBalance:"account/claimVestingBalance"
           }
           
           const use_validateAccount_methods={
@@ -187,6 +195,8 @@ var global = module.exports = typeof window != 'undefined' && window.Math == Mat
             queryAccountNHAssetOrders:"NHAssets/queryAccountNHAssetOrders",
             queryNHAssetsByCreator:"NHAssets/queryNHAssetsByCreator",
             getAccountProposals:"proposals/loadAccountProposals",
+            queryDebt:"market/queryDebt",
+            queryVestingBalance:"account/queryVestingBalance"
           }
 
           for(let key in apiMethods){
@@ -419,18 +429,13 @@ var global = module.exports = typeof window != 'undefined' && window.Math == Mat
         let initPromise=new Promise((resolve)=>{
             this.init(init_res=>{
               if(init_res.code==1){
-                params.new_proxy_id=params.proxyAccount||"";
-                params.witnesses_ids=params.witnessesIds;
-
-                let {witnesses_ids,committee_ids,new_proxy_id,onlyGetFee}=params;
+                let {vote_ids,votes,type}=params;
                 this.api.dispatch("account/accountOpt",{
                   method:"vote/publishVotes",
                   params:{
-                    witnesses_ids,
-                    committee_ids,
-                    new_proxy_id,
-                    onlyGetFee,
-                    // feeAssetId,
+                    vote_ids,
+                    votes,
+                    type,
                     callback:res=>{ resolve(res) }
                   }
                 })

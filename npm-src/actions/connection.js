@@ -120,8 +120,30 @@ export const initConnection =(store,params) => {
     //RPC connected
     if (status === 'realopen') {
       commit(types.SET_WS_CONNECTING,false);
+      if(process.browser){
         dispatch("IDB_INIT");
-
+      }else{
+        ChainStore.init(rootGetters["setting/g_settingsAPIs"].real_sub).then(()=>{
+          state.reconnectCounter=3;
+          API.ChainListener.enable();
+          API.ChainListener.store=store;
+          Promise.all([
+            rootGetters["setting/g_settingsAPIs"].isCheckCachedUserData? dispatch("account/checkCachedUserData",null,{root:true}):true,
+            API.Explorer.getGlobalObject()
+          ]).then((res)=>{
+             _callbacks.forEach(callback_item=>{ callback_item({code:1}); });
+             _callbacks.length=1;    
+          })
+        }).catch(error=>{
+           if(state.reconnectCounter>5){
+            _callbacks.forEach(callback=>{ callback({code:300,message:"ChainStore sync error, please check your system clock"}); });
+           }else{
+            commit(types.WS_DISCONNECTED);
+            state.reconnectCounter++
+            dispatch("initConnection",{refresh:false,clearCallback:false});
+           }
+        })
+      }
       
       // ChainStore.init().then(()=>{
       //   API.ChainListener.enable();

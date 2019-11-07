@@ -27,6 +27,17 @@ const MarketUtils = {
         return op.amount_to_sell.asset_id !== op.fee.asset_id;
     },
 
+    getMarketName(base, quote) {
+        // if (!base || !quote) return {marketName: "_"};
+        let baseID = parseInt(base.split(".")[2], 10);
+        let quoteID = parseInt(quote.split(".")[2], 10);
+
+        let first = quoteID > baseID ? quote : base;
+        let second = quoteID > baseID ? base : quote;
+
+        // const marketName = `${first.get("symbol")}_${second.get("symbol")}`;
+        return {baseID, quoteID, first, second};
+    },
     limitByPrecision(value, asset, floor = true) {
         let assetPrecision = asset.toJS ? asset.get("precision") : asset.precision;
         let valueString = value.toString();

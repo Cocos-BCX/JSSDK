@@ -1,5 +1,5 @@
 // require('babel-polyfill');
-require('bcxjs-indexeddbshim');
+require('indexeddbshim');
 
 
 import Vue from 'vue'
@@ -30,6 +30,7 @@ import BackupStore from './store/BackupStore.js';
 import AccountStore from './store/AccountStore.js';
 
 import * as utils from './utils/index';
+
 
 
   class BCX {
@@ -106,6 +107,7 @@ import * as utils from './utils/index';
               queryAccountBalances:"user/getAccountBalances",//query account's specified asset
               queryAccountAllBalances:"user/getUserAllBalance", //query account's owned assets
               queryTransactionBaseFee:"assets/getTransactionBaseFee",//get transaction base fee
+              queryFees:"assets/queryFees",
               createAccountWithPassword:"account/createAccountWithPassword",
               createAccountWithPublicKey:"account/createAccountWithPublicKey",
               passwordLogin:"account/passwordLogin",
@@ -125,7 +127,6 @@ import * as utils from './utils/index';
               queryBlock:"explorer/queryBlock",
               queryTransaction:"explorer/queryTransaction",
               lookupWitnessesForExplorer:"explorer/getExplorerWitnesses",//query blocks production info
-              claimVestingBalance:"account/claimVestingBalance",
               lookupWSNodeList:"connection/lookupWSNodeList",//get API server list
               deleteAPINode:"connection/deleteAPINode",//delete an API server address
               addAPINode:"setting/addAPINode",//add an API server address
@@ -134,14 +135,19 @@ import * as utils from './utils/index';
               unsubscribe:"operations/unsubscribe",
               queryDataByIds:"explorer/getDataByIds",
               queryPriceHistory:"market/queryPriceHistory",
-              queryAssetRestricted:"assets/queryAssetRestricted"
+              queryAssetRestricted:"assets/queryAssetRestricted",
+              queryGas:"assets/estimationGas"
           }
           const use_accountOpt_methods={
             getPrivateKey:"account/_getPrivateKey", 
             changePassword:"account/changePassword",
             upgradeAccount:"account/upgradeAccount",
-            lookupBlockRewards:"account/getVestingBalances",
 
+            witnessCreate:"vote/witnessCreate",
+            committeeMemberCreate:"vote/committeeMemberCreate",
+            witnessUpdate:"vote/witnessUpdate",
+            committeeMemberUpdate:"vote/committeeMemberUpdate",
+            
             registerCreator:"NHAssets/registerCreator",
             creatWorldView:"NHAssets/creatWorldView",
             creatNHAsset:"NHAssets/creatNHAsset",
@@ -165,6 +171,7 @@ import * as utils from './utils/index';
 
             createLimitOrder:"market/createLimitOrder",
             cancelLimitOrder:"market/cancelLimitOrder",
+            callOrderUpdate:"market/callOrderUpdate",
 
             createContract:"contract/createContract",
             updateContract:"contract/updateContract",
@@ -173,6 +180,8 @@ import * as utils from './utils/index';
             transferAsset:"transactions/transferAsset",
             setCurrentAccount:"AccountStore/setCurrentAccount",
             proposeRelateWorldView:"NHAssets/proposeRelateWorldView",
+            updateCollateralForGas:"assets/updateCollateralForGas",
+            claimVestingBalance:"account/claimVestingBalance"
           }
           
           const use_validateAccount_methods={
@@ -183,6 +192,8 @@ import * as utils from './utils/index';
             queryAccountNHAssetOrders:"NHAssets/queryAccountNHAssetOrders",
             queryNHAssetsByCreator:"NHAssets/queryNHAssetsByCreator",
             getAccountProposals:"proposals/loadAccountProposals",
+            queryDebt:"market/queryDebt",
+            queryVestingBalance:"account/queryVestingBalance"
           }
 
           for(let key in apiMethods){
@@ -224,7 +235,6 @@ import * as utils from './utils/index';
             init_res=>init_res.code==1?this.api.dispatch(methodPath,params):init_res
           );
         }
-
         if(!params||!params.callback) return initPromise;
         initPromise.then(res=>{ params.callback(res); });
       }
@@ -416,18 +426,13 @@ import * as utils from './utils/index';
         let initPromise=new Promise((resolve)=>{
             this.init(init_res=>{
               if(init_res.code==1){
-                params.new_proxy_id=params.proxyAccount||"";
-                params.witnesses_ids=params.witnessesIds;
-
-                let {witnesses_ids,committee_ids,new_proxy_id,onlyGetFee}=params;
+                let {vote_ids,votes,type}=params;
                 this.api.dispatch("account/accountOpt",{
                   method:"vote/publishVotes",
                   params:{
-                    witnesses_ids,
-                    committee_ids,
-                    new_proxy_id,
-                    onlyGetFee,
-                    // feeAssetId,
+                    vote_ids,
+                    votes,
+                    type,
                     callback:res=>{ resolve(res) }
                   }
                 })
