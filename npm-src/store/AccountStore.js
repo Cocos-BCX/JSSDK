@@ -60,7 +60,7 @@ const actions={
                         ChainStore.subscribe(()=>{
                             dispatch("chainStoreUpdate");
                         });
-                        resolve();
+                        resolve(true);
                         state.subbed=true;
                     });
                 }).catch(err => {
@@ -69,7 +69,7 @@ const actions={
                     });     
                     state.subbed=true;
                     reject(err);
-                });
+                });  
             }).catch(err => {
 				// alert(err);
                 reject(err);
@@ -109,7 +109,7 @@ const actions={
             })
         })
         state.initial_account_refs_load = pending;
-        dispatch("tryToSetCurrentAccount")
+        return dispatch("tryToSetCurrentAccount")
     },
     tryToSetCurrentAccount:({dispatch,state})=>{
         if (accountStorage.get("currentAccount", null)) {
@@ -182,9 +182,9 @@ const actions={
                             let id = userId && userId[0];
                             if(id){
                                 id=userId[0];
-                                dispatch("account/account_signup_complete",{userId:id},{root:true});
                                 return id;
                             }
+                            dispatch("account/account_signup_complete",{userId:id},{root:true});
                         })
                     }
                 });  

@@ -67,7 +67,8 @@ var Utils = {
             return 1;
         }
         var price = this.get_asset_amount(quoteAmount, quoteAsset) / this.get_asset_amount(baseAmount, baseAsset);
-        if(price==Infinity) return 0;
+        // if(isNaN(price)) price=0;
+        if(price==Infinity||isNaN(price)) return 0;
         return inverted ? 1 / price : price;
     },
 
@@ -99,15 +100,18 @@ var Utils = {
     },
 
     format_number: (number, decimals, trailing_zeros = true) => {
-        if (isNaN(number) || !isFinite(number) || number === undefined || number === null) return "";
+        if (isNaN(number) || !isFinite(number) || number === undefined || number === null) return ""||0;
         let zeros = ".";
         for (let i = 0; i < decimals; i++) {
             zeros += "0";
         }
         let num = numeral(number).format("0,0" + zeros);
-        if (num.indexOf('.') > 0 && !trailing_zeros)
-            return num.replace(/0+$/, "").replace(/\.$/, "")
-        return num.replace(/,/g,"");
+        if (num.indexOf('.') > 0 && !trailing_zeros){
+            num=num.replace(/0+$/, "").replace(/\.$/, "")
+            return num||0;
+        }
+        num=num.replace(/,/g,"")||0;
+        return num;
     },
     formatNumber: function (num, s, z = false) {
         num = num.replace(',', "");
@@ -152,15 +156,15 @@ var Utils = {
 
         if (inverted) {
             if (parseInt(quoteAsset.id.split(".")[2], 10) < parseInt(baseAsset.id.split(".")[2], 10)) {
-                return `${this.format_number((quoteAmount / precision) / (baseAmount / basePrecision), Math.max(5, quoteAsset.precision), trailing_zeros)}${!noSymbol ? "" + quoteAsset.symbol + "/" + baseAsset.symbol : ""}`;
+                return `${this.format_number((quoteAmount / precision) / (baseAmount / basePrecision), Math.max(5, quoteAsset.precision), trailing_zeros)}${!noSymbol ? " " + quoteAsset.symbol + "/" + baseAsset.symbol : ""}`;
             } else {
-                return `${this.format_number((baseAmount / basePrecision) / (quoteAmount / precision), Math.max(5, baseAsset.precision), trailing_zeros)}${!noSymbol ? "" + baseAsset.symbol + "/" + quoteAsset.symbol : ""}`;
+                return `${this.format_number((baseAmount / basePrecision) / (quoteAmount / precision), Math.max(5, baseAsset.precision), trailing_zeros)}${!noSymbol ? " " + baseAsset.symbol + "/" + quoteAsset.symbol : ""}`;
             }
         } else {
             if (parseInt(quoteAsset.id.split(".")[2], 10) > parseInt(baseAsset.id.split(".")[2], 10)) {
-                return `${this.format_number((quoteAmount / precision) / (baseAmount / basePrecision), Math.max(5, quoteAsset.precision), trailing_zeros)}${!noSymbol ? "" + quoteAsset.symbol + "/" + baseAsset.symbol : ""}`;
+                return `${this.format_number((quoteAmount / precision) / (baseAmount / basePrecision), Math.max(5, quoteAsset.precision), trailing_zeros)}${!noSymbol ? " " + quoteAsset.symbol + "/" + baseAsset.symbol : ""}`;
             } else {
-                return `${this.format_number((baseAmount / basePrecision) / (quoteAmount / precision), Math.max(5, baseAsset.precision), trailing_zeros)}${!noSymbol ? "" + baseAsset.symbol + "/" + quoteAsset.symbol : ""}`;
+                return `${this.format_number((baseAmount / basePrecision) / (quoteAmount / precision), Math.max(5, baseAsset.precision), trailing_zeros)}${!noSymbol ? " " + baseAsset.symbol + "/" + quoteAsset.symbol : ""}`;
             }
         }
     },
@@ -381,7 +385,7 @@ var Utils = {
         const cerBase = new Asset({
             asset_id: cer.base.asset_id,
             amount: cer.base.amount,
-            precision: coreAsset?coreAsset.precision:8
+            precision: coreAsset?coreAsset.precision:5
         });
       
         const cerQuote = new Asset({
@@ -407,38 +411,45 @@ var Utils = {
         if (!fromRate || !toRate) {
             return null;
         }
+
         // Handle case of input simply being a fromAsset and toAsset
         if (fromRate.toJS && this.is_object_type(fromRate.get("id"), "asset")) {
-            fromID = fromRate.get("id")
-            fromRate = fromRate.get("bitasset") ? fromRate.getIn(["bitasset", "current_feed", "settlement_price"]).toJS() : fromRate.getIn(["options", "core_exchange_rate"]).toJS();
+            fromID = fromRate.get("id");
+            fromRate = fromRate.get("bitasset") ? fromRate.getIn(["bitasset", "current_feed", "settlement_price"]).toJS() :
+            (fromID=="1.3.1"?fromRate.getIn(["options", "core_exchange_rate"]).toJS():fromRate.toJS()); //fromRate.getIn(["options", "core_exchange_rate"]).toJS();
         }
+
+
         if (toRate.toJS) {
             toID = toRate.get("id");
-            toRate = toRate.get("bitasset") ? toRate.getIn(["bitasset", "current_feed", "settlement_price"]).toJS() : toRate.getIn(["options", "core_exchange_rate"]).toJS();
+            toRate = toRate.get("bitasset") ? toRate.getIn(["bitasset", "current_feed", "settlement_price"]).toJS() :
+            (toID=="1.3.1"?toRate.getIn(["options", "core_exchange_rate"]).toJS():toRate.toJS()); //toRate.getIn(["options", "core_exchange_rate"]).toJS();
         }
-        let fromRateQuoteID = fromRate.quote.asset_id;
-        let toRateQuoteID = toRate.quote.asset_id;
 
+
+        let fromRateQuoteID =fromRate.quote?fromRate.quote.asset_id:fromRate.asset_id;
+        let toRateQuoteID = toRate.quote?toRate.quote.asset_id:toRate.asset_id;
+        // console.info("fromRate",fromRate,toRate);
 
         let fromRateQuoteAmount, fromRateBaseAmount, finalQuoteID, finalBaseID;
 
         if (fromRateQuoteID === fromID) {
 
-            fromRateQuoteAmount = fromRate.quote.amount;
-            fromRateBaseAmount = fromRate.base.amount;
+            fromRateQuoteAmount = fromRate.quote?fromRate.quote.amount:0;
+            fromRateBaseAmount = fromRate.base?fromRate.base.amount:0;
         } else {
 
-            fromRateQuoteAmount = fromRate.base.amount;
-            fromRateBaseAmount = fromRate.quote.amount;
+            fromRateQuoteAmount =fromRate.base?fromRate.base.amount:0;
+            fromRateBaseAmount = fromRate.quote?fromRate.quote.amount:0;
         }
 
         let toRateQuoteAmount, toRateBaseAmount;
         if (toRateQuoteID === toID) {
-            toRateQuoteAmount = toRate.quote.amount;
-            toRateBaseAmount = toRate.base.amount;
+            toRateQuoteAmount = toRate.quote?toRate.quote.amount:1;
+            toRateBaseAmount = toRate.base?toRate.base.amount:1;
         } else {
-            toRateQuoteAmount = toRate.base.amount;
-            toRateBaseAmount = toRate.quote.amount;
+            toRateQuoteAmount =toRate.base?toRate.base.amount:1;
+            toRateBaseAmount = toRate.quote?toRate.quote.amount:1;
         }
 
         let baseRatio, finalQuoteAmount, finalBaseAmount;
@@ -447,10 +458,16 @@ var Utils = {
             finalQuoteAmount = fromRateQuoteAmount * baseRatio;
             finalBaseAmount = toRateQuoteAmount;
         } else {
-            baseRatio = fromRateBaseAmount / toRateBaseAmount;
+            if(toRateBaseAmount)
+              baseRatio = fromRateBaseAmount / toRateBaseAmount;
+            else baseRatio=0;
             finalQuoteAmount = fromRateQuoteAmount;
             finalBaseAmount = toRateQuoteAmount * baseRatio;
+            // console.info("fromRateQuoteAmount",fromRateQuoteAmount);
         }
+        // console.info("finalQuoteAmount",finalQuoteAmount,finalBaseAmount);
+        // console.info("toRateBaseAmount",toRateBaseAmount,fromRateBaseAmount,finalBaseAmount);
+
         return {
             quote: {
                 amount: finalQuoteAmount,

@@ -214,6 +214,10 @@ export const getUserAllBalance=async ({dispatch,rootGetters},params)=>{
 
     //get queried assets' market info
     let marketStats={};
+    // console.info('1111111',(await dispatch("market/getMarketStats",{
+    //   baseAsset:toAsset_symbol,
+    //   quoteAssets,
+    // },{root:true})));
     (await dispatch("market/getMarketStats",{
       baseAsset:toAsset_symbol,
       quoteAssets,
@@ -221,6 +225,7 @@ export const getUserAllBalance=async ({dispatch,rootGetters},params)=>{
       marketStats[asset.quote_symbol]=asset;
     })
 
+    // console.info("marketStats",marketStats);
     let balances=[];
     let amount=0;
     let fromAsset;
@@ -285,7 +290,7 @@ export const clearAccountCache=({commit})=>{
    commit(types.CLEAR_ACCOUNT);
 }
 
-export const getUserInfo=async ({dispatch},{account="",isCache=false})=>{
+export const getUserInfo=async ({dispatch},{account="",isCache=false,isSubscribe=false})=>{
   account=account.trim();
   if(!account){
     account=PersistentStorage.getSavedUserData();
@@ -296,7 +301,7 @@ export const getUserInfo=async ({dispatch},{account="",isCache=false})=>{
     }
   }
 
-  let acc = await API.Account.getUser(account,isCache);
+  let acc = await API.Account.getUser(account,isCache,isSubscribe);
   if(acc.success){
     return {code:1,data:acc.data}
   }else{

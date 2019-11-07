@@ -41,7 +41,6 @@ var openDatabase = function() {
     var database_name = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : getDatabaseName();
 
     return new Promise((resolve, reject) => {
-
         var openRequest = iDB.impl.open(database_name, DB_VERSION);
 
         openRequest.onupgradeneeded = function (e) {

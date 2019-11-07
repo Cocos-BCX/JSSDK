@@ -43,7 +43,7 @@
     trxTypes_transfer_to_blind: "向隐私账户转账",
     trxTypes_blind_transfer: "隐私转账",
     trxTypes_transfer_from_blind: "从隐私账户转出",
-    trxTypes_committee_member_update: "更新理事会成员账户",
+    trxTypes_committee_member_update: "更新理事会成员",
     trxTypes_asset_claim_fees: "领取资产手续费",
     trxTypes_asset_fund_fee_pool: "注资资产手续费池",
 
@@ -52,17 +52,18 @@
     trxTypes_revise_contract:"更新合约",
 
     trxTypes_register_nh_asset_creator:"注册开发者",
-    trxTypes_creat_world_view:"创建世界观",
-    trxTypes_creat_nh_asset:"NH资产创造",
+    trxTypes_create_world_view:"创建世界观",
+    trxTypes_create_nh_asset:"NH资产创造",
     trxTypes_updata_game_item:"NH资产更新",
     trxTypes_delete_nh_asset:"NH资产删除",
     trxTypes_transfer_nh_asset:"NH资产转移",
-    trxTypes_creat_nh_asset_order:"NH资产挂卖单",
+    trxTypes_create_nh_asset_order:"NH资产挂卖单",
     trxTypes_cancel_nh_asset_order:"NH资产挂卖单取消",
     trxTypes_fill_nh_asset_order:"NH资产订单撮合",
     trxTypes_relate_nh_asset:"NH资产关联",
     trxTypes_relate_world_view:"关联世界观",
-
+    trxTypes_update_collateral_for_gas:"GAS调整质押物",
+   
 
 
     trxTypes_contract_affecteds_asset:"资产",
@@ -83,6 +84,8 @@
     operation_asset_global_settle: "(account) 请求以 (price) 的价格进行全局清算 (asset)",
     operation_witness_create: "(account) 升级到见证人",
     operation_witness_update: "(account) 更新了见证人信息",
+    operation_committee_member_create: "(account) 升级到理事会成员",
+    operation_committee_member_update: "(account) 更新了理事会成员信息",
     operation_witness_pay: "提取见证人收入到账户",
     operation_witness_receive: "Received witness from witness",
     operation_worker_create: "(account) 创建了预算提案，请求每日支付 (pay)",
@@ -90,12 +93,13 @@
   
     operation_reg_account: "(registrar) 创建账户 (new_account)",
     operation_transfer: "(from) 转账 (amount) 到 (to)",
-    operation_vesting_balance_withdraw: "(account) 提取了解冻金额 (amount)",
+    operation_vesting_balance_withdraw: "(account) 提取了 (vesting_balance_id) 解冻金额 (amount)",
     operation_balance_claim: "(account) 领取了余额 (amount)",
     operation_asset_publish_feed: "(account) 发布了喂价 (price)",
     operation_update_account: "(account) 更新了它的账户信息",   
     operation_limit_order_sell: "(account) 提交卖单，以 (price) 的价格卖出 (amount) ",
     operation_limit_order_buy: "(account) 提交买单，以 (price) 的价格买入 (amount) ",
+    operation_call_order_update: "(account) 调整了 (debtSymbol) 债务 (debt) ，以及抵押 (collateral)",
     operation_fill_order: "(account) 以 (price) 的价格购买了 (received)",
     operation_limit_order_cancel: "(account) 取消了订单 #(order)",
     operation_asset_issue: "(account) 发行了 (amount) 到 (to)",
@@ -113,11 +117,11 @@
     operation_contract_create: "(owner) 创建合约 (contract_name)",
     operation_revise_contract:"(reviser) 更新合约 (contract_name)",
     operation_register_nh_asset_creator:"(fee_paying_account) 注册成为开发者",
-    operation_creat_world_view:"(fee_paying_account) 创建世界观 (world_view)",
-    operation_creat_nh_asset:"(fee_paying_account) 创建NH资产 (nh_asset) ，所有权账户为 (owner)",
+    operation_create_world_view:"(fee_paying_account) 创建世界观 (world_view)",
+    operation_create_nh_asset:"(fee_paying_account) 创建NH资产 (nh_asset) ，所有权账户为 (owner)",
     operation_delete_nh_asset:"(fee_paying_account) 删除NH资产 (nh_asset)",
     operation_transfer_nh_asset:"(from) 的NH资产 (nh_asset) 所有权转移到 (to)",
-    operation_creat_nh_asset_order:"(seller) 提交卖单，以 (amount) 的价格挂卖NH资产 (nh_asset)",
+    operation_create_nh_asset_order:"(seller) 提交卖单，以 (amount) 的价格挂卖数据资产 (nh_asset) ，otc手续费: (pending_orders_fee)",
     operation_cancel_nh_asset_order:"(fee_paying_account) 取消了NH资产出售单 (order)",
     operation_fill_nh_asset_order:"(fee_paying_account) 以 (price_amount) (price_asset_symbol) 的价格购买 (seller) 的NH资产 (nh_asset)",
     operation_proposal_create: "(fee_paying_account) 创建提议 (result) ： ",
@@ -127,7 +131,7 @@
     operation_relate_world_view:"(related_account) 关联 (view_owner) 的世界观 (world_view)",
 
     operation_relate_nh_asset:"(nh_asset_creator) (relate)父级NH资产 (nh_asset) 和子级NH资产 (nh_asset) 关联",
-
+    operation_update_collateral_for_gas:"(mortgager) 将 (beneficiary) 抵押物调整为 (collateral)",
 
     contract_affecteds_nh_modifined:"(affected_account) 的NH资产 (affected_item) 修改数据 (modified)",
     contract_affecteds_nh_transfer_to:"NH资产 (affected_item) 转入 (affected_account)",

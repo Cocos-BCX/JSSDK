@@ -1,7 +1,5 @@
 import { key } from 'bcxjs-cores';
 import { Apis } from 'bcxjs-ws';
-// import  fetch  from 'node-fetch';
-// var fetch = require('node-fetch');
 export const suggestBrainkey = (dictionary) => {
   return key.suggest_brain_key(dictionary);
 };

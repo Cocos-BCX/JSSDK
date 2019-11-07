@@ -53,16 +53,17 @@
     trxTypes_revise_contract:"Upate contract",
 
     trxTypes_register_nh_asset_creator:"Register Developer",
-    trxTypes_creat_world_view:"Create worldview",
-    trxTypes_creat_nh_asset:"NH asset creation",
+    trxTypes_create_world_view:"Create worldview",
+    trxTypes_create_nh_asset:"NH asset creation",
     trxTypes_updata_game_item:"NH Asset Update",
     trxTypes_delete_nh_asset:"NH asset deletion",
     trxTypes_transfer_nh_asset:"NH Asset Transfer",
-    trxTypes_creat_nh_asset_order:"NH Asset Certificate of Sale",
+    trxTypes_create_nh_asset_order:"NH Asset Certificate of Sale",
     trxTypes_cancel_nh_asset_order:"NH Asset Certificate Cancellation",
     trxTypes_fill_nh_asset_order:"NH Asset Order Matching",
     trxTypes_relate_nh_asset:"NH asset Association",
     trxTypes_relate_world_view:"Relevant worldview",
+    trxTypes_update_collateral_for_gas:"GAS Adjustment Pledge",
 
     trxTypes_contract_affecteds_asset:"Assets",
 
@@ -81,7 +82,7 @@
     operation_fill_order: "(account) bought (received) at (price)",
     operation_vesting_balance_withdraw: "(account) withdrew vesting balance of (amount)",
     operation_balance_claim: "(account) claimed a balance of (amount)",
-    operation_publish_feed: "(account) published feed price of (price)",
+    operation_asset_publish_feed: "(account) published feed price of (price)",
     operation_set_proxy: "(account) set (proxy) as their voting proxy",
     operation_update_account: "(account) updated their account data",
     operation_limit_order_sell: "(account) placed an order to sell (amount) at (price)",
@@ -116,11 +117,11 @@
     operation_contract_create: "(owner) Create Contract (contract_name)",
     operation_revise_contract:"(reviser) Update Contract (contract_name)",
     operation_register_nh_asset_creator:"(fee_paying_account) Registed as a developer",
-    operation_creat_world_view:"(fee_paying_account) Create a worldview",
-    operation_creat_nh_asset:"(fee_paying_account) Creates NH assets with ownership account (owner)",
+    operation_create_world_view:"(fee_paying_account) Create a worldview",
+    operation_create_nh_asset:"(fee_paying_account) Creates NH assets with ownership account (owner)",
     operation_delete_nh_asset:"(fee_paying_account) Delete NH Asset (nh_asset)",
     operation_transfer_nh_asset:"Transfer of ownership of (from) NH assets (nh_asset) to (to)",
-    operation_creat_nh_asset_order:"(seller) submits a sales order to sell NH asset (nh_asset) at (amount) price",
+    operation_create_nh_asset_order:"(seller) submits a sales order to sell NH asset (nh_asset) at (amount) price otc fee: (pending_orders_fee)",
     operation_cancel_nh_asset_order:"(fee_paying_account) cancelled NH asset sale order (order)",
     operation_fill_nh_asset_order:"(fee_paying_account) buys NH assets of (nh_asset) at a price of (price_amount) (price_asset_symbol)",
     operation_proposal_create: "(fee_paying_account) created a proposed transaction (result) : ",
@@ -129,6 +130,7 @@
 
     operation_relate_world_view:"(related_account) relation (view_owner) worldview (world_view)",
     operation_relate_nh_asset:"(nh_asset_creator) (related) parent NH asset (nh_asset) and child NH asset (nh_asset) Association",
+    operation_update_collateral_for_gas:"(mortgager) adjust (beneficiary) collateral to (collateral)",
 
 
     contract_affecteds_nh_modifined:"(affected_account) NH assets (affected_item) modify data (modified)",

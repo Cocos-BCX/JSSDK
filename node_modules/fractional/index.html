@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" 
+    "http://www.w3.org/TR/html4/strict.dtd">
+
+<title>fraction.js - a javascript fraction library</title>
+
+<h1>fraction.js</h1>
+
+<div>
+    <em>fraction.js</em> is a fraction library written in javascript.  With it
+    you can comfortably create and manipulate fractions from Javascript.
+</div>
+<p>
+<div>
+Usage:
+<pre>
+js> load('fraction-0.2.js'); // creates the global Fraction object
+<span id='examples'>
+js> (new Fraction(7,3)).multiply(new Fraction(1,2))
+1 1/6
+js> (new Fraction(7,3)).divide(new Fraction(1,2))
+4 2/3
+js> (new Fraction(3,10)).add(new Fraction(5,9))
+77/90
+js> (new Fraction(0.25)).add(new Fraction(1,6))
+5/12
+js> (new Fraction(0.35)).subtract(new Fraction(1,4))
+1/10
+</span>
+</pre>
+</div>
+
+<div>Download: <a href='releases/fraction-0.2.js'>fraction-0.2.js</a> &nbsp;<em>2009-11-19</em></div>
+<div>Demo: <a href='../recipesizer/'>Recipesizer</a></div>
+<div>License: <a href='http://en.wikipedia.org/wiki/MIT_License'>MIT</a></div>
+<div>Author: <a href='../'>Erik Garrison</a></div>
+<div>
+    <h3>Notes</h3>
+    <ul>
+        <li>Each Fraction object contains two members: denominator and
+        numerator.</li>
+
+        <li>Fractions are stored following all operations in normalized
+        (numerator and denominator are divided by their greatest common
+        factor).</li>
+
+        <li>Fractions methods can take any type of number or other
+        fractions objects.</li>
+
+        <li>Fractions can be created from any kind of number (e.g. f = new
+        Fraction(0.25) yields '1/4'), although rounding problems in Javascript
+        may produce unintended results if fractions are initialized with the
+        decimal equivalents of numbers such as 1/3, 1/9, etc.</li>
+
+    </ul>
+</div>
+<div>
+    <h3>Release History</h3>
+    <li><b>0.2</b> <em>2009-11-19</em> - Major cleanup, resolution of namespace issues.</li>
+    <li><b>0.1</b> <em>2009-10-30</em> - Basic functionality.  Issues with namespacing (use of array mixins, other problems).</li>
+</div>

@@ -1,4 +1,5 @@
 import * as types from '../mutations';
+import { Apis } from 'bcxjs-ws';
 import API from '../services/api';
 import {arrayToObject } from '../utils';
 import utils from "../lib/common/utils";
@@ -6,10 +7,30 @@ import helper from "../lib/common/helper";
 import assetConstants from "../lib/chain/asset_constants";
 
 import assetUtils from "../lib/common/asset_utils";
-import {ChainStore} from "bcxjs-cores";
+import {ChainStore,ChainTypes} from "bcxjs-cores";
 import Immutable from "immutable";
 import big from "bignumber.js";
 
+
+
+export const estimationGas = async (store, {amount}) => {
+   const { commit, getters,rootGetters } = store;
+   if(isNaN(Number(amount))){
+    return {code:135,message:"Please check parameter data type"};
+   }
+
+   let core_asset=await API.Assets.fetch(["1.3.0"],true);
+   let res=await API.Assets.estimation_gas((await helper.toOpAmount(amount,core_asset)).data);
+   if(res.code!=1){
+    return res;
+   }
+   let gas=res.data;
+   let gas_asset=await API.Assets.fetch([gas.asset_id],true);
+
+   gas.amount=helper.getFullNum(gas.amount,gas_asset.precision);
+   gas.amount_symbol=gas_asset.symbol;
+   return {code:1,data:gas}
+};
 
 export const fetchAssets = async (store, {assets,isOne=false,isCache=true}) => {
   const { commit, getters,rootGetters } = store;
@@ -81,7 +102,6 @@ export const getTransactionBaseFee=async ({dispatch},{transactionType,feeAssetId
     const coreAsset=await dispatch("fetchAssets",{assets:["1.3.0"],isOne:true});
 
     // let fee =helper.getFullNum(utils.estimateFee(transactionType, null, globalObject)/Math.pow(10,coreAsset.precision));
-    // console.info('globalObject',globalObject);
     let fee=helper.getFullNum(utils.getFee(transactionType,feeAsset,coreAsset,globalObject).getAmount({real:true}));
     return {code:1,data:{
       fee_amount:fee,
@@ -90,6 +110,52 @@ export const getTransactionBaseFee=async ({dispatch},{transactionType,feeAssetId
   }catch(e){
     return {code:0,message:e.message};
   }
+}
+
+export const queryFees=async ({dispatch})=>{
+
+  let _operationTypes={};
+  Object.keys(ChainTypes.operations).forEach(name => {
+    const code = ChainTypes.operations[name];
+      _operationTypes[code] = name;
+  });
+
+  let fee_grouping = {
+      general: [0, 27],
+      contract:[34,35,50],
+      nh_asset:[37,40,41,42,43,44,45],
+      asset: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
+      market: [1, 2, 3, 4, 16,17],
+      account: [5, 6, 7],
+      business: [18, 19, 20, 21, 22,23,24,25]
+  };
+
+  let globalObject =await API.Explorer.getGlobalObject();
+  if(globalObject.code!=1){
+    return globalObject;
+  }
+  globalObject=globalObject.data;
+  let current_fees_parameters=globalObject.parameters.current_fees.parameters;
+  let {precision,symbol}=await API.Assets.fetch(["1.3.0"],true);
+  
+  let _fee_grouping={};
+  for(let groupName in fee_grouping){
+    let feeIds = fee_grouping[groupName];
+    // console.info('feeIds',feeIds);
+    feeIds.forEach(code=>{
+        let fees=current_fees_parameters[code][1];
+        for(let key in fees){
+          fees[key]=helper.getFullNum(fees[key],precision)+" "+symbol;
+        }
+        if(!_fee_grouping[groupName]) _fee_grouping[groupName]=[];
+        _fee_grouping[groupName].push({
+            type:_operationTypes[code],
+            fees
+        })
+    })
+  }
+
+  return {code:1,data:_fee_grouping};
 }
 
 export const updateAsset=async ({dispatch},{issuer,
@@ -106,7 +172,6 @@ export const updateAsset=async ({dispatch},{issuer,
   // auths,
   feedProducers,
   originalFeedProducers,
-  onlyGetFee,
   callback,
   assetChanged})=>{
     let quotePrecision = utils.get_asset_precision(
@@ -121,29 +186,33 @@ export const updateAsset=async ({dispatch},{issuer,
         .times(quotePrecision)
         .toString();
 
-    let cr_quote_asset =(await API.Assets.fetch([core_exchange_rate.quote.asset_id]))[0];
-    let cr_quote_precision = utils.get_asset_precision(
-        cr_quote_asset.precision
-    );
-    let cr_base_asset =(await API.Assets.fetch([core_exchange_rate.base.asset_id]))[0]
-    let cr_base_precision = utils.get_asset_precision(
-        cr_base_asset.precision
-    );
+    let cr_quote_amount,cr_base_amount;
+    if(core_exchange_rate){
+        let cr_quote_asset =(await API.Assets.fetch([core_exchange_rate.quote.asset_id]))[0];
+        let cr_quote_precision = utils.get_asset_precision(
+            cr_quote_asset.precision
+        );
+        let cr_base_asset =(await API.Assets.fetch([core_exchange_rate.base.asset_id]))[0]
+        let cr_base_precision = utils.get_asset_precision(
+            cr_base_asset.precision
+        );
 
-    let cr_quote_amount  = new big(core_exchange_rate.quote.amount)
-        .times(cr_quote_precision)
-        .toString();
-    let cr_base_amount = new big(core_exchange_rate.base.amount)
-        .times(cr_base_precision)
-        .toString();
+         cr_quote_amount  = new big(core_exchange_rate.quote.amount)
+            .times(cr_quote_precision)
+            .toString();
+         cr_base_amount = new big(core_exchange_rate.base.amount)
+            .times(cr_base_precision)
+            .toString();
 
-    if(core_exchange_rate.base.amount>1000||core_exchange_rate.quote.amount>1000){
-      return {code:171,message:"The amount of fee exchange rate assets should not exceed 1000"}
+        if(core_exchange_rate.base.amount>1000||core_exchange_rate.quote.amount>1000){
+          return {code:171,message:"The amount of fee exchange rate assets should not exceed 1000"}
+        }
+        
+        if(helper.getDecimals(cr_base_amount)>cr_base_precision||helper.getDecimals(cr_quote_amount)>cr_quote_precision){
+          return {code:172,message:"precision overflow of fee exchange rate assets"}
+        }
     }
     
-    if(helper.getDecimals(cr_base_amount)>cr_base_precision||helper.getDecimals(cr_quote_amount)>cr_quote_precision){
-      return {code:172,message:"precision overflow of fee exchange rate assets"}
-    }
 
     let updateObject = {
         fee: {
@@ -161,34 +230,70 @@ export const updateAsset=async ({dispatch},{issuer,
             description: description,
             issuer_permissions: permissions,
             flags: flags,
-            // whitelist_authorities: auths.whitelist_authorities.toJS(),
-            // blacklist_authorities: auths.blacklist_authorities.toJS(),
-            // whitelist_markets: auths.whitelist_markets.toJS(),
-            // blacklist_markets: auths.blacklist_markets.toJS(),
-            extensions: asset.getIn(["options", "extensions"]),
-            core_exchange_rate: {
-                quote: {
-                    amount: cr_quote_amount,
-                    asset_id: core_exchange_rate.quote.asset_id
-                },
-                base: {
-                    amount: cr_base_amount,
-                    asset_id: core_exchange_rate.base.asset_id
-                }
-            }
+            extensions: asset.getIn(["options", "extensions"])
         }
     };
+    if(core_exchange_rate){
+      updateObject.new_options.core_exchange_rate={
+          quote: {
+              amount: cr_quote_amount,
+              asset_id: core_exchange_rate.quote.asset_id
+          },
+          base: {
+              amount: cr_base_amount,
+              asset_id: core_exchange_rate.base.asset_id
+          }
+      }
+    }
+
     if (issuer === new_issuer || !new_issuer) {
         delete updateObject.new_issuer;
     }
+    // console.info("updateObject",updateObject);
+    let operations=[
+      {
+          op_type:9,
+          type:"asset_update",
+          params:updateObject
+      }
+    ]
+    if (
+      isBitAsset &&original_bitasset_opts&&
+      (bitasset_opts.feed_lifetime_sec !==
+          original_bitasset_opts.feed_lifetime_sec ||
+          bitasset_opts.minimum_feeds !==
+              original_bitasset_opts.minimum_feeds ||
+          bitasset_opts.force_settlement_delay_sec !==
+              original_bitasset_opts.force_settlement_delay_sec ||
+          bitasset_opts.force_settlement_offset_percent !==
+              original_bitasset_opts.force_settlement_offset_percent ||
+          bitasset_opts.maximum_force_settlement_volume !==
+              original_bitasset_opts.maximum_force_settlement_volume ||
+          bitasset_opts.short_backing_asset !==
+              original_bitasset_opts.short_backing_asset)
+  ) {
+
+      let bitAssetUpdateObject = {
+          fee: {
+              amount: 0,
+              asset_id: 0
+          },
+          asset_to_update: asset.get("id"),
+          issuer: issuer,
+          new_options: bitasset_opts
+      };
+
+      operations.push({
+          op_type:11,
+          type:"asset_update_bitasset",
+          params:bitAssetUpdateObject
+      })
+
+      // console.info("operations",operations);
+  }
 
     return dispatch('transactions/_transactionOperations', {
-        operations:[{
-            op_type:9,
-            type:"asset_update",
-            params:updateObject
-        }],
-        onlyGetFee,
+        operations
     },{root:true});  
 }
 
@@ -202,6 +307,7 @@ export const _updateAsset=async ({dispatch,rootGetters},params)=>{
         transferRestricted,
         chargeMarketFee,
         description,
+        bitassetOpts,
         onlyGetFee=false,
       }=params;
 
@@ -225,8 +331,10 @@ export const _updateAsset=async ({dispatch,rootGetters},params)=>{
   let isBitAsset = u_asset.bitasset_data_id !== undefined;
 
   let flagBooleans = assetUtils.getFlagBooleans(0, isBitAsset);
-  // if(chargeMarketFee)
-  // flagBooleans["charge_market_fee"]=chargeMarketFee;
+  // console.info("flagBooleans0000",JSON.parse(JSON.stringify(flagBooleans)));
+
+  if(chargeMarketFee)
+  flagBooleans["charge_market_fee"]=true;
   
   // let permissionBooleans = assetUtils.getFlagBooleans("all",isBitAsset);
 
@@ -234,29 +342,26 @@ export const _updateAsset=async ({dispatch,rootGetters},params)=>{
 
   flagBooleans.witness_fed_asset=false;
   flagBooleans.committee_fed_asset=false;
-  let flags;
-  if(whiteList!=undefined||transferRestricted!=undefined){
-    if(whiteList!=undefined) flagBooleans.white_list=whiteList;
-    if(transferRestricted!=undefined) flagBooleans.transfer_restricted=transferRestricted;
 
-    // console.info("flagBooleans",flagBooleans,isBitAsset);
-    flags = assetUtils.getFlags(flagBooleans, isBitAsset);
-    
-  }else{
-    flags=u_asset.getIn(["options","issuer_permissions"])
-  }
+  if(whiteList!=undefined) flagBooleans.white_list=whiteList;
+  if(transferRestricted!=undefined) flagBooleans.transfer_restricted=transferRestricted;
+
+  // console.info("flagBooleans1111",flagBooleans);
+  let flags= assetUtils.getFlags(flagBooleans, isBitAsset);
+  // console.info("flags",flags);
+  // if(whiteList!=undefined||transferRestricted!=undefined){
+  //   if(whiteList!=undefined) flagBooleans.white_list=whiteList;
+  //   if(transferRestricted!=undefined) flagBooleans.transfer_restricted=transferRestricted;
+  //   // console.info("flagBooleans",flagBooleans,isBitAsset);
+  //   flags = assetUtils.getFlags(flagBooleans, isBitAsset);
+  // }else{
+  //   flags=u_asset.getIn(["options","issuer_permissions"])
+  // }
 
   // let permissions = assetUtils.getPermissions(
   //   permissionBooleans,
   //   isBitAssetisBitAsset
   // );
-
-  // let auths = {
-  //   whitelist_authorities: u_asset.getIn(["options","whitelist_authorities"]),
-  //   blacklist_authorities: u_asset.getIn(["options","blacklist_authorities"]),
-  //   whitelist_markets: u_asset.getIn(["options","whitelist_markets"]),
-  //   blacklist_markets:u_asset.getIn(["options","blacklist_markets"]),
-  // };
 
   let _params={
     issuer:rootGetters["account/getAccountUserId"],
@@ -265,10 +370,9 @@ export const _updateAsset=async ({dispatch,rootGetters},params)=>{
       symbol:assetId,
       // precision,
       max_supply:u_asset.getIn(["options","max_supply"]),
-      market_fee_percent:u_asset.getIn(["options","market_fee_percent"]),
-      max_market_fee:u_asset.getIn(["options","max_market_fee"])
+      market_fee_percent:Number(u_asset.getIn(["options","market_fee_percent"])),
+      max_market_fee:Number(u_asset.getIn(["options","max_market_fee"]))
     },
-    core_exchange_rate:(u_asset.getIn(["options","core_exchange_rate"])).toJS(),
     asset:u_asset,
     flags:flags,//u_asset.getIn(["options","flags"]),
     permissions:u_asset.getIn(["options","issuer_permissions"]),
@@ -291,6 +395,12 @@ export const _updateAsset=async ({dispatch,rootGetters},params)=>{
     assetChanged:true,
     onlyGetFee,
   }
+
+  if(u_asset.getIn(["options","core_exchange_rate"])){
+    _params.core_exchange_rate=(u_asset.getIn(["options","core_exchange_rate"])).toJS();
+    // console.info("_params.core_exchange_rate",_params.core_exchange_rate);
+  }
+
   if(maxSupply){
     _params.update.max_supply=maxSupply*Math.pow(10,u_asset.get("precision"));
   }
@@ -299,7 +409,7 @@ export const _updateAsset=async ({dispatch,rootGetters},params)=>{
     _params.description=JSON.stringify({main:description,short_name:"",market:""});
   }
 
-  if(coreExchangeRate){
+  if(coreExchangeRate){//&&u_asset.get("id")=="1.3.1"
     _params.core_exchange_rate.quote.amount=coreExchangeRate.quoteAmount||1;
     _params.core_exchange_rate.base.amount=coreExchangeRate.baseAmount||1;
   }
@@ -309,6 +419,43 @@ export const _updateAsset=async ({dispatch,rootGetters},params)=>{
     _params.update.max_market_fee=chargeMarketFee.maxMarketFee||0;
   }
 
+
+  // console.info("u_asset",u_asset);
+  let bitasset_data_id=u_asset.get("bitasset_data_id");
+  if(bitasset_data_id&&bitassetOpts){
+    let bitassetData=await dispatch("explorer/getDataByIds",{ids:[bitasset_data_id]},{root:true});; 
+    if(bitassetData.code!=1){
+      return bitassetData;
+    }
+
+    if(bitassetData.data.length){
+      let _bitasset_opts=bitassetData.data[0];
+
+      let {feedLifetimeSec,minimumFeeds,forceSettlementDelaySec,
+        forceSettlementOffsetPercent,maximumForceSettlementVolume,shortBackingAsset}=bitassetOpts;
+
+
+        let bitasset_options=JSON.parse(JSON.stringify(_bitasset_opts.options)); 
+        if(minimumFeeds) bitasset_options.minimum_feeds=Number(minimumFeeds);
+        if(feedLifetimeSec) bitasset_options.feed_lifetime_sec=Number(feedLifetimeSec)*60;
+        if(forceSettlementDelaySec) bitasset_options.force_settlement_delay_sec=Number(forceSettlementDelaySec)*60;
+        if(forceSettlementOffsetPercent) bitasset_options.force_settlement_offset_percent=Number(forceSettlementOffsetPercent)*assetConstants.GRAPHENE_1_PERCENT;
+        if(maximumForceSettlementVolume) bitasset_options.maximum_force_settlement_volume=Number(maximumForceSettlementVolume)* assetConstants.GRAPHENE_1_PERCENT;
+        if(shortBackingAsset) bitasset_options.short_backing_asset=shortBackingAsset;
+
+        let {minimum_feeds,feed_lifetime_sec,force_settlement_delay_sec,
+          force_settlement_offset_percent,maximum_force_settlement_volume}=bitasset_options;
+        if(isNaN(minimum_feeds)||isNaN(feed_lifetime_sec)||isNaN(force_settlement_delay_sec)||
+        isNaN(force_settlement_offset_percent)||isNaN(maximum_force_settlement_volume)){
+          return {code:135,message:"Please check parameter data type"};
+        }
+      //  console.info("_params.bitasset_opts",bitasset_options,_bitasset_opts);
+         _params.bitasset_opts=bitasset_options;
+         _params.original_bitasset_opts=_bitasset_opts.options;
+    }
+    
+  }
+  
   return dispatch("updateAsset",_params);
 }
 
@@ -324,7 +471,7 @@ export const assetClaimFees=async ({commit,dispatch},{assetId,amount,account,onl
   }
   return  dispatch('transactions/_transactionOperations',{
       operations:[{
-          op_type:39,
+          op_type:31,
           type:"asset_claim_fees",
           params:{
             issuer:account.id,
@@ -396,11 +543,9 @@ export const createAsset=async ({commit,dispatch},{account_id,
   permissions,
   cer,
   isBitAsset,
-  is_prediction_market,
   bitasset_opts,
-  description,
-  onlyGetFee,
-  callback})=>{
+  description
+  })=>{
    // Create asset action here...
   //  console.log(
   //   "create asset:",
@@ -426,12 +571,12 @@ export const createAsset=async ({commit,dispatch},{account_id,
     let coreAsset=await dispatch("assets/fetchAssets",{assets:["1.3.0"],isOne:true},{root:true});
     let corePrecision = utils.get_asset_precision(coreAsset.precision);
    
-    if(cer.base.amount>1000|| cer.quote.amount>1000){
-      return {code:171,message:"The amount of fee exchange rate assets should not exceed 1000"}
-    }
-    if(helper.getDecimals(cer.base.amount)>8||helper.getDecimals(cer.quote.amount)>8){
-      return {code:172,message:"precision overflow of fee exchange rate assets"}
-    }
+    // if(cer.base.amount>1000|| cer.quote.amount>1000){
+    //   return {code:171,message:"The amount of fee exchange rate assets should not exceed 1000"}
+    // }
+    // if(helper.getDecimals(cer.base.amount)>8||helper.getDecimals(cer.quote.amount)>8){
+    //   return {code:172,message:"precision overflow of fee exchange rate assets"}
+    // }
 
     let operationJSON = {
         fee: {
@@ -447,24 +592,9 @@ export const createAsset=async ({commit,dispatch},{account_id,
             max_market_fee: max_market_fee,
             issuer_permissions: permissions,
             flags: flags,
-            core_exchange_rate: {
-                base: {
-                  amount: cer.base.amount * precision,
-                  asset_id: "1.3.1"
-                },
-                quote: {
-                  amount: cer.quote.amount * corePrecision,
-                  asset_id: cer.quote.asset_id    
-                }
-            },
-            // whitelist_authorities: [],
-            // blacklist_authorities: [],
-            // whitelist_markets: [],
-            // blacklist_markets: [],
             description: description,
             extensions: null
         },
-        // is_prediction_market: is_prediction_market,
         extensions: null
     };
 
@@ -477,8 +607,7 @@ export const createAsset=async ({commit,dispatch},{account_id,
             op_type:8,
             type:"asset_create",
             params:operationJSON
-        }],
-        onlyGetFee
+        }]
     },{root:true});  
 }
 
@@ -487,14 +616,13 @@ export const _createAsset=async ({dispatch,rootGetters},params)=>{
     return {code:101,message:"Parameter is missing"};
   }
   let { isBitAsset=false,
-        is_prediction_market=false,
         assetId,
         maxSupply=100000,
-        precision=8,
+        precision=5,
         coreExchangeRate,
         chargeMarketFee,
         description,
-        onlyGetFee=false,
+        bitassetOpts
       }=params;
 
   let c_asset=await dispatch("assets/fetchAssets",{assets:[assetId],isOne:true},{root:true});
@@ -524,26 +652,17 @@ export const _createAsset=async ({dispatch,rootGetters},params)=>{
     },
     flags,
     permissions,
-    cer: {
-      // quote: {
-      //     asset_id: null,
-      //     amount: 1
-      // },
-      // base: {
-      //     asset_id: "1.3.0",
-      //     amount: 1
-      // }
-      quote: {
-        asset_id: "1.3.0",
-        amount: 1
-      },
-      base: {
-          asset_id:null,
-          amount: 1
-      }
-    },
+    // cer: {
+    //   quote: {
+    //     asset_id: "1.3.0",
+    //     amount: 1
+    //   },
+    //   base: {
+    //       asset_id:null,
+    //       amount: 1
+    //   }
+    // },
     isBitAsset,
-    is_prediction_market,
     bitasset_opts: {
       feed_lifetime_sec: 60 * 60 * 24,
       minimum_feeds:1,
@@ -554,17 +673,34 @@ export const _createAsset=async ({dispatch,rootGetters},params)=>{
           20 * assetConstants.GRAPHENE_1_PERCENT,
       short_backing_asset: "1.3.0"
     },
-    description: JSON.stringify({main:description,short_name:"",market:""}),
-    onlyGetFee
+    description: JSON.stringify({main:description,short_name:"",market:""})
   }
-  if(coreExchangeRate){
-    _params.cer.quote.amount=coreExchangeRate.quoteAmount||1;
-    _params.cer.base.amount=coreExchangeRate.baseAmount||1;
-  }
+  // if(coreExchangeRate){
+  //   _params.cer.quote.amount=coreExchangeRate.quoteAmount||1;
+  //   _params.cer.base.amount=coreExchangeRate.baseAmount||1;
+  // }
 
   if(chargeMarketFee){
     _params.createObject.market_fee_percent=chargeMarketFee.marketFeePercent||0;
     _params.createObject.max_market_fee=chargeMarketFee.maxMarketFee||0;
+  }
+
+  if(bitassetOpts&&isBitAsset){
+    let {feedLifetimeSec=60 * 60 * 24,minimumFeeds=1,forceSettlementDelaySec=60 * 60 * 24,
+      forceSettlementOffsetPercent=1 * assetConstants.GRAPHENE_1_PERCENT,
+      maximumForceSettlementVolume= 20 * assetConstants.GRAPHENE_1_PERCENT,shortBackingAsset="1.3.0"}=bitassetOpts;
+      if(!feedLifetimeSec||!minimumFeeds||!forceSettlementDelaySec||!forceSettlementOffsetPercent
+        ||!maximumForceSettlementVolume||!shortBackingAsset){
+          return {code:101,message:"Parameter is missing"};
+      }
+      _params.bitasset_opts={
+        feed_lifetime_sec: feedLifetimeSec,
+        minimum_feeds:minimumFeeds,
+        force_settlement_delay_sec: forceSettlementDelaySec,
+        force_settlement_offset_percent: forceSettlementOffsetPercent* assetConstants.GRAPHENE_1_PERCENT,
+        maximum_force_settlement_volume: maximumForceSettlementVolume * assetConstants.GRAPHENE_1_PERCENT,
+        short_backing_asset: shortBackingAsset
+      }
   }
 
   return dispatch("createAsset",_params);
@@ -652,7 +788,7 @@ export const assetUpdateRestricted=async ({dispatch,rootGetters},params)=>{
   },{root:true});
 }
 
-export const queryAssets=async ({dispatch,state,commit},{symbol="",assetId="",simple=true})=>{
+export const queryAssets=async ({dispatch,state,commit},{symbol="",assetId="",simple=false})=>{
   let assets=state.assets;
   let lastAsset = assets
       .sort((a, b) => {
@@ -668,6 +804,8 @@ export const queryAssets=async ({dispatch,state,commit},{symbol="",assetId="",si
   symbol=symbol||assetId;
   if(symbol){
     symbol=symbol.trim();
+    let symbolRes=await API.Assets.fetch_asset_one(symbol);
+    if(symbolRes.code!=1) return symbolRes;
     await dispatch("onGetAssetList",{start:symbol,count:1});
     state.assetsFetched=state.assetsFetched + 99;
   }else{
@@ -718,7 +856,6 @@ export const formatAssets=async ({dispatch},{assets,simple=false})=>{
         return 0;
     }
  }); 
-//  assets=assets.toJS();
   for(let i=0;i<assets.length;i++){
       let {issuer,dynamic,precision,id,symbol,options,bitasset_data_id,dynamic_asset_data_id}=assets[i];
       let {core_exchange_rate,description,market_fee_percent,max_market_fee,
@@ -726,18 +863,46 @@ export const formatAssets=async ({dispatch},{assets,simple=false})=>{
         blacklist_authorities,blacklist_markets}=options;
         
       issuer_res=await dispatch("user/getUserInfo",{account:issuer,isCache:true},{root:true});
-      let core_asset=await API.Assets.fetch(["1.3.0"],true);
-      let {base,quote}=core_exchange_rate;
+      // let core_asset=await API.Assets.fetch(["1.3.0"],true);
+      // console.info('core_exchange_rate',core_exchange_rate);
+      if(core_exchange_rate){
+        let {base,quote}=core_exchange_rate;
 
-      let base_asset=(await API.Assets.fetch_asset_one(base.asset_id)).data;
-      let quote_asset=(await API.Assets.fetch_asset_one(quote.asset_id)).data;
+        let base_asset=(await API.Assets.fetch_asset_one(base.asset_id)).data;
+        let quote_asset=(await API.Assets.fetch_asset_one(quote.asset_id)).data;
+  
+  
+        core_exchange_rate.text=(helper.formatAmount(quote.amount,quote_asset.precision)||1)/
+                              helper.formatAmount(base.amount,base_asset.precision)
+                             +" "+ quote_asset.symbol+"/"+base_asset.symbol;
+      }
+      let {bitasset_data}=assets[i];
+      // console.info("bitasset_data",bitasset_data);
+      if(bitasset_data){
+        let {base,quote}= bitasset_data.current_feed.settlement_price;
+        let base_asset=(await API.Assets.fetch_asset_one(base.asset_id)).data;
+        let quote_asset=(await API.Assets.fetch_asset_one(quote.asset_id)).data;
 
-      // let base_precision=(await API.Assets.fetch_asset_one(base.asset_id)).data.precision;
-      // let quote_precision=(await API.Assets.fetch_asset_one(United Labs of BCTech.quote.asset_id)).data.precision;
+        assets[i].bitasset_data.format_feed_price=utils.format_price(
+          bitasset_data.current_feed.settlement_price.quote.amount,
+          quote_asset,
+          bitasset_data.current_feed.settlement_price.base.amount,
+          base_asset,
+          true,
+          true,
+          false
+        );
+        assets[i].bitasset_data.format_feed_price_text=utils.format_price(
+          bitasset_data.current_feed.settlement_price.quote.amount,
+          quote_asset,
+          bitasset_data.current_feed.settlement_price.base.amount,
+          base_asset,
+          false,
+          true,
+          false
+        );
+      }
 
-      core_exchange_rate.text=(helper.formatAmount(quote.amount,quote_asset.precision)||1)/
-                            helper.formatAmount(base.amount,base_asset.precision)
-                           +" "+ quote_asset.symbol+"/"+base_asset.symbol;
       let asset_item;
       ChainStore.getAsset(id);
       ChainStore.getObject(dynamic_asset_data_id)
@@ -749,14 +914,13 @@ export const formatAssets=async ({dispatch},{assets,simple=false})=>{
       if(simple){
         asset_item={
           id,
+          dynamic_asset_data_id,
           issuer,
           issuer_name:issuer_res.code==1&&issuer_res.data?issuer_res.data.account.name:"",
           precision,
           symbol,
           dynamic:{
             current_supply:helper.formatAmount(dynamic.current_supply,precision),
-            fee_pool:helper.formatAmount(dynamic.fee_pool,core_asset.precision),
-            fee_pool_symbol:core_asset.symbol,
             accumulated_fees:helper.formatAmount(dynamic.accumulated_fees,precision)
           },
           options:{
@@ -779,38 +943,31 @@ export const formatAssets=async ({dispatch},{assets,simple=false})=>{
         asset_item={
           bitasset_data:assets[i].bitasset_data,
           bitasset_data_id,
+          dynamic_asset_data_id,
           dynamic:{
             current_supply:helper.formatAmount(dynamic.current_supply,precision),
-            fee_pool:helper.formatAmount(dynamic.fee_pool,precision),
-            fee_pool_symbol:core_asset.symbol,
             accumulated_fees:helper.formatAmount(dynamic.accumulated_fees,precision)
           },
           id,
-          bitasset_data_id,
           issuer,
           issuer_name:issuer_res.data.account.name,
           options:{
-            core_exchange_rate,
             description:"",
-            flags:assetUtils.getFlagBooleans(
-              flags,
-              !!bitasset_data_id//whether it's a smart asset
-            ),
+            flags,
             permissionBooleans,
             market_fee_percent:market_fee_percent/100,
             max_market_fee:helper.formatAmount(max_market_fee,precision),
             max_supply:helper.formatAmount(max_supply,precision),
-            // whitelist_authorities,
-            // whitelist_markets,
-            // blacklist_authorities,
-            // blacklist_markets
           },
           precision,
           symbol,
           //charge_market_fee
         }
-      }
 
+      }
+      if(core_exchange_rate){
+        asset_item.options.core_exchange_rate=core_exchange_rate;
+      }
       try{
         if(description)
         asset_item.description=JSON.parse(description).main;
@@ -898,30 +1055,27 @@ export const assetPublishFeed=async ({dispatch,rootGetters},params)=>{
   if(asset_res.code!==1) return asset_res;
 
   let {id,precision,options}=asset_res.data;
-  // options.core_exchange_rate.quote.amount= options.core_exchange_rate.quote.amount*10;
-  let core_exchange_rate=options.core_exchange_rate;
 
-  
-  if(coreExchangeRate.baseAmount){
-    let cr_base_asset =(await API.Assets.fetch([core_exchange_rate.base.asset_id]))[0]
-    let cr_base_precision = utils.get_asset_precision(
-        cr_base_asset.precision
-    );
-    core_exchange_rate.base.amount = new big(coreExchangeRate.baseAmount)
-    .times(cr_base_precision)
-    .toString();
+  // let core_exchange_rate=options.core_exchange_rate;
+  // if(coreExchangeRate.baseAmount){
+  //   let cr_base_asset =(await API.Assets.fetch([core_exchange_rate.base.asset_id]))[0]
+  //   let cr_base_precision = utils.get_asset_precision(
+  //       cr_base_asset.precision
+  //   );
+  //   core_exchange_rate.base.amount = new big(coreExchangeRate.baseAmount)
+  //   .times(cr_base_precision)
+  //   .toString();
 
-  } 
-
-  if(coreExchangeRate.quoteAmount){
-    let cr_quote_asset =(await API.Assets.fetch([core_exchange_rate.quote.asset_id]))[0];
-    let cr_quote_precision = utils.get_asset_precision(
-        cr_quote_asset.precision
-    );
-    core_exchange_rate.quote.amount=new big(coreExchangeRate.quoteAmount)
-    .times(cr_quote_precision)
-    .toString();
-  } 
+  // } 
+  // if(coreExchangeRate.quoteAmount){
+  //   let cr_quote_asset =(await API.Assets.fetch([core_exchange_rate.quote.asset_id]))[0];
+  //   let cr_quote_precision = utils.get_asset_precision(
+  //       cr_quote_asset.precision
+  //   );
+  //   core_exchange_rate.quote.amount=new big(coreExchangeRate.quoteAmount)
+  //   .times(cr_quote_precision)
+  //   .toString();
+  // } 
 
   let price_feed={
     settlement_price:{
@@ -932,12 +1086,12 @@ export const assetPublishFeed=async ({dispatch,rootGetters},params)=>{
        quote:(await helper.toOpAmount(price,"1.3.0")).data
     },
     maintenance_collateral_ratio:Number((maintenanceCollateralRatio*1000).toFixed(0)),
-    maximum_short_squeeze_ratio:Number((maximumShortSqueezeRatio*1000).toFixed(0)),
-    core_exchange_rate
+    maximum_short_squeeze_ratio:Number((maximumShortSqueezeRatio*1000).toFixed(0))//,
+    // core_exchange_rate
   }
   return dispatch('transactions/_transactionOperations', {
     operations:[{
-      op_type:18,
+      op_type:17,
       type:"asset_publish_feed",
       params:{
         publisher:rootGetters['account/getAccountUserId'],
@@ -1020,10 +1174,49 @@ export const assetSettle=async ({dispatch,rootGetters},params)=>{
        type:"asset_settle",
        params:{
          account:rootGetters['account/getAccountUserId'],
-         amount:(await helper.toOpAmount(price,asset_res.data)).data,
+         amount:(await helper.toOpAmount(amount,asset_res.data)).data,
          extensions:[]
        }
      }],
      onlyGetFee
    },{root:true});
+}
+
+export const updateCollateralForGas=async ({dispatch,rootGetters},params)=>{
+   if(!helper.trimParams(params,{mortgager:""})) return {code:101,message:"Parameter is missing"};
+   let {mortgager,beneficiary,amount,isPropose=false}=params;
+   if(!mortgager){
+     mortgager=rootGetters["account/getAccountUserId"];
+   }else{
+    let mortgager_res=await dispatch("user/getUserInfo",{account:mortgager,isCache:true},{root:true});
+    if(mortgager_res.code!=1) return mortgager_res;
+    mortgager=mortgager_res.data.account.id;
+   }
+ 
+   let beneficiary_res=await dispatch("user/getUserInfo",{account:beneficiary,isCache:true},{root:true});
+   if(beneficiary_res.code!=1) return beneficiary_res;
+   beneficiary=beneficiary_res.data.account.id;
+
+   if(isNaN(Number(amount))){
+     return {code:135,message:"Please check parameter data type"};
+   }
+   let core_asset=await API.Assets.fetch(["1.3.0"],true);
+   amount=(await helper.toOpAmount(amount,core_asset)).data.amount;
+
+   let proposeAccount="";
+   if(isPropose){
+    proposeAccount=rootGetters["account/getAccountUserId"];
+   }
+   return dispatch('transactions/_transactionOperations', {
+    operations:[{
+      op_type:54,
+      type:"update_collateral_for_gas",
+      params:{
+        mortgager,
+        beneficiary,
+        collateral:amount,
+      }
+    }],
+    proposeAccount
+  },{root:true});
 }

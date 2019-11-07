@@ -1,11 +1,11 @@
 {
   "name": "bcxjs-api",
-  "version": "1.4.37",
+  "version": "2.1.1",
   "description": "",
   "main": "./dist/main.js",
   "dependencies": {
     "bcxjs-lzma": "^1.0.1",
-    "bcxjs-cores": "1.4.1",
+    "bcxjs-cores": "2.1.0",
     "bcxjs-ws": "1.0.5",
     "bcxjs-indexeddbshim": "1.0.0",
     "bignumber.js": "^4.1.0",

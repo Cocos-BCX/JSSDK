@@ -5,7 +5,6 @@ import Immutable from "immutable";
 import * as types from '../mutations';
 import API from '../services/api';
 import PersistentStorage from '../services/persistent-storage';
-// import _dictionary from '../../test/brainkey_dictionary.js';United Labs of BCTech.
 import * as WalletDbS from '../store/WalletDb';
 import utils from '../lib/common/utils';
 import helper from '../lib/common/helper';
@@ -42,7 +41,7 @@ const createWallet = ({ password,wif }) => {
   return result;
 };
 
-/**United Labs of BCTech.
+/**
  * Unlocks user's wallet via provided password
  * @param {string} password - user password
  */
@@ -114,9 +113,6 @@ export const createAccountWithPassword = async (store, params) => {
 
   console.log('Account created : ', result.success);
   if (result.success) {
-    const userId = await API.Account.getAccountIdByOwnerPubkey(result.data.account.owner_key);
-    let id = userId && userId[0];
-    if(id) id=userId[0]
     return new Promise(resolve=>{
       setTimeout(()=>{
         if(autoLogin){
@@ -125,7 +121,11 @@ export const createAccountWithPassword = async (store, params) => {
             password
           },{ root: true }))
         }else{
-          resolve({code:1,data:{account_id:id,account_name:account}})
+          API.Account.getAccountIdByOwnerPubkey(result.data.account.owner_key).then(userId=>{
+              let id = userId && userId[0];
+              if(id) id=userId[0];
+              resolve({code:1,data:{account_id:id,account_name:account}})
+          });
         }
       },2000)
     })
@@ -263,8 +263,8 @@ export const application_api_create_account=({dispatch},{ owner_pubkey,
                         asset_id: 0
                     },
                     "registrar": chain_registrar.get("id"),
-                    "referrer": chain_referrer.get("id"),
-                    "referrer_percent": referrer_percent,
+                    // "referrer": chain_referrer.get("id"),
+                    // "referrer_percent": referrer_percent,
                     "name": new_account_name,
                     "owner": {
                         "weight_threshold": 1,
@@ -280,9 +280,9 @@ export const application_api_create_account=({dispatch},{ owner_pubkey,
                     },
                     "options": {
                         "memo_key": active_pubkey,
-                        "voting_account": "1.2.5",
-                        "num_witness": 0,
-                        "num_committee": 0,
+                        // "voting_account": "1.2.5",
+                        // "num_witness": 0,
+                        // "num_committee": 0,
                         "votes": [ ]
                     }
                 }
@@ -446,12 +446,13 @@ export const saveImport=({state,dispatch,rootGetters})=>{
 
       var import_count = private_key_objs.length;
       console.log(`Successfully imported ${import_count} keys.`)
-      // this.onCancel() // back to claim balances. United Labs of BCTech.
-
-      return dispatch("AccountStore/onCreateAccount",{name_or_account:private_key_objs[0].import_account_names[0]},{root:true}).then(()=>{
-          let names =rootGetters["AccountStore/linkedAccounts"].toArray().sort();
-          return dispatch("getAccountInfo");   
-      });                    
+      // this.onCancel() // back to claim balances.
+      return dispatch("AccountRefsStore/checkPrivateKeyStore",null,{root:true}).then(()=>{
+          return dispatch("AccountStore/onCreateAccount",{name_or_account:private_key_objs[0].import_account_names[0]},{root:true}).then(()=>{
+              let names =rootGetters["AccountStore/linkedAccounts"].toArray().sort();
+              return dispatch("getAccountInfo");   
+          }); 
+      });                 
   }).catch(error => {
       console.error("error:", error)
       var message = error
@@ -505,7 +506,7 @@ export const passwordLogin = async (store,params) => {
   const userId = await API.Account.getAccountIdByOwnerPubkey(ownerPubkey);
   let id = userId && userId[0];
   if (id) {
-    if(rootGetters["WalletDb/wallet"]){
+    if(rootGetters["AccountStore/linkedAccounts"].size){
       await dispatch("WalletManagerStore/deleteWallet",null,{root:true});
     }else{
       await dispatch("_logout");
@@ -794,65 +795,80 @@ export const setAccountUserId=({commit},userId)=>{
   commit(types.ACCOUNT_LOGIN_COMPLETE, {userId});
 }
 
-export const getVestingBalances=async ({dispatch,rootGetters},{account,type=1})=>{
-  let vbs = await API.Account.getVestingBalances(account.id);
+export const queryVestingBalance=async ({dispatch,rootGetters},{account_id,type})=>{
+  let vbs = await API.Account.getVestingBalances(account_id);
   let cvbAsset,
       vestingPeriod,
       earned,
+      old_earned,
+      new_earned,
+      total_earned,
+      past_sconds,
+      coin_seconds_earned_last_update,
       secondsPerDay = 60 * 60 * 24,
       availablePercent;
   let new_vbs=[];
   for(let i=0;i<vbs.length;i++){
-    let {id,balance,policy}=vbs[i];
+    let {id,balance,policy,describe}=vbs[i];
     cvbAsset=await dispatch("assets/fetchAssets",{assets:[balance.asset_id],isOne:true},{root:true})
-    earned=policy[1].coin_seconds_earned;
+    
+    coin_seconds_earned_last_update=policy[1].coin_seconds_earned_last_update;
+    vestingPeriod = policy[1].vesting_seconds;
+    past_sconds=parseInt((new Date()-new Date(coin_seconds_earned_last_update+"Z"))/1000);
+    if(past_sconds>vestingPeriod) past_sconds=vestingPeriod;
 
-      vestingPeriod = policy[1].vesting_seconds;
-      if(type==1&&vestingPeriod!=86400){
-        continue;
-      }
+    if(/^1\.6\.\d+/.test(describe)){
+      describe="cashback_block"
+    }
+    if(type&&"cashback_"+type!=describe){
+        continue
+    }
+
+    total_earned=vestingPeriod*balance.amount;
+    new_earned=(past_sconds / vestingPeriod)*(total_earned);
+    old_earned=Number(policy[1].coin_seconds_earned);
+    earned=old_earned+new_earned;
+    if(earned>=total_earned) earned=total_earned;
+
+    availablePercent = (vestingPeriod === 0) ? 1 : earned / (vestingPeriod * balance.amount);
+
+    let remaining_hours=utils.format_number(
+          vestingPeriod *
+              (1 - availablePercent) /
+              3600 || 0,
+          2
+      )
 
       let require_coindays=utils.format_number(utils.get_asset_amount(
-                    balance.amount *
-                        vestingPeriod /
-                        secondsPerDay,
-                    cvbAsset
-                ),0)
-               
-      availablePercent = vestingPeriod === 0 ? 1 : earned / (vestingPeriod * balance.amount);
-
-      let remaining_days=utils.format_number(
-            vestingPeriod *
-                (1 - availablePercent) /
-                secondsPerDay || 0,
-            2
-        )
-        // remaining_days=Number(remaining_days.replace(/,/g,""));
-      // let available_get=utils.format_number(availablePercent * 100, 2)+" % / "
-      //                   + (availablePercent * balance.amount/Math.pow(10,cvbAsset.precision))+" "+cvbAsset.symbol;
-        earned=utils.format_number(utils.get_asset_amount(
-                          earned / secondsPerDay,
-                          cvbAsset
-                      ),0);   
+        balance.amount *
+            vestingPeriod /
+            secondsPerDay,
+        cvbAsset
+      ),0)
+      earned=utils.format_number(utils.get_asset_amount(
+                      earned / secondsPerDay,
+                      cvbAsset
+                  ),0);   
+  
       let precision_value=Math.pow(10,cvbAsset.precision)                
       new_vbs.push({
         id,
+        type:describe,
         return_cash:balance.amount/precision_value,
-        earned_coindays:earned,
-        require_coindays,
-        remaining_days,
+        remaining_hours,
         available_percent:utils.format_number(availablePercent * 100,2),
         available_balance:{
-          amount: utils.format_number(availablePercent * balance.amount/precision_value,8),
+          amount: utils.format_number((availablePercent*balance.amount)/precision_value,cvbAsset.precision),
           asset_id:cvbAsset.id,
           symbol:cvbAsset.symbol,
           precision:cvbAsset.precision
         }
+        //,
+        // require_coindays,
+        // earned
       })
   }
-  if(type!=2){
-    new_vbs=new_vbs.length?new_vbs[0]:null;
-  }
+
   let res={code:1,data:new_vbs}
   if(!new_vbs){
     res={code:127,message:"No reward available"}
@@ -860,26 +876,26 @@ export const getVestingBalances=async ({dispatch,rootGetters},{account,type=1})=
   return res;
 }
 
-export const claimVestingBalance=async ({dispatch},{id})=>{
+export const claimVestingBalance=async ({dispatch},{id,account})=>{
    if(!id){
     return {code:101,message:"Parameter is missing"};
    }
    id=id.trim();
 
-   let res=await dispatch("_accountOpt",{
-              method:"account/getVestingBalances",
-              params:{ type:2 }
+   let res=await dispatch("_validateAccount",{
+              method:"account/queryVestingBalance",
+              params:{ type:'' },
+              account:account.id
             })
 
     if(res.code!=1) return res;
-           
     let rewards=res.data.filter(item=>item.id==id);
     if(rewards.length){
       let {amount,precision,asset_id}=rewards[0].available_balance;
       amount=Math.floor(amount*Math.pow(10,precision));
       return  dispatch('transactions/_transactionOperations', {
             operations:[{
-                op_type:31,
+                op_type:27,
                 type:"vesting_balance_withdraw",
                 params:{
                   vesting_balance:id,

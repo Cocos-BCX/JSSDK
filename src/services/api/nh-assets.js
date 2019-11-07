@@ -100,7 +100,7 @@ export const lookupNHAssets=async (nh_asset_hash_or_ids,owner=false,account_id)=
         }
         return {
             code:147,
-            message:nh_asset_hash_or_ids+'NHAsset do not exist'
+            message:nh_asset_hash_or_ids+' NHAsset do not exist'
         };
     } catch(error){
         let message=error.message;
@@ -215,9 +215,9 @@ export const getNHCreator=async (nh_asset_creator_account_id)=>{
     }
 }
 
-export const listNHAssetsByCreator=async ({account_id,pageSize=10,page=1})=>{
+export const listNHAssetsByCreator=async ({account_id,worldView="",pageSize=10,page=1})=>{
     try{
-        const response=await Apis.instance().db_api().exec('list_nh_asset_by_creator', [account_id,pageSize,page]);
+        const response=await Apis.instance().db_api().exec('list_nh_asset_by_creator', [account_id,worldView,pageSize,page]);
         if(response){
             return await formatItems(response[0],response[1]);
         }

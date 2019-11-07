@@ -9,7 +9,8 @@ export default class AssetUtils {
             transfer_restricted: false,
             disable_force_settle: false,
             global_settle: false,
-            disable_confidential: false,
+            disable_issuer: true,
+            // disable_confidential: false,
             witness_fed_asset: false,
             committee_fed_asset: false
         };
@@ -35,6 +36,7 @@ export default class AssetUtils {
             ) {
                 delete booleans[flag];
             } else {
+                // console.info("mask",mask,assetConstants.permission_flags[flag],mask & assetConstants.permission_flags[flag])
                 if (mask & assetConstants.permission_flags[flag]) {
                     booleans[flag] = true;
                 }
