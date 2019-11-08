@@ -795,7 +795,7 @@ export const setAccountUserId=({commit},userId)=>{
   commit(types.ACCOUNT_LOGIN_COMPLETE, {userId});
 }
 
-export const queryVestingBalance=async ({dispatch,rootGetters},{account_id,type})=>{
+export const queryVestingBalance=async ({dispatch,rootGetters},{account_id,type,vid,isLimit})=>{
   let vbs = await API.Account.getVestingBalances(account_id);
   let cvbAsset,
       vestingPeriod,
@@ -808,25 +808,30 @@ export const queryVestingBalance=async ({dispatch,rootGetters},{account_id,type}
       secondsPerDay = 60 * 60 * 24,
       availablePercent;
   let new_vbs=[];
+
   for(let i=0;i<vbs.length;i++){
     let {id,balance,policy,describe}=vbs[i];
     cvbAsset=await dispatch("assets/fetchAssets",{assets:[balance.asset_id],isOne:true},{root:true})
     
     coin_seconds_earned_last_update=policy[1].coin_seconds_earned_last_update;
     vestingPeriod = policy[1].vesting_seconds;
-    past_sconds=parseInt((new Date()-new Date(coin_seconds_earned_last_update+"Z"))/1000);
+    past_sconds=Math.floor((new Date()-new Date(coin_seconds_earned_last_update+"Z"))/1000);
     if(past_sconds>vestingPeriod) past_sconds=vestingPeriod;
-
+   
     if(/^1\.6\.\d+/.test(describe)){
       describe="cashback_block"
+    }
+    if(vid&&vid!=id){
+      continue
     }
     if(type&&"cashback_"+type!=describe){
         continue
     }
-
+   
     total_earned=vestingPeriod*balance.amount;
     new_earned=(past_sconds / vestingPeriod)*(total_earned);
     old_earned=Number(policy[1].coin_seconds_earned);
+
     earned=old_earned+new_earned;
     if(earned>=total_earned) earned=total_earned;
 
@@ -850,7 +855,18 @@ export const queryVestingBalance=async ({dispatch,rootGetters},{account_id,type}
                       cvbAsset
                   ),0);   
   
-      let precision_value=Math.pow(10,cvbAsset.precision)                
+      let precision_value=Math.pow(10,cvbAsset.precision);
+      let available_balance_amount= utils.format_number((availablePercent*balance.amount)/precision_value,cvbAsset.precision);    
+      
+      if(isLimit){
+        if(Number(old_earned)>0&&past_sconds<60){
+          return {code:181,message:`Please try again in ${60-past_sconds} seconds`};
+        }
+        if(available_balance_amount<1){
+          return {code:182,message:`draw quantity is less than 1`};
+        }
+      }
+    
       new_vbs.push({
         id,
         type:describe,
@@ -858,7 +874,7 @@ export const queryVestingBalance=async ({dispatch,rootGetters},{account_id,type}
         remaining_hours,
         available_percent:utils.format_number(availablePercent * 100,2),
         available_balance:{
-          amount: utils.format_number((availablePercent*balance.amount)/precision_value,cvbAsset.precision),
+          amount: available_balance_amount,
           asset_id:cvbAsset.id,
           symbol:cvbAsset.symbol,
           precision:cvbAsset.precision
@@ -884,7 +900,7 @@ export const claimVestingBalance=async ({dispatch},{id,account})=>{
 
    let res=await dispatch("_validateAccount",{
               method:"account/queryVestingBalance",
-              params:{ type:'' },
+              params:{ type:'',vid:id,isLimit:true },
               account:account.id
             })
 

@@ -65,3 +65,38 @@ const finally = require("ext/thenable_/finally");
 
 finally.call(thenable, () => console.log("Thenable resolved"));
 ```
+
+#### Math
+
+##### `Math.ceil10` _(ext/math/ceil-10)_
+
+Decimal ceil
+
+```javascript
+const ceil10 = require("ext/math/ceil-10");
+
+ceil10(55.51, -1); // 55.6
+ceil10(-59, 1); // -50;
+```
+
+##### `Math.floor10` _(ext/math/floor-10)_
+
+Decimal floor
+
+```javascript
+const floor10 = require("ext/math/floor-10");
+
+floor10(55.59, -1); // 55.5
+floor10(59, 1); // 50
+```
+
+##### `Math.round10` _(ext/math/round-10)_
+
+Decimal round
+
+```javascript
+const round10 = require("ext/math/round-10");
+
+round10(55.549, -1); // 55.5
+round10(1.005, -2); // 1.01
+```

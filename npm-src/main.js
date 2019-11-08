@@ -427,6 +427,17 @@ import * as utils from './utils/index';
             this.init(init_res=>{
               if(init_res.code==1){
                 let {vote_ids,votes,type}=params;
+                if(!vote_ids||votes==undefined||type==undefined){
+                  resolve({code:101,message:"Parameter is missing"});
+                  return;
+                }
+                if(!Array.isArray(vote_ids)||isNaN(Number(votes))||!(/witnesses|committee/.test(type))){
+                  resolve({code:1011,message:"Parameter error"});
+                  return;
+                }
+                if(votes==0){
+                  vote_ids.length=0;
+                }
                 this.api.dispatch("account/accountOpt",{
                   method:"vote/publishVotes",
                   params:{

@@ -399,6 +399,10 @@ export const _updateAsset=async ({dispatch,rootGetters},params)=>{
   if(u_asset.getIn(["options","core_exchange_rate"])){
     _params.core_exchange_rate=(u_asset.getIn(["options","core_exchange_rate"])).toJS();
     // console.info("_params.core_exchange_rate",_params.core_exchange_rate);
+    if(coreExchangeRate){
+      _params.core_exchange_rate.quote.amount=coreExchangeRate.quoteAmount||1;
+      _params.core_exchange_rate.base.amount=coreExchangeRate.baseAmount||1;
+    }
   }
 
   if(maxSupply){

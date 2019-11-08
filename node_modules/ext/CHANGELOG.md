@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/medikoo/ext/compare/v1.1.2...v1.2.0) (2019-11-07)
+
+### Features
+
+- ceil10, floor10 and round10 for Math ([6a2bc4b](https://github.com/medikoo/ext/commit/6a2bc4b))
+
 ### [1.1.2](https://github.com/medikoo/ext/compare/v1.1.1...v1.1.2) (2019-10-29)
 
 ### Bug Fixes
