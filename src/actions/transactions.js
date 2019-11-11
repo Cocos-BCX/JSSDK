@@ -104,7 +104,6 @@ export const _transactionOperations = async (store, { operations,proposeAccount=
 
         if(Object.keys(op_result).length) results.push(op_result);
      }
-
       let params=operations[0].params;
       if("action" in params&&params.action=="changePassword"){
         dispatch("account/_logout",null,{root:true});
