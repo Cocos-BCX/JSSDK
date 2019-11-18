@@ -66,7 +66,7 @@ export const _transactionOperations = async (store, { operations,proposeAccount=
   const res=await API.Transactions[worker?"transactionOpWorker":"transactionOp"](fromId,operations,fromAccount,proposeAccount,store);
   if (res.success) {
 
-    if(onlyGetFee) return {code:1,data:res.data}
+    // if(onlyGetFee) return {code:1,data:res.data}
     
      let {id,block_num,trx}=res.data[0];
      let results=[];
@@ -104,6 +104,7 @@ export const _transactionOperations = async (store, { operations,proposeAccount=
 
         if(Object.keys(op_result).length) results.push(op_result);
      }
+
       let params=operations[0].params;
       if("action" in params&&params.action=="changePassword"){
         dispatch("account/_logout",null,{root:true});

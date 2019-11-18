@@ -38,8 +38,6 @@ onmessage = function(event) { try {
            transaction.propose(propose_options)
         }
       
-        console.log('----------transactionOp-------------------', transaction)
-
         if(transaction.success==false){
           return transaction;
         }

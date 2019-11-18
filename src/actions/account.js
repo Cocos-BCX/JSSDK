@@ -812,6 +812,7 @@ export const queryVestingBalance=async ({dispatch,rootGetters},{account_id,type,
   for(let i=0;i<vbs.length;i++){
     let {id,balance,policy,describe}=vbs[i];
     cvbAsset=await dispatch("assets/fetchAssets",{assets:[balance.asset_id],isOne:true},{root:true})
+    
     coin_seconds_earned_last_update=policy[1].coin_seconds_earned_last_update;
     vestingPeriod = policy[1].vesting_seconds;
     past_sconds=Math.floor((new Date()-new Date(coin_seconds_earned_last_update+"Z"))/1000);

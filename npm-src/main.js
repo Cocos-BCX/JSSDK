@@ -1,5 +1,5 @@
 // require('babel-polyfill');
-require('indexeddbshim');
+require('bcxjs-indexeddbshim');
 
 
 import Vue from 'vue'
