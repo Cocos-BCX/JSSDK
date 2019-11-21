@@ -36,12 +36,12 @@ Node.js版本8.9.3或更高版本
 在用 bcxjs 构建大型应用时推荐使用 NPM 安装。NPM 能很好地和诸如 webpack 或 Browserify 模块打包器配合使用
 ```js
 # 最新稳定版
-$ npm install bcxjs-api
+$ npm install bcx-api
 ```
 
 如果您有一个转换器，例如Babel，则支持在浏览器中使用ES6模块语法导入。
 ```js
-import BCX from "bcxjs-api"
+import BCX from "bcx-api"
 ```
 
 
@@ -50,32 +50,36 @@ import BCX from "bcxjs-api"
 ### 实例化类库对象
 
 ```JavaScript
-var bcx=new BCX({
-		default_ws_node:”ws://XXXXXXXXX” //节点rpc地址,选填。如果没有指定此项则会自动连接ws_node_list中速度最快的节点
-		ws_node_list:[{url:"ws://xxxxxxx",name:"xxxxx"}]//API服务器节点列表，必填
-		faucet_url:"http://xxx.xxx.xxx.xxx:xxxx", //注册入口
-		networks:[{
-			core_asset:"xxx",//核心资产符号
-			chain_id:"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"//链id   
-		}], 
-		auto_reconnect:false,//当RPC断开时是否自动连接，默认为true
-		app_keys:["xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"],//合约授权，不进行合约授权，则不用配置此选项
-		real_sub:true//true：实时订阅，false:区块订阅，订阅通知频率为出块频率
-		sub_max_op:13//订阅时最大处理OP数量
-});
+  var _configParams={ 
+                    ws_node_list:[
+                        {url:"ws://xxxxxxxxxxxxx",name:"Cocos - China - Beijing"},   
+                     ],
+                     networks:[
+                        {
+                            core_asset:"COCOS",
+                            chain_id:"xxxxxxxxxxxxxxxxxxxxxxxxxxx" 
+                        }
+                     ], 
+                    faucet_url:"xxxxxxxxxxxxxxxxxxxxxx",
+                    auto_reconnect:true,
+                    real_sub:true,
+                    check_cached_nodes_data:false
+                    //app_keys:["5HxzZncKDjx7NEaEv989Huh7yYY7RukcJLKBDQztXAmZYCHWPgd"]
+                };
+
+                var bcx=new BCX(_configParams);
 ```
 
 ### 调用实例-转账
 
 ```JavaScript
 	bcx.transferAsset({
-            fromAccount: 'test1',
-            toAccount: 'test2',
+            fromAccount: 'xxxx',
+            toAccount: 'xxxxx',
             amount: amount,
-            assetId: 'COCOS',
-            feeAssetId: 'COCOS',
+            assetId: 'COCOS',         
             memo: memo,
-            onlyGetFee: false,
+            isPropose: false,// 是否提议
         }).then(function (res) {
              console.log('transferAsset res',res);
         })
@@ -189,7 +193,7 @@ data:{
 
 # Part 2. 区块链系统的互操作API  
   
-## 钱包模式  
+## 钱包模式 （NODE版不支持钱包模式相关API）
   
 ### 创建账户  
 方法：createAccountWithWallet  
@@ -330,7 +334,6 @@ callback:若有该参数，则内部会自动判断进行链初始化，否则�
 方法：upgradeAccount  
 功能：购买终身会员账户后，可以创建子账户，此操作需消耗一定的手续费  
 参数：  
-	onlyGetFee：是否只获取此操作手续费  
 	callback：回调函数  
   
 ### 导出用户私钥  
@@ -376,9 +379,7 @@ callback:若有该参数，则内部会自动判断进行链初始化，否则�
 	amount：发送的代币数量  
 	assetId：资产ID （如：X.X.X）或 代币符号（如：BTC）  
 	memo：转账备注  
-	feeAssetId：支付手续费的代币资产符号  
 	isPropose：是否发起提议  
-	onlyGetFee（boolean）：是否只获取本次操作所需手续费  
 	callback：设置转账后的回调函数  
   
 ### 创建资产  
@@ -389,16 +390,23 @@ callback:若有该参数，则内部会自动判断进行链初始化，否则�
 	precision：精度(小数位数)  
 	maxSupply：最大资产总量  
 	description: 资产描述，可不填  
-	onlyGetFee：设置只返回本次调用所需手续费  
+	isBitAsset：是否是智能币 SmartCoin
+	coreExchangeRate(Object)：是否收取交易手续费,不传该参数说明不收取交易手续费  
+	bitassetOpts： {
+		feedLifetimeSec：
+		minimumFeeds：
+		forceSettlementDelaySec：
+		forceSettlementOffsetPercent：
+		maximumForceSettlementVolume：
+	}
 	callback：见统一API说明  
-	coreExchangeRate(Object)：  
+	
 ```JavaScript  
 		{  
 			quoteAmount:标价资产(即创建的代币，默认1),  
 			baseAmount: 基准资产(即核心资产，默认1)  
 		}  
 ```  
-  
   
 ### 更新资产  
 方法：updateAsset  
@@ -407,8 +415,9 @@ callback:若有该参数，则内部会自动判断进行链初始化，否则�
 	assetId：资产符号，正则^\[\.A-Z\]+$  
 	maxSupply：最大资产总量  
 	newIssuer：更新发行人  
-  description：资产描述，可不填  
-	onlyGetFee：设置只返回本次调用所需手续费  
+    description：资产描述，可不填  
+	whiteList：  黑白名单
+	transferRestricted：限制交易
 	callback：见统一API说明  
 	coreExchangeRate(Object)：手续费汇率  
 ```JavaScript  
@@ -425,7 +434,6 @@ callback:若有该参数，则内部会自动判断进行链初始化，否则�
 参数：  
 	assetId：资产符号   
 	amount：销毁数量  
-	onlyGetFee：设置只返回本次调用所需手续费  
 	callback：回调函数  
   
 ### 资产发行  
@@ -436,16 +444,6 @@ callback:若有该参数，则内部会自动判断进行链初始化，否则�
 	amount：发行数量  
 	assetId：资产符号   
 	memo：备注消息，选填  
-	onlyGetFee：设置只返回本次调用所需手续费  
-	callback：回调函数  
-  
-### 注资资产手续费池  
-方法：assetFundFeePool  
-功能：所有网络手续费最终将使用核心资产代币进行支付。手续费资金池用来承担从 二级资产代币 转换为 核心资产代币 的费用，以便用户可以使用 二级资产代币 来支付手续费。如果资金池中余额用完，用户将无法继续使用 二级资产代币 支付手续费。目前支持使用二级资产代币作为手续费的API有“转账、投票、升级终身会员、资产发行”，后续会继续扩展  
-参数：  
-	assetId：需要注资的二级资产代币符号   
-	amount：注资核心资产代币数量  
-	onlyGetFee：设置只返回本次调用所需手续费  
 	callback：回调函数  
   
 ### 领取资产手续费  
@@ -454,7 +452,6 @@ callback:若有该参数，则内部会自动判断进行链初始化，否则�
 参数：  
 	assetId：需要领取的二级资产代币符号   
 	amount：二级资产代币数量  
-	onlyGetFee：设置只返回本次调用所需手续费  
 	callback：回调函数  
   
 ### 查询链上发行的资产  
@@ -648,15 +645,18 @@ callback:若有该参数，则内部会自动判断进行链初始化，否则�
 方法：queryVotes  
 功能：查询节点投票信息数据   
 参数：  
+  	queryAccount：投票账户
+	type:类型（见证人\理事会）
 	callback：回调函数  
   
 ### 用户提交投票信息  
 方法：publishVotes  
 功能：保存的时候设置了代理账户，用户投票信息将统一跟随代理账户   
 参数：  
-	witnessesIds（array）：节点账户id集合，查询节点投票信息数据中会有每个节点的账户ID  
-	proxyAccount：代理账户名  
-	callback：回调函数  
+	type:   	witnesses or committee(见证人投票or理事会投票)
+	vote_ids:	(array)：节点账户id集合，查询节点投票信息数据中会有每个节点的账户ID  
+	votes:  	投票数  
+	callback：	回调函数  
   
 ## 区块链浏览器类接口  
   
@@ -665,12 +665,14 @@ callback:若有该参数，则内部会自动判断进行链初始化，否则�
 功能：通过区块高度查询区块信息  
 参数：  
 	block：区块高度  
-  
+  	callback：回调函数 
+
 ### 查询交易  
 方法：queryTransaction  
 功能：通过交易id（即交易hash）查询交易信息  
 参数：  
 	transactionId：交易id  
+	callback：回调函数 
 
 ### 查询信息通过id  
 方法：queryDataByIds 
@@ -698,10 +700,11 @@ callback:若有该参数，则内部会自动判断进行链初始化，否则�
 	callback：回调函数  
   
 ### 查看账户节点出块奖励  
-方法：lookupBlockRewards  
+方法：queryVestingBalance  
 功能：参照demo解析数据  
 参数：  
-	callback：回调函数  
+	account：查询账户  
+	callback：回调函数 
   
 ### 领取节点出块奖励  
 方法：claimVestingBalance  
@@ -771,27 +774,23 @@ callback:若有该参数，则内部会自动判断进行链初始化，否则�
 参数：  
 	authority：合约权限(一对公私钥中的公钥publicKey)，开发者在使用API初始化的时候，可以配置私钥，配置了该公钥对应的私钥才可以调用合约。  
 	name：合约名称，正则/^[a-z][a-z0-9\.-]{4,63}$/，首字母开头+字母或数字或点.或短横线-，长度4至63
-	data：合约lua代码  
-	onlyGetFee：设置只返回本次操作所需手续费   
+	data：合约lua代码   
 	callback：见统一API说明  
   
 ### 合约更新  
 方法：updateContract  
 功能：更新合约代码  
 参数：  
-	nameOrId合约名称或Id，示例：contract.test02  
+	nameOrId合约名称或Id
 	data：合约lua代码  
-	onlyGetFee：设置只返回本次操作所需手续费   
   
 ### 合约调用  
 方法：callContractFunction  
 功能：调用合约函数接口   
 参数：  
-	nameOrId：合约名称或Id，示例：contract.test02  
-	functionName：合约里的函数名称，my_nht_describe_change （修改道具属性）  
-	valueList(array)： 调用合约函数的参数列表，示例：[4.2.0,{"size":"large"}] ，这里的参数若传json字符串，则合约需调用cjson解析，若传对象则无需cjson解析  
-	runtime：运行合约函数的时间(单位毫秒)，默认为5  
-	onlyGetFee：设置只返回本次操作所需手续费，默认为false  
+	nameOrId：合约名称或Id
+	functionName：合约里的函数名称， 
+	valueList(array)： 调用合约函数的参数列表，这里的参数若传json字符串，则合约需调用cjson解析，若传对象则无需cjson解析,多参使用换行符隔开。
 	callback：回调函数  
   
 ### 查询合约信息  

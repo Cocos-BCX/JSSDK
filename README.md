@@ -38,12 +38,12 @@ NPM, which works well with modules packagers such as webpack or Browserify, is h
 
 ```js
 # The latest stable version
-$ npm install bcxjs-api
+$ npm install bcx-api
 ```
 
 ES6 module syntax import is supported when there is a converter like Babel.
 ```js
-import BCX from "bcxjs-api"
+import BCX from "bcx-api"
 ```
 
 
@@ -52,35 +52,39 @@ import BCX from "bcxjs-api"
 ### Instantiating the class library object
 
 ```JavaScript
-var bcx=new BCX({
-		default_ws_node:”ws://XXXXXXXXX” //node rpc address, optional. If you do not specify this, it will automatically connect to the fastest node in ws_node_list
-		ws_node_list:[{url:"ws://xxxxxxx",name:"xxxxx"}]//API server node list, required
-		faucet_url:"http://xxx.xxx.xxx.xxx:xxxx", //Registration
-		networks:[{
-			core_asset:"xxx",//core asset symbol
-			chain_id:"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"//chain id 
-		}], 
-		auto_reconnect:false,//Whether to connect automatically when RPC is disconnected, the default is true
-		app_keys:["xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"],//Contract authorization. Do not need to configure this if there is no contract authorization
-		real_sub:true//true：real-time subscription，false:blockchain subscription，the frequency of subscription notification is the frequency block production  
-		sub_max_op:13//Maximum number of OP processed at subscription
-});
+ var _configParams={ 
+                    ws_node_list:[
+                        {url:"ws://xxxxxxxxxxxxx",name:"Cocos - China - Beijing"},   
+                     ],
+                     networks:[
+                        {
+                            core_asset:"COCOS",
+                            chain_id:"xxxxxxxxxxxxxxxxxxxxxxxxxxx" 
+                        }
+                     ], 
+                    faucet_url:"xxxxxxxxxxxxxxxxxxxxxx",
+                    auto_reconnect:true,
+                    real_sub:true,
+                    check_cached_nodes_data:false
+                    //app_keys:["5HxzZncKDjx7NEaEv989Huh7yYY7RukcJLKBDQztXAmZYCHWPgd"]
+                };
+
+                var bcx=new BCX(_configParams);
 ```
 
 ### Instance of call - transfer
 
 ```JavaScript
 	bcx.transferAsset({
-            fromAccount: 'test1',
-            toAccount: 'test2',
-            amount: amount,
-            assetId: 'COCOS',
-            feeAssetId: 'COCOS',
-            memo: memo,
-            onlyGetFee: false,
-        }).then(function (res) {
-             console.log('transferAsset res',res);
-        })
+            fromAccount: 'xxxx',
+            toAccount: 'xxxxx',
+            amount: amount,
+            assetId: 'COCOS',         
+            memo: memo,
+            isPropose: false,// is propose
+        }).then(function (res) {
+             console.log('transferAsset res',res);
+        })
 ```  
 
 
@@ -191,7 +195,7 @@ data:{
 
 # Part 2. Interoperable API for Blockchain Systems  
   
-## Wallet mode  
+## Wallet mode (the node version does not support the related API of wallet mode) 
   
 ### Create an account  
 Method：createAccountWithWallet  
@@ -332,7 +336,6 @@ Parameters:
 Method: upgradeAccount  
 Function: After purchasing a lifetime membership account, you can create a sub-account, which requires a certain fee.  
 Parameters:   
-	onlyGetFee: Whether to get this operation fee only  
 	callback: callback function  
   
 ### Export user private key  
@@ -375,10 +378,8 @@ Parameters:
 	toAccount: The recipient’s account name  
 	amount: Amount of tokens sent  
 	assetId: Asset ID (e.g. X.X.X) or token symbol (e.g. BTC)  
-	memo: Transfer memo  
-	feeAssetId: Token asset symbol used to pay for transfer fee  
+	memo: Transfer memo   
 	isPropose: Whether to propose  
-	onlyGetFee（boolean）: Whether to get the transaction fee for this operation  
 	callback: Set the callback function after the transfer  
 
 ### Create an asset  
@@ -389,9 +390,17 @@ Parameters:
 	precision: precise to decimal digit  
 	maxSupply: Maximum asset supply  
 	description: Asset description, optional  
-	onlyGetFee: Set to return only the fee required for this call  
+	isBitAsset：Smart coin or not
+	coreExchangeRate(Object)：Whether to charge transaction fee or not. If the parameter is not passed, the transaction fee will not be charged
+	bitassetOpts： {
+		feedLifetimeSec：
+		minimumFeeds：
+		forceSettlementDelaySec：
+		forceSettlementOffsetPercent：
+		maximumForceSettlementVolume：
+	}
 	callback: See the unified API parameter description  
-	coreExchangeRate(Object)：  
+ 
 ```JavaScript  
 		{  
 			quoteAmount: quote asset(Created token, default 1),  
@@ -407,7 +416,8 @@ Parameters:
 	maxSupply: Maximum asset supply  
 	newIssuer: Update issuer  
 	description: Asset description, optional  
-	onlyGetFee: Set to return only the fee required for this call  
+  	whiteList：  Blacklist and whitelist
+ 	transferRestricted：Restricted transaction
 	callback: See the unified API parameter description  
 	coreExchangeRate(Object): Fee exchange rate  
 ```JavaScript  
@@ -423,7 +433,6 @@ Function: Burn token assets
 Parameters:   
 	assetId: Asset symbol  
 	amount: Amount to be destroyed  
-	onlyGetFee: Set to return only the fee required for this call  
 	callback: callback function  
   
 ### Issue asset  
@@ -434,25 +443,15 @@ Parameters:
 	amount: Amount to be issued  
 	assetId: Asset symbol  
 	memo: memos, optional  
-	onlyGetFee: Set to return only the fee required for this call  
 	callback: callback function   
-  
-### Asset fund fee pool  
-Method: assetFundFeePool  
-Function: All fees will eventually be paid using the core asset token. The fee pool is used to cover the fee for the exchange from the secondary asset token to the core asset token so that the user can use the secondary token to pay the fee. If the balance in the funds pool is used up, the user will not be able to continue to use the secondary asset token to pay the transaction fee. Currently, the APIs that supports the use of secondary asset tokens as a fee include “transfer, vote, lifetime membership upgrade, asset issuance”, which will be expanded.  
-Parameters:   
-	assetId: Secondary asset token symbol requiring fund injection  
-	amount: Amount of core asset tokens to be injected  
-	onlyGetFee: Set to return only the fee required for this call  
-	callback: callback function    
+    
   
 ### Collect asset fees  
 Method: assetClaimFees  
 Function: The asset issuer can collect the accumulated fees here.  
 Parameters:   
 	assetId: Secondary asset token symbol to be collected  
-	amount: Amount of secondary asset tokens  
-	onlyGetFee: Set to return only the fee required for this call  
+	amount: Amount of secondary asset tokens   
 	callback: callback function  
   
 ### Query the assets issued on the blockchain  
@@ -646,15 +645,18 @@ Parameters:
 Method: queryVotes  
 Function: Query the data of node votes   
 Parameters:   
+	queryAccount：Voting accounts
+	type:		  Type (witness / council)
 	callback: callback function  
   
 ### User submits voting information  
 Method: publishVotes  
 Function: The proxy account is set when saving, which will be followed by the user’s voting information.   
 Parameters:   
-	witnessesIds（array）: Set of node account ids. The query node vote data will have the account ID of each node  
-	proxyAccount: Proxy account name  
-	callback: callback function  
+	type:   	witnesses or committee(witness vote or council vote)
+	vote_ids:	(array)：Node account ID collection. When querying node voting information, the account ID of each node will be displayed in the data
+	votes:  	Number of votes 
+	callback: 	callback function  
 
 ## Blockchain explorer interface  
   
@@ -696,9 +698,10 @@ Parameters:
 	callback: callback function  
   
 ### View block rewards of the account node  
-Method: lookupBlockRewards  
+Method: queryVestingBalance  
 Function: Analyze data with reference to demo  
-Parameters:   
+Parameters: 
+	account： query account  
 	callback: callback function   
   
 ### Collect block reward  
@@ -768,27 +771,24 @@ Method: createContract
 Function: Create a smart contract. If you want to set permissions on the contract, you must add a specific lua code when creating the contract, and call the contract function set_permissions_flag => contract authority code: function my_change_contract_authority( publickey) assert(is_owner()) change_contract_authority( publickey) end function set_permissions_flag(flag) assert(is_owner()) set_permissions_flag(flag) end  
 Parameters:   
 	authority: Contract authority (public key publicKey in a pair of public and private keys), the developer can configure the private key when using the API initialization, and configure the private key corresponding to the public key to call the contract.  
-	name: Contract name, regular /^[az][a-z0-9.-]{4,63}$/, beginning with the letter + letters or numbers or dot. or dash -, length 4 to 63 data: contract lua Code  
-	onlyGetFee: Set to return only the fee required for this operation  
+	name: Contract name, regular /^[az][a-z0-9.-]{4,63}$/, beginning with the letter + letters or numbers or dot. or dash -, length 4 to 63.
+	data: contract lua Code  
 	callback: See the unified API parameter description  
   
 ### Update the contract  
 Method: updateContract  
 Function: Update contract code  
 Parameters:   
-	nameOrId: Contract name or Id，Example: contract.test02  
+	nameOrId: Contract name or Id，
 	data: Contract lua code  
-	onlyGetFee: Set to return only the fee for this operation  
   
 ### Contract call  
 Method: callContractFunction  
 Function: Call contract function interface   
 Parameters:   
-	nameOrId: Contract name or Id，Example: contract.test02  
-	functionName: Function name in the contract，my_nht_describe_change（Modify item properties）  
-	valueList(array): Call the parameter list of the contract function, example: [4.2.0,{"size": "large"}] , If the parameter passes a json string, the contract needs to call cjson parsing. If the object is passed, no cjson parsing is required.  
-	runtime: The time (in milliseconds) to run the contract function with a default of 5  
-	onlyGetFee: Set to return only the fee for this operation with a default of false  
+	nameOrId: Contract name or Id， 
+	functionName: Function name in the contract.  
+	valueList(array): Call the parameter list of the contract function.parameter passes a json string, the contract needs to call cjson parsing. If the object is passed, no cjson parsing is required.  
 	callback: callback function  
   
   
