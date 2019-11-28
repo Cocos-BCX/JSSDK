@@ -143,7 +143,7 @@ const Operations = {
     const ApiObject =[(await API.Explorer.getGlobalObject()).data];
     const ApiObjectDyn =[(await API.Explorer.getDynGlobalObject(false)).data];
     // console.info('operations',JSON.parse(JSON.stringify(operations)));
-    const operationTypes = [0, 1, 2,3,4,5,6,7,8,9,10,12,13,14,15,16,17,18,19,20,21,23,24,27,31,34,35,37,38,39,40,41,42,43,44,45,50,54,300,301,303,3010,3011,3012];//,53,54.55,56,57,58
+    const operationTypes = [0, 1, 2,3,4,5,6,7,8,9,10,12,13,14,15,16,17,18,19,20,21,23,24,26,27,30,31,34,35,37,38,39,40,41,42,43,44,45,50,54,300,301,303,3010,3011,3012];//,53,54.55,56,57,58
     const filteredOperations = operations.filter(op => {
       return operationTypes.includes(op.op[0])
     });
@@ -728,6 +728,43 @@ const Operations = {
                       ]
                   )
                 break;
+      case "asset_global_settle":
+                return await Operations.getTranslateInfo(
+                            "operation_asset_global_settle",
+                            [
+                                {type: "account", value: op.payload.issuer, arg: "account"},
+                                {type: "price", value: op.payload.settle_price, arg: "price"},
+                                {type: "asset", value: op.payload.asset_to_settle, arg: "asset"}
+                            ]
+                        )
+                      break;
+     case "asset_settle":
+              return await Operations.getTranslateInfo(
+                          "operation_asset_settle",
+                          [
+                            {type: "account", value: op.payload.account, arg: "account"},
+                            {type: "amount", value: op.payload.amount, arg: "amount"}
+                          ]
+                      )
+                    break;
+       case "asset_settle_cancel":
+              return await Operations.getTranslateInfo(
+                          "operation_asset_settle_cancel",
+                          [
+                            {type: "account", value: op.payload.creator, arg: "account"},
+                            {type: "amount", value: op.payload.amount, arg: "amount"}
+                          ]
+                      )
+                    break;
+       case "vesting_balance_create":
+                return await Operations.getTranslateInfo(
+                            "operation_vesting_balance_create",
+                            [
+                                {type: "account", value: op.payload.creator, arg: "account"},
+                                {type: "amount", value: op.payload.amount, arg: "amount"}
+                            ]
+                        )
+                      break;
         case "asset_update_feed_producers":
           return await Operations.getTranslateInfo(
                       "operation_asset_update_feed_producers",

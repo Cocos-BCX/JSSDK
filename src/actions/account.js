@@ -1,5 +1,4 @@
-import { PrivateKey, key, Aes, brainKey,ChainValidation,FetchChain } from 'bcxjs-cores';
-import {ChainStore,FetchChainObjects} from "bcxjs-cores";
+import { PrivateKey, key, Aes, brainKey,ChainValidation,FetchChain,ChainStore,FetchChainObjects } from 'bcxjs-cores';
 import Immutable from "immutable";
 
 import * as types from '../mutations';
@@ -689,13 +688,6 @@ export const _getPrivateKey=async ({dispatch},{account})=>{
         return true;
     }))
     
-
-    // let activePrivateKey = (activePublicKey !== '') ?await dispatch("WalletDb/getPrivateKey",activePublicKey,{root:true}): '';
-    // let ownerPrivateKey = (ownerPublicKey !== '') ?await dispatch("WalletDb/getPrivateKey",ownerPublicKey,{root:true}): '';
-
-    // console.info("activePrivateKey",activePrivateKey,activePublicKey,account);
-    // activePrivateKey=activePrivateKey?activePrivateKey.toWif():"";
-    // ownerPrivateKey=ownerPrivateKey?ownerPrivateKey.toWif():"";
     if(activePrivateKeys.length||ownerPrivateKeys.length){
       return  {
         code:1,
@@ -765,7 +757,7 @@ export const _validateAccount=async ({dispatch},{method,params,account,accountFi
     if(accountFieldName=="to_account_id")
        return {code:133,message:"Parameter 'toAccount' can not be empty"};
 
-    //return {code:101,message:"Parameter is missing"}
+    return {code:101,message:"Parameter is missing"}
   }else{
     let acc_res=await dispatch("user/getUserInfo",{account,isCache:true},{root:true});
     if(acc_res.code!=1) return acc_res;
@@ -824,7 +816,7 @@ export const queryVestingBalance=async ({dispatch,rootGetters},{account_id,type,
     if(vid&&vid!=id){
       continue
     }
-    if(type&&"cashback_"+type!=describe){
+    if(type&&type!=describe){
         continue
     }
    

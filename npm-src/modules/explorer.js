@@ -32,10 +32,6 @@ const actions={
                       });
             parse_ops=await API.Operations.parseOperations({ operations: parse_ops,store });
             transaction.parse_ops=parse_ops.operations;
-            transaction.parse_ops= transaction.parse_ops.map(item=>{
-                item.date=new Date(item.date+"Z").format("yyyy/MM/dd HH:mm:ss");
-                return item;
-            });
             transaction.trx_id=transactionId;
             transaction.expiration=new Date(transaction.expiration+"Z").format("yyyy/MM/dd HH:mm:ss");
             delete transaction.operations;

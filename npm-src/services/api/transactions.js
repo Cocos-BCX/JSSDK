@@ -33,18 +33,7 @@ const signTransaction = async (transaction,store) => {
 const buildOperationsAndBroadcast = async (transaction,store,opObjects) => {
   await signTransaction(transaction,store);
   await transaction.update_head_block();
-  // await transaction.set_required_fees();
-  // if(store.rootGetters["transactions/onlyGetOPFee"]){
-  //   let feeObj=transaction.operations[0][1].fee;
-  //   let feeAsset=await store.dispatch("assets/fetchAssets",{assets:[feeObj.asset_id],isOne:true},{root:true});
-  //   opObjects[0].opObject.fee=feeObj;
-  //   return {
-  //     fee_amount:helper.getFullNum(feeObj.amount/Math.pow(10,feeAsset.precision)),
-  //     fee_symbol:feeAsset.symbol,
-  //     opObjects
-  //   }
-  // }
-  // console.info("transaction",transaction);
+
   const res=await transaction.broadcast();
   return res;
 };
@@ -69,10 +58,6 @@ const process_transaction=(transaction,store,opObjects)=>{
         try{
            error=error.message.match(/@@.*@@/)[0].replace(/@@/g,"");
           _error=JSON.parse(error);
-          // if(_error.message.indexOf(' -delta: Insufficient Balance: ')>=0){
-          //   let {a,b,r}=_error.data.stack[0].data;
-          //   _error.message="Insufficient Balance for the fee of "+r+;//balance after current operation: "+b+",
-          // }
         }catch (e){
           _error={
             message:error.message
@@ -141,49 +126,16 @@ const transactionOpWorker = async (fromId,operations,fromAccount,propose_options
 
 const transactionOp = async (fromId,operations,fromAccount,proposeAccountId="",store) => {
   const opObjects=await buildOPObjects(operations,proposeAccountId||fromId,fromAccount,store);
-  // console.info("opObjects",JSON.parse(JSON.stringify(opObjects)));
   if(opObjects.code&&opObjects.code!=1){
     return opObjects;
   }
   
-  // if(store.rootGetters["PrivateKeyStore/app_keys"])
   const transaction = new TransactionBuilder();
-
   opObjects.forEach(op=>{
     transaction.add_type_operation(op.type, op.opObject); 
   });
 
-  // let {crontab}=store.rootState.crontab;
-  
-  // if(crontab){
-  //   await transaction.set_required_fees();
-  //   await  transaction.update_head_block();
-  //   let {startTime,executeInterval,executeTimes}=crontab;
 
-  //   if(startTime==undefined||executeInterval==undefined||executeTimes==undefined){
-  //     return {code:101,message:"Crontab parameter is missing"};
-  //   }
-  //   startTime=parseInt(startTime);
-  //   executeInterval=parseInt(executeInterval);
-  //   executeTimes=parseInt(executeTimes);
-  //   if(isNaN(startTime)||isNaN(executeInterval)||isNaN(executeTimes)){
-  //     return {code:1011,message:"Parameter error"};
-  //   }
-
-  //   if(startTime<=0||executeInterval<=0||executeTimes<=0){
-  //       return {code:176,message:"Crontab must have parameters greater than 0"}
-  //   }
-
-  //   let res=await Apis.instance().db_api().exec("get_objects", [["2.1.0"]]);
-  //   let now_time=new Date(res[0].time+"Z").getTime();
-  //   let crontab_options={
-  //     crontab_creator:fromId,
-  //     start_time:Math.floor((now_time+startTime)/1000),//+Number(startTime),
-  //     execute_interval:executeInterval,
-  //     scheduled_execute_times:executeTimes
-  //   }
-  //   transaction.crontab(crontab_options)   
-  // }
 
   if(proposeAccountId){
      await  transaction.update_head_block();
@@ -192,7 +144,6 @@ const transactionOp = async (fromId,operations,fromAccount,proposeAccountId="",s
      }  
      transaction.propose(propose_options)
   }
-  // console.info("transaction",transaction);
   return  process_transaction(transaction,store,opObjects);
 };
 
@@ -281,8 +232,6 @@ const buildOPObjects=async (operations,fromId,fromAccount,store)=>{
 
         let {op_type}=opItem;
 
-        // console.info("opParams0000000000",opParams,op_type,opObject);
-
         if(typeof op_type!="undefined"){
           if((op_type>=37&&op_type<=45)&&op_type!=43){
               if("asset_id" in opParams)  opParams.asset_id=assetObj.symbol;
@@ -297,7 +246,7 @@ const buildOPObjects=async (operations,fromId,fromAccount,store)=>{
               }
 
           }else if(op_type==0||op_type==13){
-              let {to,amount=0,memo}=opParams;
+              let {to,amount=0,memo,isEncryption}=opParams;
 
               let toAccount =await getUser(to);
               if (!toAccount.success)  return { success: false, error: 'Account receivable does not exist',code:116 };
@@ -317,39 +266,29 @@ const buildOPObjects=async (operations,fromId,fromAccount,store)=>{
                 opObject.asset_to_issue=amount;
               }
               if (memo) {
-                let memo_key=toAccount.data.account.options.memo_key;
-                let memo_from_privkey =await store.dispatch("WalletDb/getPrivateKey",fromAccount.account.options.memo_key,{root:true})
-                try {
-                  opObject.memo = encryptMemo(new Buffer(memo, "utf-8"), memo_from_privkey, memo_key);
-                } catch (error) {
-                  return { success: false, error: 'Encrypt memo failed',code:118 };
+                if(isEncryption){
+                  let memo_key=toAccount.data.account.options.memo_key;
+                  let memo_from_privkey =await store.dispatch("WalletDb/getPrivateKey",fromAccount.account.options.memo_key,{root:true})
+
+                  try {
+                    memo=encryptMemo(new Buffer(memo, "utf-8"), memo_from_privkey, memo_key);
+                  } catch (error) {
+                    return { success: false, error: 'Encrypt memo failed',code:118 };
+                  }
                 }
+                opObject.memo =[isEncryption?1:0,memo];//
               }
           }else if(!opObject){
             opObject=opParams;
           } 
         }
 
-        // opObject.fee = {
-        //   amount:0,
-        //   asset_id:"1.3.0"
-        // };
-        // if("transfer,account_upgrade,call_order_update,limit_order_cancel".indexOf(opItem.type)!=-1){
-        //   let feeAssetObj=await API.Assets.fetch_asset_one(fee_asset_id);
-        //   if(feeAssetObj.code!=1){
-        //     return feeAssetObj;
-        //   }
-        //   opObject.fee.asset_id=await accountUtils.getFinalFeeAsset(
-        //     Immutable.fromJS(fromAccount),
-        //     opItem.type,
-        //     feeAssetObj.data.id
-        //   );
-        // }
         opObjects.push({
             type:opItem.type,
             opObject
         });
       }catch(e){
+        console.info("e",e);
         return {
           success:false,
           error:e.message,

@@ -63,7 +63,8 @@
     trxTypes_relate_nh_asset:"NH资产关联",
     trxTypes_relate_world_view:"关联世界观",
     trxTypes_update_collateral_for_gas:"GAS调整质押物",
-   
+    trxTypes_asset_settle_cancel:"资产清算取消",
+
 
 
     trxTypes_contract_affecteds_asset:"资产",
@@ -132,7 +133,10 @@
 
     operation_relate_nh_asset:"(nh_asset_creator) (relate)父级NH资产 (nh_asset) 和子级NH资产 (nh_asset) 关联",
     operation_update_collateral_for_gas:"(mortgager) 将 (beneficiary) 抵押物调整为 (collateral)",
+    operation_vesting_balance_create:"(account) 创建冻结账目余额 (amount)",
+    operation_asset_settle_cancel:"(account) 取消资产清算 (amount)",
 
+    
     contract_affecteds_nh_modifined:"(affected_account) 的NH资产 (affected_item) 修改数据 (modified)",
     contract_affecteds_nh_transfer_to:"NH资产 (affected_item) 转入 (affected_account)",
     contract_affecteds_nh_transfer_from:"(affected_account) 的NH资产 (affected_item) 转出",

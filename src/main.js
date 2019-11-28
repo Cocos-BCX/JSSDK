@@ -139,7 +139,8 @@ var global = module.exports = typeof window != 'undefined' && window.Math == Mat
               queryDataByIds:"explorer/getDataByIds",
               queryPriceHistory:"market/queryPriceHistory",
               queryAssetRestricted:"assets/queryAssetRestricted",
-              queryGas:"assets/estimationGas"
+              queryGas:"assets/estimationGas",
+              formatOperations:"operations/formatOperations"//
           }
           const use_accountOpt_methods={
             getPrivateKey:"account/_getPrivateKey", 

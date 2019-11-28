@@ -255,7 +255,7 @@ export const getUserAllBalance=async ({dispatch,rootGetters},params)=>{
           balance:helper.getFullNum(amount,fromAssetPrecision),
           symbol:fromSymbol,
           precision:fromAssetPrecision,
-          eq_value:helper.getFullNum(eqValue,fromAssetPrecision),
+          eq_value:id!="1.3.1"?helper.getFullNum(eqValue,fromAssetPrecision):0,
           eq_unit:toAsset.symbol,
           eq_precision:toAsset.precision,
           locked_total:contract_asset_locked?helper.getFullNum(contract_asset_locked._locked_total[id]||0,fromAssetPrecision):0,

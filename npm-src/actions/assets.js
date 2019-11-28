@@ -399,7 +399,7 @@ export const _updateAsset=async ({dispatch,rootGetters},params)=>{
   if(u_asset.getIn(["options","core_exchange_rate"])){
     _params.core_exchange_rate=(u_asset.getIn(["options","core_exchange_rate"])).toJS();
     // console.info("_params.core_exchange_rate",_params.core_exchange_rate);
-    if(coreExchangeRate){
+    if(coreExchangeRate){//&&u_asset.get("id")=="1.3.1"
       _params.core_exchange_rate.quote.amount=coreExchangeRate.quoteAmount||1;
       _params.core_exchange_rate.base.amount=coreExchangeRate.baseAmount||1;
     }
@@ -413,10 +413,6 @@ export const _updateAsset=async ({dispatch,rootGetters},params)=>{
     _params.description=JSON.stringify({main:description,short_name:"",market:""});
   }
 
-  if(coreExchangeRate){//&&u_asset.get("id")=="1.3.1"
-    _params.core_exchange_rate.quote.amount=coreExchangeRate.quoteAmount||1;
-    _params.core_exchange_rate.base.amount=coreExchangeRate.baseAmount||1;
-  }
 
   if(chargeMarketFee){
     _params.update.market_fee_percent=chargeMarketFee.marketFeePercent||0;
@@ -810,7 +806,7 @@ export const queryAssets=async ({dispatch,state,commit},{symbol="",assetId="",si
     symbol=symbol.trim();
     let symbolRes=await API.Assets.fetch_asset_one(symbol);
     if(symbolRes.code!=1) return symbolRes;
-    await dispatch("onGetAssetList",{start:symbol,count:1});
+    await dispatch("onGetAssetList",{start:symbolRes.data.symbol,count:1});
     state.assetsFetched=state.assetsFetched + 99;
   }else{
     if (assets.size === 0) {

@@ -61,22 +61,21 @@ const Operations = {
     return amountAssetId === feeAssetId;
   },
 
-  // User for transfer operations. Determines if user received or sent
-  _getOperationOtherUserName: async (userId, payload) => {
-    const otherUserId = payload.to === userId ? payload.from : payload.to;
-    const userRequest = await API.Account.getAccount(otherUserId,true);
-    return userRequest.success ? userRequest.data.account.name : '';
-  },
-
   // Parses operation for improved format
-  _parseOperation: async (operation, userId, ApiObject, ApiObjectDyn) => {
+  _parseOperation: async (operation, ApiObject, ApiObjectDyn,isReqDate=true) => {
     const [type, payload] = operation.op;
     const operationType = Operations._operationTypes[type];
-    let date = Operations._getOperationDate(operation, ApiObject, ApiObjectDyn);
-    let block_res=await API.Operations.get_block_header(operation.block_num);
-    if(block_res.code==1){
-      date=new Date(block_res.data.timestamp+"Z").format("yyyy/MM/dd HH:mm:ss");
+    let date = "";
+    if(operation.date){
+      date=operation.date;
+    }else if(isReqDate){
+        date = Operations._getOperationDate(operation, ApiObject, ApiObjectDyn);
+        let block_res=await API.Operations.get_block_header(operation.block_num);
+        if(block_res.code==1){
+          date=new Date(block_res.data.timestamp+"Z").format("yyyy/MM/dd HH:mm:ss");
+        }
     }
+    
     let isBid = false;
     let otherUserName = null;
     let res={
@@ -94,10 +93,6 @@ const Operations = {
     //   res.buyer=isBid;
     // }
 
-    if (operationType === 'transfer'&&userId) {
-      otherUserName = await Operations._getOperationOtherUserName(userId, payload);
-      res.other_user_name=otherUserName;
-    }
     if(operation.result){
       res.result=operation.result[1];
       res.result.type=_store.rootGetters["setting/trx_results"][operation.result[0]];
@@ -121,9 +116,9 @@ const Operations = {
         });
         res.result.contract_affecteds=await Operations.parseOperations({
           operations:_operations,
-          userId:_store.rootGetters["account/getAccountUserId"],
           store:_store,
-          isContract:true
+          isContract:true,
+          isReqDate:false
         });
         let additional_cost=res.result.additional_cost
         if(additional_cost){
@@ -137,21 +132,20 @@ const Operations = {
 
   // Parses array of operations, return array of parsed operations and array of assets ids
   // that were user in it. United Labs of BCTech.
-  parseOperations: async ({ operations, userId=null,store,isContract=false }) => {
+  parseOperations: async ({ operations, store,isContract=false,isReqDate=true }) => {
     _store=store;
     const ApiInstance = Apis.instance();
-    const ApiObject =[(await API.Explorer.getGlobalObject()).data];
-    const ApiObjectDyn =[(await API.Explorer.getDynGlobalObject(false)).data];
-    // console.info('operations',JSON.parse(JSON.stringify(operations)));
-    const operationTypes = [0, 1, 2,3,4,5,6,7,8,9,10,12,13,14,15,16,17,18,19,20,21,23,24,27,31,34,35,37,38,39,40,41,42,43,44,45,50,54,300,301,303,3010,3011,3012];//,53,54.55,56,57,58
+    const ApiObject =isReqDate?[(await API.Explorer.getGlobalObject()).data]:null;
+    const ApiObjectDyn =isReqDate?[(await API.Explorer.getDynGlobalObject(false)).data]:null;
+    const operationTypes = [0, 1, 2,3,4,5,6,7,8,9,10,12,13,14,15,16,17,18,19,20,21,23,24,26,27,30,31,34,35,37,38,39,40,41,42,43,44,45,50,54,300,301,303,3010,3011,3012];//,53,54.55,56,57,58
     const filteredOperations = operations.filter(op => {
       return operationTypes.includes(op.op[0])
     });
     let parsedOperations=[];
     for(let j=0;j<filteredOperations.length;j++){
-      parsedOperations.push(await Operations._parseOperation(filteredOperations[j], userId, ApiObject, ApiObjectDyn));
+      parsedOperations.push(await Operations._parseOperation(filteredOperations[j], ApiObject, ApiObjectDyn,isReqDate));
     }
-    const assetsIds = Operations._getOperationsAssetsIds(parsedOperations);
+    // const assetsIds = Operations._getOperationsAssetsIds(parsedOperations);
 
     let item;
     for(let i=0;i<parsedOperations.length;i++){
@@ -204,10 +198,6 @@ const Operations = {
         delete item.typeName;
         return item;
      });
-
-      // return {
-      //   contract_affecteds: parsedOperations
-      // };
     }
     return {
       operations: parsedOperations.map(item=>{
@@ -221,8 +211,9 @@ const Operations = {
           delete item.payload;
           delete item.typeName;
           return item;
-      }),
-      assetsIds
+      })
+      // ,
+      // assetsIds
     };
   },
 
@@ -728,6 +719,43 @@ const Operations = {
                       ]
                   )
                 break;
+      case "asset_global_settle":
+                return await Operations.getTranslateInfo(
+                            "operation_asset_global_settle",
+                            [
+                                {type: "account", value: op.payload.issuer, arg: "account"},
+                                {type: "price", value: op.payload.settle_price, arg: "price"},
+                                {type: "asset", value: op.payload.asset_to_settle, arg: "asset"}
+                            ]
+                        )
+                      break;
+     case "asset_settle":
+              return await Operations.getTranslateInfo(
+                          "operation_asset_settle",
+                          [
+                            {type: "account", value: op.payload.account, arg: "account"},
+                            {type: "amount", value: op.payload.amount, arg: "amount"}
+                          ]
+                      )
+                    break;
+       case "asset_settle_cancel":
+              return await Operations.getTranslateInfo(
+                          "operation_asset_settle_cancel",
+                          [
+                            {type: "account", value: op.payload.creator, arg: "account"},
+                            {type: "amount", value: op.payload.amount, arg: "amount"}
+                          ]
+                      )
+                    break;
+       case "vesting_balance_create":
+                return await Operations.getTranslateInfo(
+                            "operation_vesting_balance_create",
+                            [
+                                {type: "account", value: op.payload.creator, arg: "account"},
+                                {type: "amount", value: op.payload.amount, arg: "amount"}
+                            ]
+                        )
+                      break;
         case "asset_update_feed_producers":
           return await Operations.getTranslateInfo(
                       "operation_asset_update_feed_producers",
@@ -953,29 +981,7 @@ const Operations = {
      return helper.getFullNum(amount/Math.pow(10,asset.precision))+" "+asset.symbol;
   },
   // retrieves array of assets ids that were used in operations
-  _getOperationsAssetsIds: (parsedOperations) => {
-    function addNewId(array, id) {
-      if (array.indexOf(id) === -1) array.push(id);
-    }
-
-    return parsedOperations.reduce((result, operation) => {
-      switch (operation.type) {
-        case 'transfer':
-          addNewId(result, operation.payload.amount.asset_id);
-          break;
-        case 'fill_order':
-          addNewId(result, operation.payload.pays.asset_id);
-          addNewId(result, operation.payload.receives.asset_id);
-          break;
-        case 'limit_order_create':
-          addNewId(result, operation.payload.amount_to_sell.asset_id);
-          addNewId(result, operation.payload.min_to_receive.asset_id);
-          break;
-        default:
-      }
-      return result;
-    }, []);
-  },
+ 
 
   // fetches user's operations
   getUserOperations: async ({ userId,startId="1.11.0",endId="1.11.0",limit,store }) => {
@@ -985,7 +991,7 @@ const Operations = {
         [userId, startId, limit, endId]
       );
       if (response && typeof (response) === 'object') {
-        const parsedOperations = await Operations.parseOperations({ operations: response, userId,store });
+        const parsedOperations = await Operations.parseOperations({ operations: response,store });
         return {
           code: 1,
           data: parsedOperations

@@ -710,7 +710,7 @@ export const issueAsset=({dispatch},params)=>{
   if(!helper.trimParams(params,{memo:""})){
     return {code:101,message:"Parameter is missing"};
   }
-  let {toAccount,amount,memo,assetId="",onlyGetFee}=params;
+  let {toAccount,amount,memo,assetId="",isEncryption=true,}=params;
   assetId=assetId.toUpperCase();
   return dispatch('transactions/_transactionOperations', {
     operations:[{
@@ -720,10 +720,10 @@ export const issueAsset=({dispatch},params)=>{
         to:toAccount,
         amount,
         asset_id:assetId,
-        memo
+        memo,
+        isEncryption
       }
-    }],
-    onlyGetFee
+    }]
   },{root:true});
 }
 
@@ -806,7 +806,7 @@ export const queryAssets=async ({dispatch,state,commit},{symbol="",assetId="",si
     symbol=symbol.trim();
     let symbolRes=await API.Assets.fetch_asset_one(symbol);
     if(symbolRes.code!=1) return symbolRes;
-    await dispatch("onGetAssetList",{start:symbol,count:1});
+    await dispatch("onGetAssetList",{start:symbolRes.data.symbol,count:1});
     state.assetsFetched=state.assetsFetched + 99;
   }else{
     if (assets.size === 0) {

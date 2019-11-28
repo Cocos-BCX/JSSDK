@@ -18,7 +18,10 @@ const actions = {
     return res;
   },
 
-  
+  formatOperations:async (store,{ops,isReqDate=false})=>{
+     let res=await API.Operations.parseOperations({ operations:ops,store,isReqDate });
+     return {code:1,data:res.operations}
+  },
   /**
    * Dispatches actions to fetch user operations & subscribe to new operations of this user
    * @param {String} userId - user's id
@@ -58,7 +61,6 @@ const actions = {
     // parse operation data for better format & information
     const parsedData = await API.Operations.parseOperations({
       operations: [operation],
-      userId,
       store
     });
     if (!parsedData) return;
@@ -82,7 +84,6 @@ const actions = {
     // parse operation data for better format & information
     const parsedData = await API.Operations.parseOperations({
       operations: [operation],
-      userId,
       store
     });
     if (!parsedData) return;
