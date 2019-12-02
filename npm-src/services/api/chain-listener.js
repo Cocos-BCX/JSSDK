@@ -53,7 +53,6 @@ class ChainListener {
 
   
   _mainCallback(data) {
-    // console.info("this.real_sub",this.real_sub);  
     if(this.real_sub){
         data[0].forEach(operation => {
           this._subscribers.forEach((subscriber) => {
@@ -67,7 +66,6 @@ class ChainListener {
         });
         return;
       }
-
       if(!this._subscribers.length) return;
       data[0].forEach(operation => {
 

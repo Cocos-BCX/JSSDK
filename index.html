@@ -556,6 +556,9 @@
                                 <div class="checkbox">
                                     是否发起提议: <input type="checkbox"  class="isPropose" style="width:auto;" />          
                                 </div>
+                                <div class="checkbox">
+                                    是否加密: <input type="checkbox" checked  class="isEncryption" style="width:auto;" />          
+                                </div>
                                 <input type="button" id="btn_transferAsset" value="转账"  /><br /><br />
                                 <p class="res"></p>
                             </div>
@@ -658,8 +661,11 @@
                                 发行数量<input type="number" class="amount"  value="10"><br><br>
                                 资产符号<input type="text" class="asset_id"  value="TEST"><br><br>
                                 备注消息<input class="memo" type="text" value="">
-                                <p class="res"></p>
+                                <div class="checkbox">
+                                    是否加密: <input type="checkbox" checked  class="isEncryption" style="width:auto;" />          
+                                </div>
                                 <input type="button" id="btn_issueAsset" value="确认发行"  />
+                                <p class="res"></p>
                             </div>
                         </div>
                         <div class="div_module_c" id="div_reserveAsset" pclass="class_2"  >
@@ -1106,6 +1112,14 @@
                                 <h2>查询可领取的解冻资产</h2>
                                 <div class="div_queryVestingBalance div_module" >
                                     查询账户<input  type="text" class="account" value="" placeholder="查询账户"><br><br>
+                                    类型
+                                    <select class="type">
+                                       <option value="">全部</option>
+                                        <option value="cashback_gas">gas领取</option>
+                                        <option value="cashback_vb">gas抵押赎回</option>
+                                        <option value="cashback_vote">投票抵押赎回</option>
+                                        <option value="cashback_block">出块奖励领取</option>
+                                    </select><br><br>
                                     <input type="button" id="btn_queryVestingBalance" value="立即查看" /><br><br>
                                     <div class="mainInfo">
     
@@ -1484,7 +1498,7 @@
        
     </div>
 
-        <script src="assets/bcx.js?v=7"></script>
+        <script src = "build/assets/bcx.min.js"></script>
         <script type="text/javascript" src="./build/FELib/jquery-1.8.3.min.js" charset="utf-8"></script>
         <script type="text/javascript" src="./build/FELib/jsonview/jquery.jsonview.min.js" charset="utf-8"></script>
 
@@ -1508,20 +1522,21 @@
                 }
 
                 loadLeftNavs();
+                
                 var _configParams={ 
                     ws_node_list:[
-                        {url:"ws://test.cocosbcx.net",name:"Cocos - China - Beijing"},   
+                        {url:"node_url",name:""}   	
                      ],
                      networks:[
                         {
                             core_asset:"COCOS",
-                            chain_id:"c1ac4bb7bd7d94874a1cb98b39a8a582421d03d022dfa4be8c70567076e03ad0" 
+                            chain_id:"" 
                         }
                      ], 
-                    faucet_url:"http://test-faucet.cocosbcx.net",
-                    auto_reconnect:true,
-                    real_sub:true,
-                    check_cached_nodes_data:false
+                     faucet_url:"",
+                     auto_reconnect:true,
+                     real_sub:true,
+                     check_cached_nodes_data:false
                     //app_keys:["5HxzZncKDjx7NEaEv989Huh7yYY7RukcJLKBDQztXAmZYCHWPgd"]
                 };
 
@@ -2275,6 +2290,7 @@
                    },
                    queryVestingBalance(){
                         bcx.queryVestingBalance({
+                            type:gel(".div_queryVestingBalance .type").value,
                             account:gel(".div_queryVestingBalance .account").value,
                             callback:function(res){
                                 console.info("queryVestingBalance res",res);
@@ -2383,14 +2399,11 @@
                        
                         gel("#btn_queryAccountBalances").onclick=this.getAccountBalances;
 
-                        gel(".isPropose").onclick=function(e){
+                        gel(".div_transferAsset .isPropose").onclick=function(e){
                             var isPropose=e.target.checked;
                             gel('.div_from_account').style.display=isPropose?'block':'none'
-                            // if(!isPropose){
-                            //     gel(".from_account").value="";
-                            // }
                         }
-
+                        
 
                         gel("#btn_assetUpdateRestricted").onclick=_assets.assetUpdateRestricted
 
@@ -2495,10 +2508,11 @@
                     },
                     issueAsset:function(){
                         bcx.issueAsset({
-                                toAccount:gel(".div_issueAsset .to_account").value,
-                                amount:Number(gel(".div_issueAsset .amount").value),
-                                assetId:gel(".div_issueAsset .asset_id").value,
-                                memo:gel(".div_issueAsset .memo").value
+                            toAccount:gel(".div_issueAsset .to_account").value,
+                            amount:Number(gel(".div_issueAsset .amount").value),
+                            assetId:gel(".div_issueAsset .asset_id").value,
+                            memo:gel(".div_issueAsset .memo").value,
+                            isEncryption:gel(".div_issueAsset .isEncryption").checked
                         }).then(res=>{
                             console.info('issueAsset res',res);
                             $(".div_issueAsset .res").JSONView(res);
@@ -2512,7 +2526,8 @@
                             amount:amount,
                             assetId:gel(".div_transferAsset .asset_id").value,
                             memo:gel(".div_transferAsset .transfer_memo").value,
-                            isPropose:gel(".div_transferAsset .isPropose").checked
+                            isPropose:gel(".div_transferAsset .isPropose").checked,
+                            isEncryption:gel(".div_transferAsset .isEncryption").checked
                         };
 
                         bcx.transferAsset(trxData).then(res=>{
@@ -3523,11 +3538,11 @@
                         memo=item.raw_data.memo||"";
 
                         if(memo){
-                            if(item.type=="transfer"&&!isAllOP){
+                            if((item.type=="transfer"||item.type=="asset_issue")&&!isAllOP){
                                if(isLocked){
-                                    memo=`<a href="javascript:decodeMemo(${index});">解锁</a>`
+                                    memo=memo[0]==0?memo[1]:`<a href="javascript:decodeMemo(${index});">解锁</a>`;
                                 }else{
-                                    memo=bcx.decodeMemo(memo);
+                                    memo=memo[0]==0?memo[1]:bcx.decodeMemo(memo[1]);
                                     // console.info("memo",memo);
                                     if(memo.code==1)  memo=memo.data.text||"";
                                     if(memo)  memo="备注："+memo;

@@ -1,6 +1,4 @@
-// require('babel-polyfill');
 require('bcxjs-indexeddbshim');
-
 
 import Vue from 'vue'
 import Vuex from 'vuex';
@@ -30,7 +28,6 @@ import BackupStore from './store/BackupStore.js';
 import AccountStore from './store/AccountStore.js';
 
 import * as utils from './utils/index';
-
 
 
   class BCX {
@@ -477,5 +474,6 @@ import * as utils from './utils/index';
   }
 
   export default BCX;
+  //global.BCX=BCX;
 
  

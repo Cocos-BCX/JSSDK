@@ -357,7 +357,8 @@ callback:若有该参数，则内部会自动判断进行链初始化，否则�
 	amount：发送的代币数量  
 	assetId：资产ID （如：X.X.X）或 代币符号（如：BTC）  
 	memo：转账备注  
-	isPropose：是否发起提议  
+	isEncryption(boolean):是否加密备注   
+	isPropose(boolean)：是否发起提议  
 	callback：设置转账后的回调函数  
   
 ### 创建资产  
@@ -367,12 +368,24 @@ callback:若有该参数，则内部会自动判断进行链初始化，否则�
 	assetId：资产符号，正则^\[\.A-Z\]+$  
 	precision：精度(小数位数)  
 	maxSupply：最大资产总量  
-	description: 资产描述，可不填  
+	description: 资产描述，可不填   
+	isBitAsset:是否锚定资产      
 	callback：见统一API说明  
+  	chargeMarketFee(Object)：  
 ```JavaScript  
 		{  
-			quoteAmount:标价资产(即创建的代币，默认1),  
-			baseAmount: 基准资产(即核心资产，默认1)  
+			marketFeePercent:交易手续费率 (%),  
+			maxMarketFee: 最大交易手续费 
+		}  
+```  
+    bitassetOpts(Object)：  
+```JavaScript  
+		{  
+			feedLifetimeSec(number):喂价有效时间（分钟）,
+			minimumFeeds(number):最少喂价次数,
+			forceSettlementDelaySec(number):强制清算发生前延迟时间（分钟）,
+			forceSettlementOffsetPercent(number):强制清算价格偏离百分比,
+			maximumForceSettlementVolume(number):强制清算最大数量(百分比),
 		}  
 ```  
   
@@ -385,14 +398,25 @@ callback:若有该参数，则内部会自动判断进行链初始化，否则�
 	maxSupply：最大资产总量  
 	newIssuer：更新发行人  
     description：资产描述，可不填  
-	coreExchangeRate(Object)：手续费汇率  
+	whiteList:是否开启黑白名单   
+	transferRestricted:是否开启限制交易  
+    chargeMarketFee(Object)：  
 ```JavaScript  
-	{   
-		quoteAmount:标价资产  
-		baseAmount:基准资产  
-	}  
+		{  
+			marketFeePercent:交易手续费率 (%),  
+			maxMarketFee: 最大交易手续费 
+		}  
 ```  
-  
+    bitassetOpts(Object)：  
+```JavaScript  
+		{  
+			feedLifetimeSec(number):喂价有效时间（分钟）,
+			minimumFeeds(number):最少喂价次数,
+			forceSettlementDelaySec(number):强制清算发生前延迟时间（分钟）,
+			forceSettlementOffsetPercent(number):强制清算价格偏离百分比,
+			maximumForceSettlementVolume(number):强制清算最大数量(百分比),
+		}  
+```  
   
 ### 资产销毁  
 方法：reserveAsset  
@@ -755,7 +779,7 @@ callback:若有该参数，则内部会自动判断进行链初始化，否则�
 方法：updateContract  
 功能：更新合约代码  
 参数：  
-	nameOrId合约名称或Id，示例：contract.test02  
+	nameOrId：合约名称或Id，示例：contract.test02  
 	data：合约lua代码  
   
 ### 合约调用  
@@ -778,8 +802,104 @@ callback:若有该参数，则内部会自动判断进行链初始化，否则�
 参数：  
 	account：账户名或Id  
 	contractNameOrId：合约名字或Id  
-    
-    
+
+
+## 交易市场  
+  
+### 代币资产“限价单”交易 
+方法：createLimitOrder  
+功能：代币资产“限价单”交易  
+参数：  
+	transactionPair:交易对,示例"TEST_USDT",(TEST_USDT为买卖USDT交易市场的TEST)  
+	type(number)：交易类型type(0:卖单，1:买单)    
+	price:价格price(单位为交易市场顶级资产,如USDT市场，单位为USDT) 
+	amount：数量(单位如二级资产TEST)
+
+### 取消“限价单”委托订单
+方法：cancelLimitOrder  
+功能：取消“限价单”委托订单  
+参数：  
+	orderId:订单id  
+
+### 查询&订阅市场交易对相关数据  
+方法：queryTransactionPair  
+功能：返回的数据有orders(当前买卖盘订单),my_orders(当前账户的委托订单),last_trade_history(近期该交易对的交易记录),my_last_trade_history(当前账户该交易对的交易记录) 
+参数：  
+	transactionPair：交易对,示例"TEST_USDT",(TEST_USDT为买卖USDT交易市场的TEST)   
+	subscribe(boolean)：是否开启订阅
+	hasMyTradeHistory：是否包含我的交易历史  
+  
+### 查询&订阅交易市场行情  
+方法：queryMarketStats  
+功能：查询&订阅交易市场行情  
+参数：  
+	baseAsset:交易市场资产symbol 
+	quoteAssets(Array)：相关交易对的币种,如[COCOS,TEST]  
+	subscribe(boolean):是否开启订阅   
+	assetCache(boolean):是否缓存资产信息,若缓存，则手续费汇率更新不会影响价格
+
+### 查询交易对K线数据  
+方法：queryPriceHistory  
+功能：查询交易对K线数据  
+参数：  
+	trxSymbol:交易对trx_symbol(TEST_USDT为买卖USDT交易市场的TEST) 
+	step(number)：周期(单位秒) 
+	page(number):第几页
+	pageSize(number):返回数据条数
+
+### 资产喂价提供者更新  
+方法：assetUpdateFeedProducers 
+功能：资产喂价提供者更新  
+参数：  
+	assetId:资产id 
+	newFeedProducers(Array)：喂价账户数组 
+
+### 资产喂价  
+方法：assetPublishFeed 
+功能：资产喂价 
+参数：  
+	assetId:资产id 
+	price(Number)：价格
+	maintenanceCollateralRatio(Number):维持抵押率   
+	maximumShortSqueezeRatio(Number):强制平仓比例上限   
+	coreExchangeRate:{ //手续费汇率
+		quoteAmount(Number)://基准资产数量
+		baseAmount(Number)://标价资产数量(COCOS)
+	}
+
+### 抵押债仓  
+方法：callOrderUpdate 
+功能：抵押资产借入锚定资产，如果结算价格没有被清空,则不能进行借贷，要想清空结算价格，需要发布结算价格低"维持抵押率"倍数的价格
+参数：  
+	 collateralAmount:债务金额(借入金额)   
+	 collateralAssetId:债务资产id   
+	 debtAmount:抵押资产金额   
+	 debtAssetId:抵押资产id
+
+
+### 查询债仓  
+方法：queryDebt 
+功能：查询债仓  
+参数：  
+	 account:查询账户    
+	 debtAssetId:债务资产id   
+	 collateralAssetId:抵押资产id
+
+### 个人资产清算  
+方法：assetSettle 
+功能：个人资产清算  
+参数：  
+	 assetId:清算资产符号   
+     amount:清算资产金额   
+
+### 全局资产清算  
+方法：assetGlobalSettle 
+功能：全局清算根据当前提供的价格立即清算，个人清算是以资产设定的延迟清算时间到来时的喂价价格执行清算  
+参数：  
+	 assetId:清算资产符号   
+     price:清算资产价格   
+
+
 ## 其他  
 
 ### API参数配置   

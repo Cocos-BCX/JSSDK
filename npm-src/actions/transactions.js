@@ -5,8 +5,9 @@ import helper from '../lib/common/helper';
 export const transferAsset = async ({ dispatch,rootGetters },params) => {
   helper.trimParams(params)
 
-  let {fromAccount="",toAccount,amount=0,memo,assetId="1.3.0",
-  onlyGetFee=false,feeAssetId="1.3.0",proposeAccount="",isPropose}=params;
+  let {fromAccount="",toAccount,amount=0,memo,assetId="1.3.0",isEncryption=true,
+  onlyGetFee=false,proposeAccount="",isPropose}=params;
+  
   if(!toAccount){
     return {code:124,message:"Receivables account name can not be empty"}
   }
@@ -27,7 +28,7 @@ export const transferAsset = async ({ dispatch,rootGetters },params) => {
         amount,
         asset_id:assetId,
         memo,
-        fee_asset_id:feeAssetId
+        isEncryption
       }
     }],
     proposeAccount,
@@ -66,7 +67,7 @@ export const _transactionOperations = async (store, { operations,proposeAccount=
   const res=await API.Transactions[worker?"transactionOpWorker":"transactionOp"](fromId,operations,fromAccount,proposeAccount,store);
   if (res.success) {
 
-    if(onlyGetFee) return {code:1,data:res.data}
+    // if(onlyGetFee) return {code:1,data:res.data}
     
      let {id,block_num,trx}=res.data[0];
      let results=[];

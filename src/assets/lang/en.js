@@ -55,7 +55,7 @@
     trxTypes_register_nh_asset_creator:"Register Developer",
     trxTypes_create_world_view:"Create worldview",
     trxTypes_create_nh_asset:"NH asset creation",
-    trxTypes_updata_game_item:"NH Asset Update",
+
     trxTypes_delete_nh_asset:"NH asset deletion",
     trxTypes_transfer_nh_asset:"NH Asset Transfer",
     trxTypes_create_nh_asset_order:"NH Asset Certificate of Sale",

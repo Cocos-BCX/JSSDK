@@ -289,7 +289,7 @@ const actions={
             return priceAssetRes;
         }
         let {precision,dynamic}=priceAssetRes.data[0];
-        if(price*Math.pow(10,precision)>dynamic.current_supply){
+        if(price>dynamic.current_supply){
             return {code:177,message:"Prices exceed current supply"};
         }
         let  nhs_res=await API.NHAssets.lookupNHAssets([NHAssetId]);
