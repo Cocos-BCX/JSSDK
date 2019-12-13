@@ -140,7 +140,7 @@ const Operations = {
   parseOperations: async ({ operations, userId=null,store,isContract=false }) => {
     _store=store;
     const ApiInstance = Apis.instance();
-    const ApiObject =[(await API.Explorer.getGlobalObject()).data];
+    const ApiObject =[(await API.Explorer.getGlobalObject(true)).data];
     const ApiObjectDyn =[(await API.Explorer.getDynGlobalObject(false)).data];
     // console.info('operations',JSON.parse(JSON.stringify(operations)));
     const operationTypes = [0, 1, 2,3,4,5,6,7,8,9,10,12,13,14,15,16,17,18,19,20,21,23,24,26,27,30,31,34,35,37,38,39,40,41,42,43,44,45,50,54,300,301,303,3010,3011,3012];//,53,54.55,56,57,58
@@ -883,11 +883,11 @@ const Operations = {
             let value=key.value;
             switch (key.type) {
                 case "account":
-                    let acc_res=await API.Account.getAccount(key.value,true);
-                    if(acc_res.success){
-                      value=acc_res.data.account.name
-                    }else{
-                      value=key.value;
+                    if(/^1.2.\d+/.test(key.value)){
+                        let acc_res=await API.Account.getAccount(key.value,true);
+                        if(acc_res.success){
+                          value=acc_res.data.account.name
+                        }
                     }
                     break;
                 case "asset":

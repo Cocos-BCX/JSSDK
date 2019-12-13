@@ -106,6 +106,8 @@
     operation_asset_global_settle: "(account) requested global settlement of (asset) at (price)",
     operation_witness_create: "(account) upgraded to become a witness",
     operation_witness_update: "(account) update its witness info",
+    operation_committee_member_create: "(account) Promotion to council members",
+    operation_committee_member_update: "(account) Updated Council member information",
     operation_witness_pay: "Withdrew witness pay to account",
     operation_witness_receive: "Received witness from witness",
     operation_committee_member_update_global_parameters: "(account) updated the global committee parameters",

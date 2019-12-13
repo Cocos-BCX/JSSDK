@@ -1,4 +1,4 @@
- const en_US = {
+const en_US = {
     languages_zh: "简体中文",
     languages_en: "English",
     //trxTypes
@@ -55,7 +55,7 @@
     trxTypes_register_nh_asset_creator:"Register Developer",
     trxTypes_create_world_view:"Create worldview",
     trxTypes_create_nh_asset:"NH asset creation",
-    trxTypes_updata_game_item:"NH Asset Update",
+
     trxTypes_delete_nh_asset:"NH asset deletion",
     trxTypes_transfer_nh_asset:"NH Asset Transfer",
     trxTypes_create_nh_asset_order:"NH Asset Certificate of Sale",
@@ -106,6 +106,8 @@
     operation_asset_global_settle: "(account) requested global settlement of (asset) at (price)",
     operation_witness_create: "(account) upgraded to become a witness",
     operation_witness_update: "(account) update its witness info",
+    operation_committee_member_create: "(account) Promotion to council members",
+    operation_committee_member_update: "(account) Updated Council member information",
     operation_witness_pay: "Withdrew witness pay to account",
     operation_witness_receive: "Received witness from witness",
     operation_committee_member_update_global_parameters: "(account) updated the global committee parameters",

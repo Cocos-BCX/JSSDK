@@ -245,6 +245,11 @@ const actions={
             return {code:101,message:"Parameter is missing"};
         }
         let {nameOrId,functionName,valueList,onlyGetFee}=params;
+
+        if(!(Array.isArray(valueList))){
+            return {code:135,message:"Please check parameter data type"};
+        }
+
         if(!(/1\.\d+\.\d+\./.test(nameOrId))){
           let contract_res=await dispatch("getContract",{nameOrId:nameOrId});
           if(contract_res.code==1){

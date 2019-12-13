@@ -217,6 +217,7 @@ export const IDB_INIT=(store)=>{
                    //API.Explorer.getGlobalObject()//,
                    dispatch("explorer/getExplorerWitnesses",null,{root:true})
                 ]).then((res)=>{
+                    console.log("bcxjs init ok");
                    _callbacks.forEach(callback_item=>{ callback_item({code:1,data:{selectedNodeUrl:select_ws_node}}); });
                    _callbacks.length=1;   
                    select_ws_node="";

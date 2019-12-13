@@ -21,9 +21,7 @@ const createWallet = ({ password,wif }) => {
 
   const private_key = PrivateKey.fromWif(wif) //could throw and error
   const private_plainhex = private_key.toBuffer().toString('hex')
-  // const brainkey = API.Account.suggestBrainkey(_dictionary.en);
-  // const normalizedBrainkey = key.normalize_brainKey(brainkey);
-  // const encryptedBrainkey = aesPrivate.encryptToHex(normalizedBrainkey);
+
   const encrypted_key = aesPrivate.encryptHex(private_plainhex);
 
 
@@ -132,7 +130,7 @@ export const createAccountWithPassword = async (store, params) => {
   }
 
   commit(types.ACCOUNT_SIGNUP_ERROR, { error: result.error });
-  return {code:0,message:result.error,error:result.error};
+  return {code:result.code,message:result.error,error:result.error};
 };
 
 
@@ -191,7 +189,7 @@ export const createAccountWithPublicKey = async (store, params) => {
   }
 
   commit(types.ACCOUNT_SIGNUP_ERROR, { error: result.error });
-  return {code:0,message:result.error,error:result.error};
+  return {code:result.code,message:result.error,error:result.error};
 };
 
 export const createAccountWithWallet=async({dispatch,rootGetters},params)=>{
@@ -787,7 +785,7 @@ export const setAccountUserId=({commit},userId)=>{
   commit(types.ACCOUNT_LOGIN_COMPLETE, {userId});
 }
 
-export const queryVestingBalance=async ({dispatch,rootGetters},{account_id,type,vid,isLimit})=>{
+export const queryVestingBalance=async ({dispatch,rootGetters},{account_id,type,vid,isLimit=false})=>{
   let vbs = await API.Account.getVestingBalances(account_id);
   let cvbAsset,
       vestingPeriod,
@@ -803,8 +801,7 @@ export const queryVestingBalance=async ({dispatch,rootGetters},{account_id,type,
 
   for(let i=0;i<vbs.length;i++){
     let {id,balance,policy,describe}=vbs[i];
-    cvbAsset=await dispatch("assets/fetchAssets",{assets:[balance.asset_id],isOne:true},{root:true})
-    
+    cvbAsset=await dispatch("assets/fetchAssets",{assets:[balance.asset_id],isOne:true},{root:true});
     coin_seconds_earned_last_update=policy[1].coin_seconds_earned_last_update;
     vestingPeriod = policy[1].vesting_seconds;
     past_sconds=Math.floor((new Date()-new Date(coin_seconds_earned_last_update+"Z"))/1000);
@@ -819,7 +816,7 @@ export const queryVestingBalance=async ({dispatch,rootGetters},{account_id,type,
     if(type&&type!=describe){
         continue
     }
-   
+
     total_earned=vestingPeriod*balance.amount;
     new_earned=(past_sconds / vestingPeriod)*(total_earned);
     old_earned=Number(policy[1].coin_seconds_earned);
@@ -849,16 +846,23 @@ export const queryVestingBalance=async ({dispatch,rootGetters},{account_id,type,
   
       let precision_value=Math.pow(10,cvbAsset.precision);
       let available_balance_amount= utils.format_number((availablePercent*balance.amount)/precision_value,cvbAsset.precision);    
-      
+      if(describe=="cashback_block"){
+        available_balance_amount=Math.floor(available_balance_amount);
+      }else{
+        //available_balance_amount=(Math.floor(available_balance_amount*1000))/1000;
+      }           
+     
       if(isLimit){
-        if(Number(old_earned)>0&&past_sconds<60){
-          return {code:181,message:`Please try again in ${60-past_sconds} seconds`};
+        let min_interval=10;
+        // if(describe=="cashback_block") min_interval=5;
+        if(Number(old_earned)>0&&past_sconds<min_interval&&describe!="cashback_block"){
+          return {code:181,message:`Please try again in ${min_interval-past_sconds} seconds`};
         }
-        if(available_balance_amount<1){
-          return {code:182,message:`draw quantity is less than 1`};
-        }
+        // if(available_balance_amount<1){
+        //   return {code:182,message:`draw quantity is less than 1`};
+        // }
       }
-    
+      
       new_vbs.push({
         id,
         type:describe,
@@ -871,9 +875,6 @@ export const queryVestingBalance=async ({dispatch,rootGetters},{account_id,type,
           symbol:cvbAsset.symbol,
           precision:cvbAsset.precision
         }
-        //,
-        // require_coindays,
-        // earned
       })
   }
 
@@ -884,12 +885,14 @@ export const queryVestingBalance=async ({dispatch,rootGetters},{account_id,type,
   return res;
 }
 
-export const claimVestingBalance=async ({dispatch},{id,account})=>{
-   if(!id){
-    return {code:101,message:"Parameter is missing"};
+export const claimVestingBalance=async ({dispatch},{id,account,amount})=>{
+   if(!id||!amount){
+     return {code:101,message:"Parameter is missing"};
    }
    id=id.trim();
-
+   if(isNaN(Number(amount))){
+    return {code:135,message:"Please check parameter data type"};
+   }
    let res=await dispatch("_validateAccount",{
               method:"account/queryVestingBalance",
               params:{ type:'',vid:id,isLimit:true },
@@ -899,8 +902,13 @@ export const claimVestingBalance=async ({dispatch},{id,account})=>{
     if(res.code!=1) return res;
     let rewards=res.data.filter(item=>item.id==id);
     if(rewards.length){
-      let {amount,precision,asset_id}=rewards[0].available_balance;
+      let {precision,asset_id}=rewards[0].available_balance;
+      let max_amount=rewards[0].available_balance.amount;
+      if(amount>max_amount){
+        return {code:183,message:`Up to ${max_amount}`}
+      }
       amount=Math.floor(amount*Math.pow(10,precision));
+      
       return  dispatch('transactions/_transactionOperations', {
             operations:[{
                 op_type:27,
