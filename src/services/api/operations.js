@@ -69,6 +69,7 @@ const Operations = {
     if(operation.date){
       date=operation.date;
     }else if(isReqDate){
+        if(ApiObjectDyn.code==1)
         date = Operations._getOperationDate(operation, ApiObject, ApiObjectDyn);
         let block_res=await API.Operations.get_block_header(operation.block_num);
         if(block_res.code==1){
@@ -133,11 +134,12 @@ const Operations = {
   // Parses array of operations, return array of parsed operations and array of assets ids
   // that were user in it. United Labs of BCTech.
   parseOperations: async ({ operations, store,isContract=false,isReqDate=true }) => {
+    // console.info("operations",operations);
     _store=store;
     const ApiInstance = Apis.instance();
     const ApiObject =isReqDate?[(await API.Explorer.getGlobalObject(true)).data]:null;
     const ApiObjectDyn =isReqDate?[(await API.Explorer.getDynGlobalObject(false)).data]:null;
-    const operationTypes = [0, 1, 2,3,4,5,6,7,8,9,10,12,13,14,15,16,17,18,19,20,21,23,24,26,27,30,31,34,35,37,38,39,40,41,42,43,44,45,50,54,300,301,303,3010,3011,3012];//,53,54.55,56,57,58
+    const operationTypes = [0, 1, 2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,23,24,26,27,30,31,34,35,37,38,39,40,41,42,43,44,45,50,54,300,301,303,3010,3011,3012];//,53,54.55,56,57,58
     const filteredOperations = operations.filter(op => {
       return operationTypes.includes(op.op[0])
     });
@@ -648,6 +650,7 @@ const Operations = {
                 ]
             )
            break;
+        case "asset_update_bitasset":
         case "asset_update":
           return await Operations.getTranslateInfo(
                 "operation_asset_update",
@@ -886,7 +889,7 @@ const Operations = {
                     if(!asset){
                       console.log("链上不存在资产"+asset_id);
                     }
-                    value = asset?asset.symbol:"";
+                    value = asset?asset.symbol:asset;
                     break;
                 case "amount":
                     value =await Operations.FormattedAsset(key.value.amount,key.value.asset_id,key.decimalOffset);
@@ -976,7 +979,7 @@ const Operations = {
   FormattedAsset:async (amount,asset_id,decimalOffset)=>{
      let asset=await API.Assets.fetch([asset_id],true);
      if(!asset){
-      asset={precision:8,symbol:"1.3.0"}; 
+      asset={precision:5,symbol:"1.3.0"}; 
      }
      return helper.getFullNum(amount/Math.pow(10,asset.precision))+" "+asset.symbol;
   },

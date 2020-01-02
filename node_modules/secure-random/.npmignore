@@ -1,0 +1,5 @@
+test/
+bower.json
+component.json
+.travis.yml
+.min-wd

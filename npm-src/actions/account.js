@@ -849,7 +849,7 @@ export const queryVestingBalance=async ({dispatch,rootGetters},{account_id,type,
       if(describe=="cashback_block"){
         available_balance_amount=Math.floor(available_balance_amount);
       }else{
-        //available_balance_amount=(Math.floor(available_balance_amount*1000))/1000;
+        available_balance_amount=(Math.floor(available_balance_amount*1000))/1000;
       }           
      
       if(isLimit){
@@ -858,8 +858,8 @@ export const queryVestingBalance=async ({dispatch,rootGetters},{account_id,type,
         if(Number(old_earned)>0&&past_sconds<min_interval&&describe!="cashback_block"){
           return {code:181,message:`Please try again in ${min_interval-past_sconds} seconds`};
         }
-        // if(available_balance_amount<1){
-        //   return {code:182,message:`draw quantity is less than 1`};
+        // if(available_balance_amount<0.01){
+        //   return {code:182,message:`draw quantity is less than 0.01`};
         // }
       }
       

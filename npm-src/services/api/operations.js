@@ -143,7 +143,7 @@ const Operations = {
     const ApiObject =[(await API.Explorer.getGlobalObject(true)).data];
     const ApiObjectDyn =[(await API.Explorer.getDynGlobalObject(false)).data];
     // console.info('operations',JSON.parse(JSON.stringify(operations)));
-    const operationTypes = [0, 1, 2,3,4,5,6,7,8,9,10,12,13,14,15,16,17,18,19,20,21,23,24,26,27,30,31,34,35,37,38,39,40,41,42,43,44,45,50,54,300,301,303,3010,3011,3012];//,53,54.55,56,57,58
+    const operationTypes = [0, 1, 2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,23,24,26,27,30,31,34,35,37,38,39,40,41,42,43,44,45,50,54,300,301,303,3010,3011,3012];//,53,54.55,56,57,58
     const filteredOperations = operations.filter(op => {
       return operationTypes.includes(op.op[0])
     });
@@ -657,6 +657,7 @@ const Operations = {
                 ]
             )
            break;
+        case "asset_update_bitasset":
         case "asset_update":
           return await Operations.getTranslateInfo(
                 "operation_asset_update",

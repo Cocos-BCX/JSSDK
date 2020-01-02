@@ -6,7 +6,7 @@ import { ChainConfig } from 'bcxjs-ws';
 import PersistentStorage from '../services/persistent-storage';
 
 const initialState = {
-    versions:"2.1.12",
+    versions:"2.1.13",
     ops_limit:100,
     autoReconnect:true,
     defaultSettings:{
