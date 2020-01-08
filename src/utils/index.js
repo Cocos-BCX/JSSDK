@@ -1,5 +1,43 @@
 import { Aes, TransactionHelper,key } from 'bcxjs-cores';
+import NodesManager from '../services/api/nodes-manager';
 
+export const testNodesPings=async (nodes)=>{
+    
+
+    // return new Promise(resolve=>{
+    //     var pingWorker = require("bcl-worker-loader?name=pingWorker.js!../services/workers/pingWorker.js")
+    //     var worker = new pingWorker;
+    //     worker.postMessage({
+    //       nodes
+    //     });
+
+    //     worker.onmessage = event => {
+    //       var res = event.data;
+    //       console.info("res",res);
+    //       resolve(res);
+    //     }
+    // })
+    // nodes=nodes.filter(item=>item.url!=selectedNode.url)
+    let ws_node_list={};
+    nodes.forEach(node=>{
+      ws_node_list[node.url]={location:node.name};
+    });
+
+    let testNodes =await (new NodesManager({
+      nodes:ws_node_list,
+      defaultNode:""
+    }).testNodesPings());
+
+    // testNodes=Object.keys(testNodes).map(key=>{
+    //   let {location,ping}=testNodes[key];
+    //   return {
+    //       url:key,
+    //       name:location,
+    //       ping
+    //   }
+    // });
+    return testNodes
+}
 /**
  * Return object with keys = id of each element of array (element.id)
  * @param {Array} array - array of data elements

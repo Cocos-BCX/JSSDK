@@ -1,3 +1,4 @@
+// require('babel-polyfill');
 require('bcxjs-indexeddbshim');
 
 import Vue from 'vue'
@@ -28,6 +29,7 @@ import BackupStore from './store/BackupStore.js';
 import AccountStore from './store/AccountStore.js';
 
 import * as utils from './utils/index';
+
 
 
   class BCX {
@@ -89,6 +91,7 @@ import * as utils from './utils/index';
         if(params&&(params.callback||typeof params=="function")){
            this.api.dispatch("connection/initConnection",params);
         }else{
+          this.api.dispatch("setting/setSettingsAPIS",params);
           return new Promise(resolve=>{
              //using params.callback, to compatible with API.
              if(typeof params!="object") params={};
@@ -96,6 +99,10 @@ import * as utils from './utils/index';
              this.api.dispatch("connection/initConnection",params);
           })
         }
+      }
+
+      lookupWSNodeList(params){
+        return this.api.dispatch("connection/lookupWSNodeList",params);
       }
       //abstractable methods initialization
       apiMethodsInt(){
@@ -124,7 +131,7 @@ import * as utils from './utils/index';
               queryBlock:"explorer/queryBlock",
               queryTransaction:"explorer/queryTransaction",
               lookupWitnessesForExplorer:"explorer/getExplorerWitnesses",//query blocks production info
-              lookupWSNodeList:"connection/lookupWSNodeList",//get API server list
+              // lookupWSNodeList:"connection/lookupWSNodeList",//get API server list
               deleteAPINode:"connection/deleteAPINode",//delete an API server address
               addAPINode:"setting/addAPINode",//add an API server address
               queryAssets:"assets/queryAssets",
@@ -133,7 +140,8 @@ import * as utils from './utils/index';
               queryDataByIds:"explorer/getDataByIds",
               queryPriceHistory:"market/queryPriceHistory",
               queryAssetRestricted:"assets/queryAssetRestricted",
-              queryGas:"assets/estimationGas"
+              queryGas:"assets/estimationGas",
+              formatOperations:"operations/formatOperations"//
           }
           const use_accountOpt_methods={
             getPrivateKey:"account/_getPrivateKey", 
@@ -455,25 +463,44 @@ import * as utils from './utils/index';
 
     switchAPINode(params){
       //donot send to promiseCompatible Interface, and donot check RPC connection
+      // let initPromise=new Promise((resolve)=>{
+      //     this.init(init_res=>{
+      //       if(init_res.code==1){
+      //         this.api.dispatch("connection/switchNode",{
+      //            url:params.url,
+      //            callback:res=>{ resolve(res); }
+      //         });
+      //       }else{
+      //         resolve(init_res);
+      //       }
+      //    })
+      // });
+      // if(!params.callback) return initPromise;
+      // initPromise.then(res=>{ params.callback(res);})
+      
+
       let initPromise=new Promise((resolve)=>{
-          this.init(init_res=>{
-            if(init_res.code==1){
-              this.api.dispatch("connection/switchNode",{
-                 url:params.url,
-                 callback:res=>{ resolve(res); }
-              });
-            }else{
-              resolve(init_res);
+          this.api.dispatch("connection/switchNode",{
+            url:params.url,
+            callback:res=>{ 
+               resolve(res);
             }
-         })
+          });
       });
       if(!params.callback) return initPromise;
       initPromise.then(res=>{ params.callback(res);})
+
+      // return this.api.dispatch("connection/switchNode",{
+      //   url:params.url
+      // });
     }
     /**********Interfaces cannot return value, callbacks only **end** United Labs of BCTech.*/
+
+    testNodesPings(nodes){
+      return utils.testNodesPings(nodes);
+    }
   }
 
   export default BCX;
-  //global.BCX=BCX;
 
  

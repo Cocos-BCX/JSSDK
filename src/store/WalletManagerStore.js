@@ -36,7 +36,6 @@ const actions={
         return dispatch("onSetWallet",{wallet_name, create_wallet_password, brnkey})
     },
     onSetWallet:({state,dispatch},{wallet_name = "default", create_wallet_password, brnkey, resolve})=>{
-
         let p = new Promise(resolve => {
             if (/[^a-z0-9_-]/.test(wallet_name) || wallet_name === "")
                 throw new Error("Invalid wallet name")
@@ -54,7 +53,6 @@ const actions={
             }
 
             let current = iDB.root.setProperty("current_wallet", wallet_name)
-
             resolve(Promise.all([add, current]).then(() => {
                 // Restart the database before current application initializing its new status
                 iDB.close()
@@ -83,7 +81,7 @@ const actions={
                             brainkey_plaintext:brnkey, //brainkey,
                             unlock:true, //unlock
                             public_name:wallet_name
-                        },{root:true}).then(()=>{
+                        },{root:true}).then((res)=>{
                             state.current_wallet=wallet_name;
                         })
                     })
@@ -136,6 +134,7 @@ const actions={
             
             var add=true, current=true;
             add=iDB.root.setProperty("wallet_names", wallet_names)
+
             if (current_wallet === delete_wallet_name) {
                 current_wallet = wallet_names.size ? wallet_names.first() : undefined
                 current=iDB.root.setProperty("current_wallet", current_wallet);

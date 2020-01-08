@@ -135,8 +135,8 @@ const actions={
             return {code:101,message:"Parameter is missing"};
         }
         let {name,data,authority,onlyGetFee}=params;
-        if(!(/^[a-z]([a-z0-9\.-]){4,63}/.test(name))){
-          return {code:130,message:"Please enter the correct contract name(/^[a-z]([a-z0-9\.-]){4,63}/)"};
+        if(!(/^contract\.([a-z0-9\.-]){5,54}/.test(name))){
+          return {code:130,message:"Please enter the correct contract name(/^contract.[a-z]([a-z0-9\.-]){15,63}/)"};
         }
         return dispatch('transactions/_transactionOperations', {
             operations:[{

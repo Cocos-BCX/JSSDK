@@ -288,10 +288,12 @@ const actions={
         if(priceAssetRes.code!=1){
             return priceAssetRes;
         }
+
         let {precision,dynamic}=priceAssetRes.data[0];
         if(price>dynamic.current_supply){
             return {code:177,message:"Prices exceed current supply"};
         }
+       
         let  nhs_res=await API.NHAssets.lookupNHAssets([NHAssetId]);
         if(nhs_res.code==1){
             NHAssetId=nhs_res.data[0].id;

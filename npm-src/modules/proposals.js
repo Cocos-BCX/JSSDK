@@ -77,7 +77,6 @@ const actions={
                     type_name
                 } = (await API.Operations.parseOperations({
                                 operations: [{op:operation}],
-                                userId,
                                 store
                             })
                    ).operations[0];

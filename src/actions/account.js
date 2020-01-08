@@ -68,8 +68,8 @@ export const createAccountWithPassword = async (store, params) => {
   }
   let { account, password, autoLogin=false,onlyGetFee=false}=params;
  
-  if(!(/^[a-z]([a-z0-9\.-]){4,63}$/.test(account))){
-    return {code:103,message:"Please enter the correct account name(/^[a-z]([a-z0-9\.-]){4,63}$/)"};
+  if(!(/^[a-z]([a-z0-9\.-]){4,62}$/.test(account))){
+    return {code:103,message:"Please enter the correct account name(/^[a-z]([a-z0-9\.-]){4,62}$/)"};
   }
   
   const { commit,dispatch,rootGetters,getters } = store;
@@ -140,8 +140,8 @@ export const createAccountWithPublicKey = async (store, params) => {
   }
   let { account, ownerPubkey, activePubkey}=params;
  
-  if(!(/^[a-z]([a-z0-9\.-]){4,63}$/.test(account))){
-    return {code:103,message:"Please enter the correct account name(/^[a-z]([a-z0-9\.-]){4,63}$/)"};
+  if(!(/^[a-z]([a-z0-9\.-]){4,62}$/.test(account))){
+    return {code:103,message:"Please enter the correct account name(/^[a-z]([a-z0-9\.-]){4,62}$/)"};
   }
   
   const { commit,dispatch,rootGetters,getters } = store;
@@ -199,8 +199,8 @@ export const createAccountWithWallet=async({dispatch,rootGetters},params)=>{
   let {callback,account,password,onlyGetFee=false}=params;
   dispatch("transactions/setOnlyGetOPFee",onlyGetFee,{root:true});
 
-  if(!(/^[a-z]([a-z0-9\.-]){4,63}/.test(account))){
-    return {code:103,message:"Please enter the correct account name(/^[a-z]([a-z0-9\.-]){4,63}/)"}
+  if(!(/^[a-z]([a-z0-9\.-]){4,62}/.test(account))){
+    return {code:103,message:"Please enter the correct account name(/^[a-z]([a-z0-9\.-]){4,62}/)"}
   }
 
    if(!rootGetters["WalletDb/wallet"])

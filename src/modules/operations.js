@@ -84,7 +84,8 @@ const actions = {
     // parse operation data for better format & information
     const parsedData = await API.Operations.parseOperations({
       operations: [operation],
-      store
+      store,
+      isReqDate:true
     });
     if (!parsedData) return;
 
@@ -141,7 +142,7 @@ const actions = {
         isReqTrx,
         callback:(blockInfo) => {
             dispatch("explorer/queryBlock",{
-              block:blockInfo.block_num,
+              block:blockInfo.head_block_number,
               isReqTrx,
               maxOpCount:rootGetters["setting/g_settingsAPIs"].sub_max_ops,
               block_res:{code:1,data:blockInfo}

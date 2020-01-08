@@ -33,7 +33,7 @@ const signTransaction = async (transaction,store) => {
 const buildOperationsAndBroadcast = async (transaction,store,opObjects) => {
   await signTransaction(transaction,store);
   await transaction.update_head_block();
-
+ 
   const res=await transaction.broadcast();
   return res;
 };
@@ -58,6 +58,10 @@ const process_transaction=(transaction,store,opObjects)=>{
         try{
            error=error.message.match(/@@.*@@/)[0].replace(/@@/g,"");
           _error=JSON.parse(error);
+          // if(_error.message.indexOf(' -delta: Insufficient Balance: ')>=0){
+          //   let {a,b,r}=_error.data.stack[0].data;
+          //   _error.message="Insufficient Balance for the fee of "+r+;//balance after current operation: "+b+",
+          // }
         }catch (e){
           _error={
             message:error.message
@@ -131,11 +135,42 @@ const transactionOp = async (fromId,operations,fromAccount,proposeAccountId="",s
   }
   
   const transaction = new TransactionBuilder();
+  // console.info("opObjects",opObjects);
   opObjects.forEach(op=>{
     transaction.add_type_operation(op.type, op.opObject); 
   });
 
+  // let {crontab}=store.rootState.crontab;
+  
+  // if(crontab){
+  //   await transaction.set_required_fees();
+  //   await  transaction.update_head_block();
+  //   let {startTime,executeInterval,executeTimes}=crontab;
 
+  //   if(startTime==undefined||executeInterval==undefined||executeTimes==undefined){
+  //     return {code:101,message:"Crontab parameter is missing"};
+  //   }
+  //   startTime=parseInt(startTime);
+  //   executeInterval=parseInt(executeInterval);
+  //   executeTimes=parseInt(executeTimes);
+  //   if(isNaN(startTime)||isNaN(executeInterval)||isNaN(executeTimes)){
+  //     return {code:1011,message:"Parameter error"};
+  //   }
+
+  //   if(startTime<=0||executeInterval<=0||executeTimes<=0){
+  //       return {code:176,message:"Crontab must have parameters greater than 0"}
+  //   }
+
+  //   let res=await Apis.instance().db_api().exec("get_objects", [["2.1.0"]]);
+  //   let now_time=new Date(res[0].time+"Z").getTime();
+  //   let crontab_options={
+  //     crontab_creator:fromId,
+  //     start_time:Math.floor((now_time+startTime)/1000),//+Number(startTime),
+  //     execute_interval:executeInterval,
+  //     scheduled_execute_times:executeTimes
+  //   }
+  //   transaction.crontab(crontab_options)   
+  // }
 
   if(proposeAccountId){
      await  transaction.update_head_block();
@@ -144,6 +179,7 @@ const transactionOp = async (fromId,operations,fromAccount,proposeAccountId="",s
      }  
      transaction.propose(propose_options)
   }
+  // console.info("transaction",transaction);
   return  process_transaction(transaction,store,opObjects);
 };
 
@@ -269,14 +305,14 @@ const buildOPObjects=async (operations,fromId,fromAccount,store)=>{
                 if(isEncryption){
                   let memo_key=toAccount.data.account.options.memo_key;
                   let memo_from_privkey =await store.dispatch("WalletDb/getPrivateKey",fromAccount.account.options.memo_key,{root:true})
-
-                  try {
-                    memo=encryptMemo(new Buffer(memo, "utf-8"), memo_from_privkey, memo_key);
-                  } catch (error) {
-                    return { success: false, error: 'Encrypt memo failed',code:118 };
-                  }
+                  memo=encryptMemo(new Buffer(memo, "utf-8"), memo_from_privkey, memo_key);
                 }
-                opObject.memo =[isEncryption?1:0,memo];//
+                
+                try {
+                  opObject.memo =[isEncryption?1:0,memo];//
+                } catch (error) {
+                  return { success: false, error: 'Encrypt memo failed',code:118 };
+                }
               }
           }else if(!opObject){
             opObject=opParams;

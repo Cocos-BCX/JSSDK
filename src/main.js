@@ -95,6 +95,7 @@ var global = module.exports = typeof window != 'undefined' && window.Math == Mat
         if(params&&(params.callback||typeof params=="function")){
            this.api.dispatch("connection/initConnection",params);
         }else{
+          this.api.dispatch("setting/setSettingsAPIS",params);
           return new Promise(resolve=>{
              //using params.callback, to compatible with API.
              if(typeof params!="object") params={};
@@ -102,6 +103,10 @@ var global = module.exports = typeof window != 'undefined' && window.Math == Mat
              this.api.dispatch("connection/initConnection",params);
           })
         }
+      }
+
+      lookupWSNodeList(params){
+        return this.api.dispatch("connection/lookupWSNodeList",params);
       }
       //abstractable methods initialization
       apiMethodsInt(){
@@ -130,7 +135,7 @@ var global = module.exports = typeof window != 'undefined' && window.Math == Mat
               queryBlock:"explorer/queryBlock",
               queryTransaction:"explorer/queryTransaction",
               lookupWitnessesForExplorer:"explorer/getExplorerWitnesses",//query blocks production info
-              lookupWSNodeList:"connection/lookupWSNodeList",//get API server list
+              // lookupWSNodeList:"connection/lookupWSNodeList",//get API server list
               deleteAPINode:"connection/deleteAPINode",//delete an API server address
               addAPINode:"setting/addAPINode",//add an API server address
               queryAssets:"assets/queryAssets",
@@ -462,22 +467,42 @@ var global = module.exports = typeof window != 'undefined' && window.Math == Mat
 
     switchAPINode(params){
       //donot send to promiseCompatible Interface, and donot check RPC connection
+      // let initPromise=new Promise((resolve)=>{
+      //     this.init(init_res=>{
+      //       if(init_res.code==1){
+      //         this.api.dispatch("connection/switchNode",{
+      //            url:params.url,
+      //            callback:res=>{ resolve(res); }
+      //         });
+      //       }else{
+      //         resolve(init_res);
+      //       }
+      //    })
+      // });
+      // if(!params.callback) return initPromise;
+      // initPromise.then(res=>{ params.callback(res);})
+      
+
       let initPromise=new Promise((resolve)=>{
-          this.init(init_res=>{
-            if(init_res.code==1){
-              this.api.dispatch("connection/switchNode",{
-                 url:params.url,
-                 callback:res=>{ resolve(res); }
-              });
-            }else{
-              resolve(init_res);
+          this.api.dispatch("connection/switchNode",{
+            url:params.url,
+            callback:res=>{ 
+               resolve(res);
             }
-         })
+          });
       });
       if(!params.callback) return initPromise;
       initPromise.then(res=>{ params.callback(res);})
+
+      // return this.api.dispatch("connection/switchNode",{
+      //   url:params.url
+      // });
     }
     /**********Interfaces cannot return value, callbacks only **end** United Labs of BCTech.*/
+
+    testNodesPings(nodes){
+      return utils.testNodesPings(nodes);
+    }
   }
 
   // export default BCX;

@@ -74,14 +74,15 @@ export const getUserNameByUserId= async ({ commit },nameOrId) => {
 
 
 
-export const getAccountBalances = async ({dispatch,rootGetters},params) => {
+export const getAccountBalances = async (store,params) => {
+  let {dispatch,rootGetters}=store;
   helper.trimParams(params)
   let {assetId_or_symbol="",assetId="",account="",callback=null}=params;
   assetId_or_symbol=assetId_or_symbol||assetId;
   if(!account){
     return {code:123,message:'Parameter "account" can not be empty'};
   }
-  let result=await getBalances(account,rootGetters); //
+  let result=await getBalances(account,store); //
   if(result.code==1){
       let accountBalances=JSON.parse(JSON.stringify(result.data));
       result.data={};
@@ -114,7 +115,8 @@ export const getAccountBalances = async ({dispatch,rootGetters},params) => {
   return result;
 };
 
-const getBalances=async (account,rootGetters)=>{
+const getBalances=async (account,store)=>{
+  let {rootGetters}=store;
   let result={
     code:1
   }
@@ -123,26 +125,109 @@ const getBalances=async (account,rootGetters)=>{
   if(!account&&userId){
     account=userId;
   }
-
+  let full_account;
   if(account){
-      account=await API.Account.getUser(account);
-      if(account.success){
-        accountBalances=_utils.balancesToObject(account.data.balances);
-        result.data=accountBalances;
-        if(account.data.account.contract_asset_locked)
-        result.contract_asset_locked=format_contract_asset_locked(account.data.account.contract_asset_locked);
+      let account_res=await API.Account.getUser(account);
+      if(account_res.success){
+         full_account=account_res.data;
+         accountBalances=_utils.balancesToObject(full_account.balances);
+        // if(account.data.account.contract_asset_locked)
+        //    result.contract_asset_locked=format_contract_asset_locked(account.data.account.contract_asset_locked);
       }else{
-        result.code=account.code;
-        result.message=account.error.message;
+        result.code=account_res.code;
+        result.message=account_res.error.message;
       }
   }else if(rootGetters['user/getAccountObject']){
+       full_account=rootGetters['user/getAccountObject'];
       accountBalances=rootGetters['user/getBalances']
-      result.data=accountBalances
   }else{
       result.code=111;
       result.message="Please login first";
   }
+  if(result.code==1){
+    result.data=accountBalances;
+    result.asset_locked=await format_asset_locked(full_account,store);
+  }
   return result;
+}
+
+const format_asset_locked=async (full_account,store)=>{
+  let {locked_total,witness_freeze,vote_for_witness,contract_lock_details}=full_account.account.asset_locked;
+
+  let {precision,symbol}=await API.Assets.fetch(["1.3.0"],true);
+  let _witness_freeze={
+    amount:0,
+    symbol
+  }
+  let vote_freeze={
+    amount:0,
+    symbol,
+    details:[]
+  }
+  let contract_freeze={
+    amount:0,
+    symbol,
+    details:[],
+    contracts:[]
+  };
+
+  if(witness_freeze) _witness_freeze.amount=helper.getFullNum(witness_freeze.amount,precision);
+  if(vote_for_witness) {
+    vote_freeze.amount=helper.getFullNum(vote_for_witness.amount,precision);
+    vote_freeze.details=await Promise.all(full_account.votes.map(async vote=>{
+        let vote_acc_name=vote.witness_account;
+        let acc_res=await API.Account.getAccount(vote_acc_name,true);
+        if(acc_res.success){
+          vote_acc_name=acc_res.data.account.name
+        }
+        return vote_acc_name
+    }))
+  }
+
+  let _locked_total={};
+  let locked_total_assets=locked_total.map(item=>item[0]);
+  if(locked_total_assets.length){
+     let assets=await store.dispatch("assets/fetchAssets",{
+        assets:locked_total_assets,
+        isCache:true
+      },{root:true});
+      locked_total.forEach(item=>{
+        _locked_total[item[0]]=helper.getFullNum(item[1],assets[item[0]].precision);
+      });
+
+      let contract_name="";
+      if(contract_lock_details){
+        await Promise.all(
+          contract_lock_details.map(async item=>{
+              contract_name=item[0];
+              let c_res=await API.Contract.getContract(item[0],true);
+              if(c_res.code==1) contract_name=c_res.data.name;
+              contract_freeze.contracts.push(contract_name)
+               item[1].forEach(asset=>{
+                 let amount=helper.getFullNum(asset[1],precision);
+                 if(asset[0]=="1.3.0") contract_freeze.amount+=amount;
+                 contract_freeze.details.push({
+                  contract_name,
+                  amount,
+                  symbol:assets[asset[0]].symbol
+                 })
+              })
+             
+              return item;
+          })
+        )
+
+      }
+  }
+
+   return {
+    locked_total:_locked_total,
+    lock_details:{
+      vote_freeze,
+      contract_freeze,
+      witness_freeze:_witness_freeze
+    }
+   }
 }
 
 const format_contract_asset_locked=({locked_total,lock_details})=>{
@@ -171,7 +256,8 @@ const format_contract_asset_locked=({locked_total,lock_details})=>{
     }
 }
 
-export const getUserAllBalance=async ({dispatch,rootGetters},params)=>{
+export const getUserAllBalance=async (store,params)=>{
+    let {dispatch,rootGetters}=store;
     helper.trimParams(params)
     let {account,unit}=params;
     if(!account){
@@ -179,11 +265,14 @@ export const getUserAllBalance=async ({dispatch,rootGetters},params)=>{
     }
 
     let contract_asset_locked;
-    let accountBalances=await getBalances(account,rootGetters);
+    let asset_locked;
+    let accountBalances=await getBalances(account,store);
     if(accountBalances.code==1){
-      if(accountBalances.contract_asset_locked)
-      contract_asset_locked=JSON.parse(JSON.stringify(accountBalances.contract_asset_locked));
-      accountBalances=JSON.parse(JSON.stringify(accountBalances.data));
+      // if(accountBalances.contract_asset_locked)
+      //   contract_asset_locked=JSON.parse(JSON.stringify(accountBalances.contract_asset_locked));
+        if(accountBalances.asset_locked) asset_locked=JSON.parse(JSON.stringify(accountBalances.asset_locked));
+
+        accountBalances=JSON.parse(JSON.stringify(accountBalances.data));
     }else{
       return accountBalances;
     }
@@ -214,10 +303,7 @@ export const getUserAllBalance=async ({dispatch,rootGetters},params)=>{
 
     //get queried assets' market info
     let marketStats={};
-    // console.info('1111111',(await dispatch("market/getMarketStats",{
-    //   baseAsset:toAsset_symbol,
-    //   quoteAssets,
-    // },{root:true})));
+
     (await dispatch("market/getMarketStats",{
       baseAsset:toAsset_symbol,
       quoteAssets,
@@ -242,24 +328,32 @@ export const getUserAllBalance=async ({dispatch,rootGetters},params)=>{
         }
 
         let fromAssetPrecision=fromAsset.get("precision");
-        let lock_details;
-        if(contract_asset_locked){
-           lock_details=contract_asset_locked._lock_details[id]||{};
-          for(let key in lock_details){
-            lock_details[key]=helper.getFullNum(lock_details[key],fromAssetPrecision);
-          }
-        }
-    
+        let locked_total=asset_locked.locked_total[id]||0;
+        let balance=helper.getFullNum(amount,fromAssetPrecision);
+        // let locked_total=asset_locked._locked_total;
+        // if(id in locked_total){
+          
+        // }
+        // let lock_details;
+        // if(contract_asset_locked){
+        //    lock_details=contract_asset_locked._lock_details[id]||{};
+        //   for(let key in lock_details){
+        //     lock_details[key]=helper.getFullNum(lock_details[key],fromAssetPrecision);
+        //   }
+        // }
+        
         balances.push({
           id,
-          balance:helper.getFullNum(amount,fromAssetPrecision),
+          balance,
+          available_balance:Number((balance-locked_total).toFixed(fromAssetPrecision)),
           symbol:fromSymbol,
           precision:fromAssetPrecision,
           eq_value:id!="1.3.1"?helper.getFullNum(eqValue,fromAssetPrecision):0,
           eq_unit:toAsset.symbol,
           eq_precision:toAsset.precision,
-          locked_total:contract_asset_locked?helper.getFullNum(contract_asset_locked._locked_total[id]||0,fromAssetPrecision):0,
-          lock_details:lock_details||{}
+          locked_total
+          //locked_total:contract_asset_locked?helper.getFullNum(contract_asset_locked._locked_total[id]||0,fromAssetPrecision):0,
+          //lock_details:lock_details||{}
         })
     }
 
@@ -270,17 +364,18 @@ export const getUserAllBalance=async ({dispatch,rootGetters},params)=>{
         balances=[{
             id:"1.3.0",
             balance:0,
+            available_balance:0,
             symbol,
             precision,
             eq_value:0,
             eq_unit:toAsset_symbol,
             eq_precision:toAsset.precision,
-            locked_total:0,
-            lock_details:{}
+            locked_total:0//,
+            //lock_details:{}
         }];
       }
     }
-    return {code:1,data:balances}
+    return {code:1,data:balances,asset_locked}
 }
 
 

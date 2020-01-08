@@ -517,7 +517,7 @@
                         <div class="div_module_c" id="div_queryUserInfo" pclass="class_11" >
                             <h2>查询账户信息</h2>
                             <div class="div_queryUserInfo div_module">
-                                account<input  type="text" class="account" value="test1"><br><br>
+                                account<input  type="text" class="account" value="unitedlabs.witness"><br><br>
                                 <input type="button" id="btn_queryUserInfo" value="立即查询"  /><br><br>
                                 <p class="res"></p>
                             </div>
@@ -769,7 +769,7 @@
                             <div class="div_queryAccountAllBalances div_module">
                                 <h3>其中包含资产对记账单位的换算值</h3>
                                 记账单位<input  type="text" class="asset_id" value=""><br><br>
-                                account<input  type="text" class="account" value="test1"><br><br>
+                                account<input  type="text" class="account" value="unitedlabs.witness"><br><br>
                                 <input type="button" id="btn_queryAccountAllBalances" value="立即查询"  /><br><br>
                                 <p class="res"></p>
                             </div>
@@ -1523,7 +1523,7 @@
 
                 loadLeftNavs();
                 
-                //  var _configParams={ 
+                // var _configParams={ 
                 //     ws_node_list:[
                 //          {url:"ws://test.cocosbcx.net",name:"Cocos - China - Beijing"}   
                         
@@ -1556,7 +1556,6 @@
                      check_cached_nodes_data:false
                     //app_keys:["5HxzZncKDjx7NEaEv989Huh7yYY7RukcJLKBDQztXAmZYCHWPgd"]
                 };
-
                 var bcx=new BCX(_configParams);
                 //可以不用初始化，直接调用，API会自动判断是否初始化，热没有初始化则自动初始化
                 bcx.init({
@@ -1567,16 +1566,22 @@
                 }).then(res=>{
                     console.info("init res",res);
                     console.info("this.$bcx.getAccountInfo()",bcx.getAccountInfo());
+                    if(res.code==1){
+                        _wallet.init();
+                        _user.init();
+                        _contracts.init();
+                        _NHAssets.init();
+                        _assets.init();
+                        _explorer.init();
+                        _market.init();
+                        _others.init();
 
-                    _wallet.init();
-                    _user.init();
-                    _contracts.init();
-                    _NHAssets.init();
+                        // bcx.testNodesPings(_configParams.ws_node_list).then(res=>{
+                        //     console.info("res",res);
+                        // });
+                    }
+
                     _nodes.init();
-                    _assets.init();
-                    _explorer.init();
-                    _market.init();
-                    _others.init();
                 });
                 // bcx.subscribeToRpcConnectionStatus({
                 //     callback:res=>{
@@ -3024,37 +3029,35 @@
                     },
                     lookupWSNodeList:function(){
                         bcx.lookupWSNodeList({
-                            refresh:true,
-                            callback:res=>{
-                                console.info("getWSNodeList res111",res);
-                                if(res.code==1){
-                                    gel(".div_getWSNodeList .selected_url").innerText=res.data.selectedNodeUrl
-                                    var nodes_html="";
-                                    res.data.nodes.forEach((node,index)=>{
-                                        let {name,url,ping}=node;
-                                        let connect=url!=res.data.selectedNodeUrl?
-                                        `<a href="javascript:_nodes.switchAPINode('${url}')">连接</a>
-                                        <a href="javascript:_nodes.deleteAPINode('${url}')">删除</a>`:"";
-                                        nodes_html+=`<tr>
-                                                <td>${index+1}</td>
-                                                <td >${name}</td>
-                                                <td>${url}</td>
-                                                <td>${ping} ms</td>
-                                                <td>${connect}</td>
-                                            </tr>`
-                                    });
-                                    gel(".div_getWSNodeList tbody").innerHTML=nodes_html;
-                                }
+                            refresh:true
+                        }).then(res=>{
+                            console.info("getWSNodeList res111",res);
+                            if(res.code==1){
+                                gel(".div_getWSNodeList .selected_url").innerText=res.data.selectedNodeUrl
+                                var nodes_html="";
+                                res.data.nodes.forEach((node,index)=>{
+                                    let {name,url,ping}=node;
+                                    let connect=url!=res.data.selectedNodeUrl?
+                                    `<a href="javascript:_nodes.switchAPINode('${url}')">连接</a>
+                                    <a href="javascript:_nodes.deleteAPINode('${url}')">删除</a>`:"";
+                                    nodes_html+=`<tr>
+                                            <td>${index+1}</td>
+                                            <td >${name}</td>
+                                            <td>${url}</td>
+                                            <td>${ping} ms</td>
+                                            <td>${connect}</td>
+                                        </tr>`
+                                });
+                                gel(".div_getWSNodeList tbody").innerHTML=nodes_html;
                             }
                         }); 
                     },
                     switchAPINode:function(url){
                         bcx.switchAPINode({
-                            url,
-                            callback:res=>{
-                                console.info("switchAPINode res",res);
+                            url
+                        }).then(res=>{
+                            console.info("switchAPINode res",res);
                                 this.lookupWSNodeList();
-                            }
                         })
                     },
                     addAPINode:function(){

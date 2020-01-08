@@ -13,6 +13,7 @@ const fetch = async (assets,cacheAndOne=false) => {
   }
   if(cacheAndOne){
       if(_assets[assets[0]])  return  _assets[assets[0]];
+      else  _assets[assets[0]]={precision:5,symbol:assets[0]};
   }
   
   try {

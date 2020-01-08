@@ -1,5 +1,0 @@
-import Apis from "./src/ApiInstances";
-import Manager from "./src/ConnectionManager";
-import ChainConfig from "./src/ChainConfig";
-
-export { Apis, ChainConfig, Manager };

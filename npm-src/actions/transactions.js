@@ -88,7 +88,6 @@ export const _transactionOperations = async (store, { operations,proposeAccount=
               });
               op_result.contract_affecteds=(await API.Operations.parseOperations({
                 operations:_operations,
-                userId:rootGetters["account/getAccountUserId"],
                 store,
                 isContract:true
               })).map(item=>{

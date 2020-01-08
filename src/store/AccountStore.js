@@ -139,6 +139,7 @@ const actions={
                 setTimeout(()=>{
                     dispatch("user/fetchUserForIsSave",{nameOrId:name,isSave:true},{root:true}).then(acc_res=>{
                         delete acc_res.success;
+                        // console.info("acc_res",acc_res);
                         resolve(acc_res)
                     });
                 },isCreateAccount?2000:100);

@@ -244,7 +244,8 @@ const updateAccountData=async (store,type)=>{
             prev_witnesses: witnesses,
             prev_committee: committee,
             prev_workers: workers,
-            prev_vote_ids: vids
+            prev_vote_ids: vids,
+            vote_for_witness:account.getIn(["asset_locked","vote_for_witness"])
         };
         commit(types.SET_VOTES_STATE,state);
   
@@ -317,13 +318,19 @@ export const formatVotes=async (store,proxy_account_id)=>{
             votes=votes.toFixed(3);
 
             let account_id=account.get("id");
-
+            let owner_votes=0;
+            if(getters["getVotesState"]&&action){
+                 owner_votes=helper.getFullNum(getters["getVotesState"].vote_for_witness.get("amount"),core_asset.precision);
+            }
+            // console.info("owner_votes",getters["getVotesState"].vote_for_witness.get("amount"),owner_votes);
+            
             let vote_obj=vote_ids_obj[account_id];
             let {vote_id,total_missed,last_confirmed_block_num,last_aslot}=vote_obj.toJS();
             let vote_account={
                 account_name:account.get("name"),
                 url,
                 votes,
+                owner_votes,
                 active:isActive,
                 supported:!!action,
                 supporters,

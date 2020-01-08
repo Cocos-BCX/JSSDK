@@ -1,4 +1,4 @@
-const en_US = {
+ const en_US = {
     languages_zh: "简体中文",
     languages_en: "English",
     //trxTypes

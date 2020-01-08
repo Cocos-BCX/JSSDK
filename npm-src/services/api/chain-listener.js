@@ -16,9 +16,10 @@ class ChainListener {
     this.sub_max_ops=13;
     this.real_sub=true;
   }
-  async enable() {
+  async enable(sub_max_ops) {
     ChainStore.setCustomSubscribeCallback(this._mainCallback.bind(this));
     this._enabled = true;
+    this.sub_max_ops=sub_max_ops||13;
   }
   disable() {
     return Apis.instance().db_api().exec('cancel_all_subscriptions', []).then(() => {
@@ -57,18 +58,19 @@ class ChainListener {
         data[0].forEach(operation => {
           this._subscribers.forEach((subscriber) => {
             if(subscriber.type=="BlocksOp"&&operation.id=="2.1.0"){
+              // console.info("operation",operation);
               operation.block_num=operation.block_height=operation.head_block_number;
               operation.block_id=operation.head_block_id;
               subscriber.notify(operation,false);
+            }else{
+              subscriber.notify(operation);
             }
-            subscriber.notify(operation);
           });
         });
         return;
       }
       if(!this._subscribers.length) return;
       data[0].forEach(operation => {
-
           if(operation&&operation.id=="2.1.0"){
             let {head_block_number}=operation;
 

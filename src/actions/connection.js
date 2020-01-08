@@ -87,7 +87,6 @@ export const initConnection =(store,params) => {
   }else if(!params||params.clearCallback){
     _callbacks=[];
   }
-
   //If the RPC connected, then execute the callback 
   if(getters.isWsConnected&&params&&!params.refresh){
     _callbacks.length&&_callbacks[0]({code:1});
@@ -165,7 +164,7 @@ export const initConnection =(store,params) => {
   };
 
   var startConnect=function(url="",refresh){
-    commit(types.SET_WS_CONNECTING,true);
+    commit(types.SET_WS_CONNECTING,true);    
     API.Connection.connect({
       statusCallback:updateConnectionStatus,
       changeNodeUrl:refresh?"":url,
@@ -202,11 +201,10 @@ export const IDB_INIT=(store)=>{
 
           // ChainStore.clearCache();
           // ChainStore.subscribed=false;
-
           ChainStore.init(!!real_sub).then(()=>{
               commit(types.WS_CONNECTED);
               state.reconnectCounter=3;
-              API.ChainListener.enable();
+              API.ChainListener.enable(rootGetters["setting/g_settingsAPIs"].sub_max_ops);
               API.ChainListener.store=store;
 
              //whether check local User Info Cache and use its data
@@ -216,8 +214,8 @@ export const IDB_INIT=(store)=>{
               .then(() => {
                 
                 Promise.all([
-                   //API.Explorer.getGlobalObject()//,
-                   dispatch("explorer/getExplorerWitnesses",null,{root:true})
+                   API.Explorer.getGlobalObject()//,
+                  //  dispatch("explorer/getExplorerWitnesses",null,{root:true})
                 ]).then((res)=>{
                    console.log("bcxjs init ok");
                    _callbacks.forEach(callback_item=>{ callback_item({code:1,data:{selectedNodeUrl:select_ws_node}}); });
@@ -228,7 +226,7 @@ export const IDB_INIT=(store)=>{
                   console.log("[Root.js] ----- ERROR ----->", error);
               });
           }).catch(error=>{ 
-             if(state.reconnectCounter>5){
+             if(state.reconnectCounter>1){
               _callbacks.forEach(callback=>{ callback({code:300,message:"ChainStore sync error, please check your system clock"}); });
              }else{
               commit(types.WS_DISCONNECTED);

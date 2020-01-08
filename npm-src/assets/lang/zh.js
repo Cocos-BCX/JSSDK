@@ -54,7 +54,7 @@
     trxTypes_register_nh_asset_creator:"注册开发者",
     trxTypes_create_world_view:"创建世界观",
     trxTypes_create_nh_asset:"NH资产创造",
-    trxTypes_updata_game_item:"NH资产更新",
+
     trxTypes_delete_nh_asset:"NH资产删除",
     trxTypes_transfer_nh_asset:"NH资产转移",
     trxTypes_create_nh_asset_order:"NH资产挂卖单",

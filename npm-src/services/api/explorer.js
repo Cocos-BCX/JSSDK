@@ -30,26 +30,33 @@ export const getGlobalObject= async (isCache=false) => {
         }
     }
 };
-
+let _reqOk=true;
 export const getDynGlobalObject = async (isExec=false,isReqWitness=false) => {
    try{
          //let response=await Apis.instance().db_api().exec('get_objects',[["2.1.0"]])
-         let response= ChainStore.getObject("2.1.0",false,true,false,false);
-         if(response){   
-            try{ response=response.toJS(); }
-            catch(e){}
+         if(_reqOk||isExec){
+            _reqOk=false
+            let response= ChainStore.getObject("2.1.0",false,true,false,false);
+            if(response){   
+                try{ response=response.toJS(); }
+                catch(e){}
+            }
+            
+            if((!response||isExec)){
+                response=await Apis.instance().db_api().exec('get_objects',[["2.1.0"]]);
+                response=response[0];
+                response.chainTimeOffset=ChainStore.getEstimatedChainTimeOffset();
+            }
+
+            if(isReqWitness){
+                response.current_witness_name=await getWitnessName(response.current_witness);
+            }
+            _reqOk=true;
+            return {code:1,data:response}
+         }else{
+             return {code:0};
          }
-
-         if(!response||isExec){
-            response=await Apis.instance().db_api().exec('get_objects',[["2.1.0"]]);
-            response=response[0];
-            response.chainTimeOffset=ChainStore.getEstimatedChainTimeOffset();
-        }
-
-        if(isReqWitness){
-            response.current_witness_name=await getWitnessName(response.current_witness);
-        }
-        return {code:1,data:response}
+         
    }catch(e){
        return {
            code:0,

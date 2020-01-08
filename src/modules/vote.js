@@ -25,7 +25,8 @@ const getters={
   vote_ids_obj:state=>state.vote_ids_obj,
   vote_ids:state=>state.vote_ids,
   queryAccount:state=>state.queryAccount,
-  isExplorer:state=>state.isExplorer
+  isExplorer:state=>state.isExplorer,
+  
 }
 
 const actions={

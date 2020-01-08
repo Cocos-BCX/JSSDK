@@ -168,7 +168,6 @@ const actions = {
             if(isAccountMode){
                 encryptionKey=wallet.encryptionKey;
             }
-
             if((!encryptionKey||encryptionKey=="undefined")&&!isChangePassword){
                 return {code:107,message:"Please import the private key"}
             }
@@ -257,7 +256,7 @@ const actions = {
             wallet_name:"default", 
             create_wallet_password:password
         },{root:true}).then(() => {
-            console.log("Congratulations, your wallet was successfully created.");
+            console.log("Congratulations, your wallet was successfully created.",isCreateAccount);
             if(isCreateAccount){
                 return dispatch('validatePassword',{ password,unlock:true}).then(vp_res=>{
                     return  dispatch("createAccount",{account_name:account}).then(ca_res=>{
@@ -335,7 +334,6 @@ const actions = {
                         //state.aes_private = local_aes_private
                     }
                 })
-                //console.info([add, end]);
                 //console.debug('---------------------')
                 resolve(Promise.all([add, end]))
             })

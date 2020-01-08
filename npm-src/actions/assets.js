@@ -710,7 +710,7 @@ export const issueAsset=({dispatch},params)=>{
   if(!helper.trimParams(params,{memo:""})){
     return {code:101,message:"Parameter is missing"};
   }
-  let {toAccount,amount,memo,assetId="",onlyGetFee}=params;
+  let {toAccount,amount,memo,assetId="",isEncryption=true,}=params;
   assetId=assetId.toUpperCase();
   return dispatch('transactions/_transactionOperations', {
     operations:[{
@@ -720,10 +720,10 @@ export const issueAsset=({dispatch},params)=>{
         to:toAccount,
         amount,
         asset_id:assetId,
-        memo
+        memo,
+        isEncryption
       }
-    }],
-    onlyGetFee
+    }]
   },{root:true});
 }
 

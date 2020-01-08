@@ -6,7 +6,7 @@ import { ChainConfig } from 'bcxjs-ws';
 import PersistentStorage from '../services/persistent-storage';
 
 const initialState = {
-    versions:"2.1.13",
+    versions:"2.1.14",
     ops_limit:100,
     autoReconnect:true,
     defaultSettings:{
@@ -74,9 +74,12 @@ const actions={
         commit(types.SET_AUTO_RECONNECT,b);
     },
     setSettingsAPIS:({commit,dispatch},params)=>{
+        if(!params||typeof params=="function"){
+            return {code:0};
+        }
         let {app_keys,check_cached_account_data}=params;
         //contract authorization app_keys configuration
-        if(app_keys&&Array.isArray(app_keys)) 
+        if(app_keys!=undefined&&app_keys&&Array.isArray(app_keys)) 
           dispatch("PrivateKeyStore/setAppkeys",app_keys,{root:true});
        
        //whether check and use the local cache of accounts info
@@ -118,7 +121,7 @@ const mutations = {
      [types.SET_SETTINGS_APIS]:(state,params)=>{
          let {default_ws_node,faucet_url,unit,ws_node_list,networks,
          check_cached_account_data,check_cached_nodes_data,worker,auto_reconnect,
-         sub_max_ops,app_keys,real_sub,locale}=params;
+         sub_max_ops,real_sub,locale}=params;
 
          let settingsAPIs=state.settingsAPIs;
          

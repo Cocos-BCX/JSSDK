@@ -15,12 +15,11 @@ export const getAccount = async (id,isCache=false) => {
         if(_accs[id]){
           return {code:1,data:_accs[id],success:true}
         }
-        // else{
-        //   return {code:0,success:false};
-        // }
+    }else{
+      _accs[id]={account:{name:id}};
     }
   }
-  _accs[id]="";
+  // _accs[id]="";
   try {
     if(!(/^1.2.\d+/.test(id))){
       return {code:0}

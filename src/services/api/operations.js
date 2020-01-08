@@ -204,6 +204,7 @@ const Operations = {
     return {
       operations: parsedOperations.map(item=>{
           item.parse_operations=item.parseOperations;
+          // item.parse_operations.fees=JSON.parse(item.parse_operations.fees);
           item.parse_operations_text=item.parseOperationsText;
           item.raw_data=item.payload;
           item.type_name=item.typeName;
