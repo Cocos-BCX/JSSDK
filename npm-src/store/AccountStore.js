@@ -21,7 +21,7 @@ const initialState = {
     currentAccount: null,
     linkedAccounts: Immutable.Set(),
     myIgnoredAccounts: Immutable.Set(),
-    unFollowedAccounts: Immutable.Set(process.browser?accountStorage.get("unfollowed_accounts", []):[]),
+    unFollowedAccounts: Immutable.Set((process.browser||true)?accountStorage.get("unfollowed_accounts", []):[]),
     searchAccounts: Immutable.Map(),
     searchTerm: "",
     initial_account_refs_load:true,

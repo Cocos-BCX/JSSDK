@@ -59,6 +59,7 @@ const getters={
                 private_key = null;
                 isMine = true;
             }
+            let code=1;
             if (private_key) {
                 let tryLegacy = false;
                 try {
@@ -75,6 +76,7 @@ const getters={
                     console.log("transfer memo exception ...", e);
                     memo_text = "*";
                     tryLegacy = true;
+                    code=184;
                 }
         
                 // Apply legacy method if new, correct method fails to decode
@@ -91,12 +93,19 @@ const getters={
                     } catch (e) {
                         console.log("transfer memo exception ...", e);
                         memo_text = "**";
+                        code=184;
                     }
                 }
-            }    
+            }
+            if(code!=1){
+                return {code,message:"transfer memo exception ..."};
+            } 
             return {
-                text: memo_text,
-                isMine
+                code,
+                data:{
+                    text: memo_text,
+                    isMine
+                }
             }
         }
     }

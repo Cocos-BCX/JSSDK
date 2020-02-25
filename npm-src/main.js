@@ -77,8 +77,8 @@ import * as utils from './utils/index';
         if(isSwitchNode){
           return this.api.dispatch("setting/setSettingsAPIS",params).then(res=>{
                return this.switchAPINode({
-                   url:this.api.getters["setting/g_settingsAPIs"].select_ws_node,
-                   callback:params.callback
+                  url:params.default_ws_node||this.api.getters["setting/g_settingsAPIs"].select_ws_node,
+                  callback:params.callback
                });
           });  
          }else{
@@ -346,7 +346,7 @@ import * as utils from './utils/index';
           return {code:114,message:"Account is locked or not logged in"};
         }
         if(memo){
-          return {code:1,data:this.api.getters["PrivateKeyStore/decodeMemo"](memo,this.api)};
+          return this.api.getters["PrivateKeyStore/decodeMemo"](memo,this.api);
         }else{
           return {code:129,message:"Parameter 'memo' can not be empty"};
         }

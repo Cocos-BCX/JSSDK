@@ -22,6 +22,7 @@ const signTransaction = async (transaction,store) => {
   //Contract authentication
   try{
     let app_keys=store.rootGetters["PrivateKeyStore/app_keys"];
+    if(app_keys.length&&transaction.operations[0][0]==35)//app_keys只作用于合约调用
     app_keys.forEach(app_key=>{
       app_key= PrivateKey.fromWif(app_key);
       transaction.add_signer(app_key, app_key.toPublicKey().toPublicKeyString())

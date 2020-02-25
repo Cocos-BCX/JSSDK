@@ -6,7 +6,7 @@ import { ChainConfig } from 'bcxjs-ws';
 import PersistentStorage from '../services/persistent-storage';
 
 const initialState = {
-    versions:"2.1.14",
+    versions:"2.1.15",
     ops_limit:100,
     autoReconnect:true,
     defaultSettings:{
@@ -150,6 +150,7 @@ const mutations = {
         if(settingsAPIs.check_cached_nodes_data&&Object.keys(cached_nodes_data).length){
             settingsAPIs.ws_node_list = PersistentStorage.getSavedNodesData();
         }else if(ws_node_list){
+            settingsAPIs.ws_node_list={};
             ws_node_list.forEach(node=>{
                 settingsAPIs.ws_node_list[node.url]={location:node.name};
             });

@@ -81,7 +81,7 @@ var global = module.exports = typeof window != 'undefined' && window.Math == Mat
         if(isSwitchNode){
           return this.api.dispatch("setting/setSettingsAPIS",params).then(res=>{
                return this.switchAPINode({
-                   url:this.api.getters["setting/g_settingsAPIs"].select_ws_node,
+                   url:params.default_ws_node||this.api.getters["setting/g_settingsAPIs"].select_ws_node,
                    callback:params.callback
                });
           });  
@@ -150,6 +150,7 @@ var global = module.exports = typeof window != 'undefined' && window.Math == Mat
           const use_accountOpt_methods={
             getPrivateKey:"account/_getPrivateKey", 
             changePassword:"account/changePassword",
+            changeAccountKeys:"account/changeAccountKeys",
             upgradeAccount:"account/upgradeAccount",
 
             witnessCreate:"vote/witnessCreate",
@@ -190,7 +191,8 @@ var global = module.exports = typeof window != 'undefined' && window.Math == Mat
             setCurrentAccount:"AccountStore/setCurrentAccount",
             proposeRelateWorldView:"NHAssets/proposeRelateWorldView",
             updateCollateralForGas:"assets/updateCollateralForGas",
-            claimVestingBalance:"account/claimVestingBalance"
+            claimVestingBalance:"account/claimVestingBalance",
+            committeeMemberUpdateGlobalParameters:"proposals/committeeMemberUpdateGlobalParameters"
           }
           
           const use_validateAccount_methods={
@@ -350,7 +352,7 @@ var global = module.exports = typeof window != 'undefined' && window.Math == Mat
           return {code:114,message:"Account is locked or not logged in"};
         }
         if(memo){
-          return {code:1,data:this.api.getters["PrivateKeyStore/decodeMemo"](memo,this.api)};
+          return this.api.getters["PrivateKeyStore/decodeMemo"](memo,this.api);
         }else{
           return {code:129,message:"Parameter 'memo' can not be empty"};
         }
@@ -500,8 +502,8 @@ var global = module.exports = typeof window != 'undefined' && window.Math == Mat
     }
     /**********Interfaces cannot return value, callbacks only **end** United Labs of BCTech.*/
 
-    testNodesPings(nodes){
-      return utils.testNodesPings(nodes);
+    testNodesPings(nodes,max_ping_s){
+      return utils.testNodesPings(nodes,max_ping_s);
     }
   }
 

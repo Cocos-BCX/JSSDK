@@ -119,7 +119,7 @@ export const initConnection =(store,params) => {
     //RPC connected
     if (status === 'realopen') {
       commit(types.SET_WS_CONNECTING,false);
-      if(process.browser){
+      if(process.browser||true){
         dispatch("IDB_INIT");
       }else{
         ChainStore.init(rootGetters["setting/g_settingsAPIs"].real_sub).then(()=>{

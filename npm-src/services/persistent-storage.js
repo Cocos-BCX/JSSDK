@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie';
 
-let _host=(process.browser?window.location.host:"GPH")+"_"+"1.4";
+let _host=((process.browser||true)?window.location.host:"GPH")+"_"+"1.4";
 // Persistent Storage for data cache management
 const PersistentStorage = {
   saveUserData: ({ id, encrypted_key, encryptionKey, passwordPubkey,activePubkey }) => {
