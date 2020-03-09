@@ -1,4 +1,4 @@
-import { PrivateKey,TransactionBuilder } from 'bcxjs-cores';
+import { PrivateKey,TransactionBuilder, Signature, Serializer, TransactionHelper } from 'bcxjs-cores';
 import { ChainConfig,Apis } from 'bcxjs-ws';
 import { getUser } from './account';
 import { encryptMemo } from '../../utils';
@@ -6,6 +6,57 @@ import helper from "../../lib/common/helper";
 import accountUtils from "../../lib/common/account_utils";
 import API from '../api';
 import Immutable from "immutable";
+
+// 2020-03-05  xulin_add  签名
+const signString = async (transaction, store, signContent) => {
+  let pubkey = transaction.account.active.key_auths[0][0]
+
+  let private_key = await store.dispatch("WalletDb/getPrivateKey",pubkey,{root:true})
+  let signBuffer = new Buffer(signContent)
+  let signArray = Array.from(signBuffer)
+  signArray.unshift(signContent.length)
+  let signArr = new ArrayBuffer(signArray.length);
+  let signUint8Array = new Uint8Array(signArr);
+  signUint8Array.set(signArray, 0)
+  let signre = Signature.signBuffer(signUint8Array, private_key)
+  return { success: true,data:signre.toHex(),code:1}
+}
+
+
+// 2020-03-05  xulin_add  解签
+const checkingSignString = async (checkingSignParams) => {
+  let { checkingSignContent, signContent } = checkingSignParams
+  // 解签
+  let signre = ''
+  try {
+    signre = Signature.fromHex(checkingSignContent)
+  } catch (error) {
+    return{
+      success:false,
+      error: "Incorrect information",
+      code: 0
+    }
+  }
+  let signBuffer = new Buffer(signContent)
+  let signArray = Array.from(signBuffer)
+  signArray.unshift(signContent.length)
+  let signArr = new ArrayBuffer(signArray.length);
+  let signUint8Array = new Uint8Array(signArr);
+  signUint8Array.set(signArray, 0)
+  let signature_obj = new Signature(signre.r, signre.s, signre.i)
+  let mypubkey = signature_obj.recoverPublicKeyFromBuffer(signUint8Array)
+  let userId = await API.Account.getAccountIdByOwnerPubkey(mypubkey.toPublicKeyString())
+
+  if (userId.length == 0) {
+    return{
+      success:false,
+      error: "Incorrect information",
+      code: 0
+    }
+  } else {
+    return{ success: true,data:userId,code:1}
+  }
+}
 
 
 const signTransaction = async (transaction,store) => {
@@ -131,6 +182,11 @@ const transactionOpWorker = async (fromId,operations,fromAccount,propose_options
 };
 
 const transactionOp = async (fromId,operations,fromAccount,proposeAccountId="",store) => {
+  // console.log('fromId: ', fromId)
+  // console.log('operations: ', operations)
+  // console.log('fromAccount: ', fromAccount)
+  // console.log('proposeAccountId: ', proposeAccountId)
+  // return false
   const opObjects=await buildOPObjects(operations,proposeAccountId||fromId,fromAccount,store);
   if(opObjects.code&&opObjects.code!=1){
     return opObjects;
@@ -181,7 +237,6 @@ const transactionOp = async (fromId,operations,fromAccount,proposeAccountId="",s
      }  
      transaction.propose(propose_options)
   }
-  // console.info("transaction",transaction);
   return  process_transaction(transaction,store,opObjects);
 };
 
@@ -359,4 +414,4 @@ const getUpdateAccountObject=(params,fromAccount)=>{
 }
 
 
-export default { transactionOp,transactionOpWorker };
+export default { transactionOp,transactionOpWorker, signString, checkingSignString };

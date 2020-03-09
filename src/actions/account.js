@@ -1,4 +1,4 @@
-import { PrivateKey, key, Aes, brainKey,ChainValidation,FetchChain,ChainStore,FetchChainObjects } from 'bcxjs-cores';
+import { PrivateKey, key, Aes, brainKey,ChainValidation,FetchChain,ChainStore,FetchChainObjects,  } from 'bcxjs-cores';
 import Immutable from "immutable";
 
 import * as types from '../mutations';
@@ -346,6 +346,19 @@ export const keyLogin=async (store,params)=>{
   };
 }
 
+export const signString=async ({dispatch},{account},params)=>{
+  
+  // let result = API.Account.getUser("1.2.246828")
+  let result = (await dispatch("user/fetchUser",'1.2.246828',{root:true})).data;
+  console.log(result)
+  console.log(result.account.active.key_auths[0])
+  console.log(result.account.active.key_auths[0][0])
+  let pub_key = result.account.active.key_auths[0][0]
+  let private_key=await dispatch("WalletDb/getPrivateKey",pub_key,{root:true});
+  console.log(private_key)
+  return result
+}
+
 export const importPrivateKey=async ({rootGetters,state,dispatch},params)=>{
   if(!helper.trimParams(params)){
     return {code:101,message:"Parameter is missing"};
@@ -635,7 +648,6 @@ export const checkCachedUserData =async ({ commit,dispatch,rootGetters }) => {
         isSave:true,
         activePubkey:data.activePubkey
       },{root:true});
-
       if(cacheAccount.code==1&&data.activePubkey&&cacheAccount.data.account.active.key_auths[0][0]==data.activePubkey){
         await dispatch("PrivateKeyStore/setKeys",{
           import_account_names: [data.userId],
@@ -667,13 +679,11 @@ export const _getPrivateKey=async ({dispatch},{account})=>{
     let result;
     let active = account.active;
     let owner = account.owner;
-    // let activePublicKey = (active.key_auths && active.key_auths.length > 0) ? active.key_auths[0][0] : '';
-    // let ownerPublicKey = (owner.key_auths && owner.key_auths.length > 0) ? owner.key_auths[0][0] : '';
-
     let activePrivateKeys=[];
     let ownerPrivateKeys=[];
     let activePrivateKey="";
     let ownerPrivateKey="";
+    console.log('account: ', account)
     await Promise.all(active.key_auths.map(async item=>{
        activePrivateKey=await dispatch("WalletDb/getPrivateKey",item[0],{root:true});
        if(!!activePrivateKey) activePrivateKeys.push(activePrivateKey.toWif());
@@ -746,6 +756,12 @@ export const _accountOpt=async ({ commit, rootGetters,dispatch },{method,params=
   }else{
      return {code:-11,message:"Please login first"};
   }
+}
+
+export const _psdChangePrivateKey=async ({dispatch},{account, password})=>{
+  // let owner_private = WalletDbS.generateKeyFromPassword(account, "owner", password);
+  let active_private = WalletDbS.generateKeyFromPassword(account, "active", password);
+  return active_private
 }
 
 //_validateAccount will check the incoming parameters of account to determine whether the account exists.

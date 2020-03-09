@@ -3,6 +3,7 @@ import * as types from '../mutations';
 import {PublicKey, ChainStore, Aes} from "bcxjs-cores";
 import idb_helper from "../services/api/wallet/idb-helper";
 import {PrivateKeyTcomb} from "../store/tcomb_structs";
+import * as WalletDbS from "../store/WalletDb"
 
 
 import Immutable from "immutable";
@@ -41,8 +42,90 @@ const getters={
             return _pubkeys;
        }
     },
+    
+    psdDecodeMemo:state=>{
+        let errorMessege = ""
+        return (memo_con,store,account, password)=>{
+            let memo = memo_con
+            let lockedWallet = false;
+            let memo_text, isMine = false;
+            let from_private_key = state.keys[memo.from];
+            let to_private_key = state.keys[memo.to];
+            let private_key = from_private_key ? from_private_key : to_private_key;
+            let public_key = from_private_key ? memo.to : memo.from;
+            public_key = PublicKey.fromPublicKeyString(public_key)
+            try {
+                // private_key =store.getters["WalletDb/decryptTcomb_PrivateKey"](private_key);//WalletDb.decryptTcomb_PrivateKey(private_key);
+                private_key = WalletDbS.generateKeyFromPassword(account, "active", password).privKey
+            }
+            catch (e) {
+                // Failed because wallet is locked
+                lockedWallet = true;
+                private_key = null;
+                isMine = true;
+            }
+
+            let tryLegacy = false;
+            if (private_key) {
+                try {
+                    memo_text = private_key ? Aes.decrypt_with_checksum(
+                        private_key,
+                        public_key,
+                        memo.nonce,
+                        memo.message
+                    ).toString("utf-8") : null;
+                    if (private_key && !memo_text) {
+                        // debugger
+                    }
+                } catch (e) {
+                    console.log("transfer memo exception ...", e);
+                    memo_text = "*";
+                    tryLegacy = true;
+                    errorMessege = e;
+                }
+        
+                // Apply legacy method if new, correct method fails to decode
+                if (private_key && tryLegacy) {
+                    // debugger;
+                    try {
+                        memo_text = Aes.decrypt_with_checksum(
+                            private_key,
+                            public_key,
+                            memo.nonce,
+                            memo.message,
+                            true
+                        ).toString("utf-8");
+                        tryLegacy = false;
+                    } catch (e) {
+                        console.log("transfer memo exception ...", e);
+                        memo_text = "**";
+                        tryLegacy = true;
+                        errorMessege = e;
+                    }
+                }
+            }    
+            // Error: Invalid key, could not decrypt message(1)
+            let reqData = {}
+            if (tryLegacy) {
+                reqData = {
+                    code: 0,
+                    message: errorMessege
+                }
+            } else {
+                reqData = {
+                    code: 1,
+                    data: {
+                        text: memo_text,
+                        isMine
+                    }
+                }
+            }
+            return reqData
+        }
+    },
     decodeMemo:state=>{
-        return (memo,store)=>{
+        return (memo_con,store)=>{
+            let memo = memo_con
             let lockedWallet = false;
             let memo_text, isMine = false;
             let from_private_key = state.keys[memo.from];
@@ -59,7 +142,6 @@ const getters={
                 private_key = null;
                 isMine = true;
             }
-            let code=1;
             if (private_key) {
                 let tryLegacy = false;
                 try {
@@ -76,7 +158,6 @@ const getters={
                     console.log("transfer memo exception ...", e);
                     memo_text = "*";
                     tryLegacy = true;
-                    code=184;
                 }
         
                 // Apply legacy method if new, correct method fails to decode
@@ -93,19 +174,12 @@ const getters={
                     } catch (e) {
                         console.log("transfer memo exception ...", e);
                         memo_text = "**";
-                        code=184;
                     }
                 }
-            }
-            if(code!=1){
-                return {code,message:"transfer memo exception ..."};
-            } 
+            }    
             return {
-                code,
-                data:{
-                    text: memo_text,
-                    isMine
-                }
+                text: memo_text,
+                isMine
             }
         }
     }
@@ -217,12 +291,6 @@ const actions = {
             return;
         }
         commit("pendingOperation")
-        //console.log("... onAddKey private_key_object.pubkey", private_key_object.pubkey)
-        //console.info("state.keys",state.keys);
-        // state.keys = state.keys.set(
-        //     private_key_object.pubkey,
-        //     PrivateKeyTcomb(private_key_object)
-        // );
         commit(types.SET_KEYS,PrivateKeyTcomb(private_key_object))
         // Vue.set(state.keys,private_key_object.pubkey, PrivateKeyTcomb(private_key_object));
 

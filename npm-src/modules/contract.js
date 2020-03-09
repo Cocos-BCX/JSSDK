@@ -241,13 +241,11 @@ const actions={
         return res;
     },
     callContractFunction:async ({dispatch},params)=>{
-        if(!helper.trimParams(params,{contractKey})){
+        if(!helper.trimParams(params)){
             return {code:101,message:"Parameter is missing"};
         }
-        let {nameOrId,functionName,valueList,contractKey,onlyGetFee}=params;
-        if(contractKey){
-            dispatch("setting/setSettingsAPIS",{app_keys:[contractKey]},{root:true});
-        }
+        let {nameOrId,functionName,valueList,onlyGetFee}=params;
+
         if(!(Array.isArray(valueList))){
             return {code:135,message:"Please check parameter data type"};
         }

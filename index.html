@@ -325,7 +325,7 @@
                         <h2 style="border-bottom:0; padding-bottom:0; margin:6px 0;">钱包解锁与锁定</h2>
                         <div class="div_unlock div_module">
                             <p>私钥模式登录可以使用该方法</p>
-                            <input type="text" class="pwd" placeholder="解锁密码" value="12345678"/><br><br>
+                            <input type="text" class="pwd" placeholder="解锁密码" value="xulin1"/><br><br>
                             <input type="button" id="btn_unlock" value="确认解锁"  /><br><br>
                             <input type="button" id="btn_lock" value="确认锁定"  />
                         </div>
@@ -407,8 +407,8 @@
                             <h2>登录</h2>
                             <div class="div_login div_module">
                                     <!-- tom0002,12345678 -->
-                                用户名<input type="text" id="login_username"  value="test1"><br><br>
-                                密码<input type="text" id="login_pwd"  value="12345678"><br><br><br>
+                                用户名<input type="text" id="login_username"  value="xulin-test1"><br><br>
+                                密码<input type="text" id="login_pwd"  value="xulin123"><br><br><br>
                                 <input type="button" id="btn_login" value="登录"  />
                             </div>
                         </div>
@@ -510,7 +510,26 @@
                         <div class="div_module_c" id="div_getPrivateKey" pclass="class_11" >
                             <h2>获取私钥</h2>
                             <div class="div_getPrivateKey div_module">
+                                <input type="text" id="input_psd" placeholder="密码"  /><br><br>
+                                <input type="button" id="btn_psdChangePrivateKey" value="测试密码转化私钥"  /><br><br>
                                 <input type="button" id="btn_getPrivateKey" value="获取私钥"  /><br><br>
+                                <p class="res"></p>
+                            </div>
+                        </div>
+                        <div class="div_module_c" id="div_sign" pclass="class_11" >
+                            <h2>签名</h2>
+                            <div class="div_getPrivateKey div_module">
+                                <input type="text" id="input_sign" placeholder="签名信息"  /><br><br>
+                                <input type="button" id="btn_sign" value="签名"  /><br><br>
+                                <p class="res"></p>
+                            </div>
+                        </div>
+                        <div class="div_module_c" id="div_checkoutSign" pclass="class_11" >
+                            <h2>验签</h2>
+                            <div class="div_getPrivateKey div_module">
+                                <input type="text" id="input_sign_checkoutSign" placeholder="签名信息"  /><br><br>
+                                <input type="text" id="input_checkoutSign" placeholder="验签信息"  /><br><br>
+                                <input type="button" id="btn_checkoutSign" value="验签"  /><br><br>
                                 <p class="res"></p>
                             </div>
                         </div>
@@ -526,7 +545,8 @@
                         <div class="div_module_c" id="div_getOperations" pclass="class_11" >
                             <h2>查询和订阅账户记录</h2>
                             <div class="div_getOperations div_module" style="width:98%;">
-                                account<input  type="text" class="account" value="test1"><br><br>
+                                password<input  type="text" class="password" value="xulin123"><br><br>
+                                account<input  type="text" class="account" value="xulin-test1"><br><br>
                                 limit<input  type="text" class="limit" value="10"><br><br>
                                 <input type="button" id="btn_getOperations" value="立即查询" /><br><br>
                                 <table class="table">
@@ -549,10 +569,10 @@
                             <h2>转账</h2>
                             <div class="div_transferAsset div_module">
                                 <div class="div_from_account" style="display:none;">来自<input  type="text" class="from_account" value="test1"><br><br></div>
-                                发往<input  type="text" class="to_account" value="test2"><br><br>
+                                发往<input  type="text" class="to_account" value="xulin-test1"><br><br>
                                 数量<input type="number" class="transfer_amount"  value="1"><br><br>
                                 资产id<input type="text" class="asset_id"  value="COCOS"><br><br>
-                                备注消息<input class="transfer_memo" type="text" value="">
+                                备注消息<input class="transfer_memo" type="text" value="I am mechanic">
                                 <div class="checkbox">
                                     是否发起提议: <input type="checkbox"  class="isPropose" style="width:auto;" />          
                                 </div>
@@ -1523,53 +1543,25 @@
 
                 loadLeftNavs();
                 
-                // var _configParams={ 
-                //     // default_ws_node:"wss://node.cocos-terminal.com/wss",
-                //     ws_node_list:[
-                //        {url:"wss://api.cocosbcx.net",name:"Cocos - Terminal"},
-                //        {url:"wss://node.cocos-terminal.com/wss",name:"Cocos - Terminal"}   
-                //      ],
-                //      networks:[
-                //         {
-                //             core_asset:"COCOS",
-                //             chain_id:"1ae3653a3105800f5722c5bda2b55530d0e9e8654314e2f3dc6d2b010da641c5" 
-                //         }
-                //      ], 
-                //      faucet_url:"http://test-faucet.cocosbcx.net",
-                //      auto_reconnect:true,
-                //      real_sub:true,
-                //      check_cached_nodes_data:false
-                //     //app_keys:["5HxzZncKDjx7NEaEv989Huh7yYY7RukcJLKBDQztXAmZYCHWPgd"]
-                // };
-
-                // var _configParams={ 
-                //     ws_node_list:[
-                //          {url:"ws://test.cocosbcx.net",name:"Cocos - China - Beijing"}   
-                        
-                //      ],
-                //      networks:[
-                //         {
-                //             core_asset:"COCOS",
-                //             chain_id:"1ae3653a3105800f5722c5bda2b55530d0e9e8654314e2f3dc6d2b010da641c5" 
-                //         }
-                //      ], 
-                //      faucet_url:"https://test-faucet.cocosbcx.net",
-                //      auto_reconnect:true,
-                //      real_sub:true,
-                //      check_cached_nodes_data:false
-                //     //app_keys:["5HxzZncKDjx7NEaEv989Huh7yYY7RukcJLKBDQztXAmZYCHWPgd"]
-                // };
                 var _configParams={ 
+                    // default_ws_node:"wss://node.cocos-terminal.com/wss",
+                    // default_ws_node:"wss://api.cocosbcx.net",
+                    default_ws_node:"wss://test.cocosbcx.net",
                     ws_node_list:[
-                      {url:"wss://api.cocosbcx.net",name:"Cocos - Terminal"}
+                       {url:"wss://test.cocosbcx.net",name:"Test"},
+                       {url:"wss://api.cocosbcx.net",name:"Cocos - Terminal"},
+                       {url:"wss://node.cocos-terminal.com/wss",name:"Cocos - Terminal"},
                      ],
                      networks:[
                         {
                             core_asset:"COCOS",
-                            chain_id:"6057d856c398875cac2650fe33caef3d5f6b403d184c5154abbff526ec1143c4" 
+                            chain_id:"1ae3653a3105800f5722c5bda2b55530d0e9e8654314e2f3dc6d2b010da641c5" 
+                            // chain_id:"6057d856c398875cac2650fe33caef3d5f6b403d184c5154abbff526ec1143c4" 
                         }
                      ], 
-                     faucet_url:"https://faucet.cocosbcx.net",
+                     faucet_url:"http://test-faucet.cocosbcx.net",
+                    //  faucet_url:"https://faucet.cocosbcx.net",
+
                      auto_reconnect:true,
                      real_sub:true,
                      check_cached_nodes_data:false
@@ -2834,6 +2826,11 @@
                         
                         gel("#btn_queryUserInfo").onclick=this.queryUserInfo;
                         gel("#btn_getPrivateKey").onclick=this.getPrivateKey;
+                        gel("#btn_sign").onclick=this.sign;
+                        gel("#btn_checkoutSign").onclick=this.checkoutSign;
+                        
+                        gel("#btn_psdChangePrivateKey").onclick=this.psdChangePrivateKey;
+                        
                         gel("#btn_getOperations").onclick=this.fetchAndSubscribe
 
                         gel(".div_createAccountWithPublicKey .btn_generateKey").onclick=this.generateKey;
@@ -2887,10 +2884,31 @@
                             }
                         })
                     },
+                    psdChangePrivateKey:function(){
+                        let input_psd = document.getElementById('input_psd').value
+                        
+                        bcx.psdChangePrivateKey(input_psd)
+                    },
                     getPrivateKey:function(){
                         bcx.getPrivateKey().then(res=>{
                             console.info(res);
                             $(".div_getPrivateKey .res").JSONView(res);
+                        });
+                    },
+                    sign(){
+                        bcx.signString({
+                            signContent: document.getElementById('input_sign').value
+                        }).then(res=>{
+                            console.log("========")
+                            console.log(res)
+                        });
+                    },
+                    checkoutSign(){
+                        bcx.checkingSignString({
+                            checkingSignContent: document.getElementById('input_checkoutSign').value,
+                            signContent: document.getElementById('input_sign_checkoutSign').value
+                        }).then(res=>{
+                            console.log(res)
                         });
                     },
                     queryUserInfo:function(){
@@ -3578,26 +3596,45 @@
                         })
                     }
                 }
-    
-
                 function renderOp(operations,selector,isAllOP=false){
                     gel(selector).innerHTML="";
                     var operations_html=""
                     var memo="",more="";
                     var isLocked=bcx.getAccountInfo().locked;
+                    // _user.operations
                     operations.forEach(function(item,index){
                         more="";
                         memo=item.raw_data.memo||"";
-
                         if(memo){
+                            let backups = memo
                             if((item.type=="transfer"||item.type=="asset_issue")&&!isAllOP){
                                if(isLocked){
                                     memo=memo[0]==0?memo[1]:`<a href="javascript:decodeMemo(${index});">解锁</a>`;
                                 }else{
                                     memo=memo[0]==0?memo[1]:bcx.decodeMemo(memo[1]);
-                                    // console.info("memo",memo);
-                                    if(memo.code==1)  memo=memo.data.text||"";
-                                    if(memo)  memo="备注："+memo;
+
+                                    // let account = gel(".div_getOperations .account").value
+                                    // let password = gel(".div_getOperations .password").value
+                                    // memo=memo[0]==0?memo[1]:bcx.psdDecodeMemo(item.raw_data.memo[1], account, password);
+
+                                    console.info("memo",memo);
+                                    if(memo.code==1)  {
+                                        // memo=memo.data.text||"";
+                                        if (memo.data.text) {
+                                            memo = memo.data.text
+                                            if(memo)  memo="备注："+memo;
+                                        } else {
+                                            // let account = gel(".div_getOperations .account").value
+                                            let password = gel(".div_getOperations .password").value
+                                            // memo=memo[0]==0?memo[1]:bcx.psdDecodeMemo(item.raw_data.memo[1], item.parse_operations.from, password);
+
+                                            // memo=`<a href="javascript:renderMemo(${item.raw_data.memo[1]}, ${account}, ${password}, ${index});">密码解密</a>`
+                                            memo = `<a href="javascript:renderMemo(${index});">密码解密</a>`
+
+                                        }
+                                        
+                                    }
+                                    
                                 }
                             }else if(item.type=="creat_nh_asset_order"){
                                 memo="备注："+memo;
@@ -3622,6 +3659,7 @@
                         }
 
                         var new_options_html="";
+                        _user.operations[index].memoResult = memo
                         if(item.raw_data.new_options) new_options_html='<div class="new_options"><span class="green" >新的设定</span> <div></div></div>';
 
                         var tr = document.createElement('tr');
@@ -3641,7 +3679,7 @@
                         gel(selector).appendChild(tr);
                         if(item.raw_data.new_options) $("."+op_class+" .new_options div").JSONView(item.raw_data,{ collapsed: true })
                     })
-                    //gel(selector).innerHTML=operations_html;
+                    // gel(selector).innerHTML=operations_html;
                 }
 
                 function showOpMore(op_index,isAllOP){   
@@ -3662,8 +3700,54 @@
                         alert("请先解锁账户");
                         return;
                     }
-                    _user.fetchAndSubscribe();       
+                    _user.decodeMemo();       
                 }
+
+                function renderMemo(targetIndex) {
+
+                    gel('.div_getOperations tbody').innerHTML="";
+                    // var account = bcx.getAccountInfo().locked;
+                    console.log(bcx.getAccountInfo().account_name)
+                    var operations_html=""
+                    var memo="",more="";
+                    let account = bcx.getAccountInfo().account_name
+                    let password = gel(".div_getOperations .password").value
+                    let result = bcx.psdDecodeMemo(_user.operations[targetIndex].raw_data.memo[1], account, password);
+                    if (result.code != 1) {
+                        alert("密码错误")
+                        // item.memoResult = result
+                    }
+                    console.log('result')
+                    console.log(result.data.text)
+                    _user.operations.forEach(function(item,index){
+                        if (index == targetIndex) {
+                                item.memoResult = result.data.text
+                            
+                        }
+                        var new_options_html="";
+                        // _user.operations[index].memoResult = memo
+                        if(item.raw_data.new_options) new_options_html='<div class="new_options"><span class="green" >新的设定</span> <div></div></div>';
+
+                        var tr = document.createElement('tr');
+                        var op_class="op_"+item.id.replace(/\./g,"");
+                        tr.className=op_class;
+                        tr.innerHTML=`
+                            <td scope="row" width="80">${item.block_num}</th>
+                                <td width="140" >${item.type_name}</td>
+                            <td style="max-width:500px; word-wrap: break-word; padding-right:10px;">
+                                ${item.parse_operations_text} <span class="memo">${item.memoResult}</span>
+                                ${more}
+                                ${new_options_html}
+                            </td>
+                            <td>${item.parse_operations.fees}</td>
+                            <td>${item.date}</td>`
+
+                        gel('.div_getOperations tbody').appendChild(tr);
+                        if(item.raw_data.new_options) $("."+op_class+" .new_options div").JSONView(item.raw_data,{ collapsed: true })
+                    })
+                    // bcx.psdDecodeMemo(item.raw_data.memo[1], account, password)
+                }
+                
                 
 
                 function gel(selector){

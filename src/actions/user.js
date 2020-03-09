@@ -298,7 +298,7 @@ export const getUserAllBalance=async (store,params)=>{
     let assetsIds=Object.keys(accountBalances)
     if(!accountBalances.toAssetId)  assetsIds.push(toAsset.id);
     let reqBalances=await dispatch("assets/fetchAssets",{assets:assetsIds},{root:true});//queried assets info
-    let quoteAssets=Object.keys(reqBalances);
+    let quoteAssets=Object.keys(reqBalances).filter(key=>/^[a-zA-Z]+$/.test(key))
     reqBalances=Immutable.fromJS(reqBalances);
 
     //get queried assets' market info
@@ -322,12 +322,15 @@ export const getUserAllBalance=async (store,params)=>{
 
         let eqValue=amount;
         let fromSymbol = fromAsset.get("symbol");
-        console.info('marketStats',marketStats,fromSymbol,toAsset.symbol);
         if(fromSymbol!=toAsset.symbol){
+          console.log("=======")
+          console.log(marketStats)
+          console.log(fromSymbol)
+          console.log(eqValue)
+          console.log(marketStats.hasOwnProperty(fromSymbol))
           let price=marketStats[fromSymbol].latest_price;
           eqValue =eqValue*price;
         }
-
         let fromAssetPrecision=fromAsset.get("precision");
         let locked_total=asset_locked.locked_total[id]||0;
         let balance=helper.getFullNum(amount,fromAssetPrecision);

@@ -748,6 +748,12 @@ export const _accountOpt=async ({ commit, rootGetters,dispatch },{method,params=
   }
 }
 
+export const _psdChangePrivateKey=async ({dispatch},{account, password})=>{
+  // let owner_private = WalletDbS.generateKeyFromPassword(account, "owner", password);
+  let active_private = WalletDbS.generateKeyFromPassword(account, "active", password);
+  return active_private
+}
+
 //_validateAccount will check the incoming parameters of account to determine whether the account exists.
 export const _validateAccount=async ({dispatch},{method,params,account,accountFieldName="account_id"})=>{
   helper.trimParams(params);

@@ -197,6 +197,8 @@ const actions = {
 
     getPrivateKey:async ({rootGetters,dispatch,state},public_key)=>{
         let _passwordKey=state._passwordKey; 
+        console.log(state)
+        console.log(state)
         if (_passwordKey) return _passwordKey[public_key];
         if(! public_key) return null
         if(public_key.Q) public_key = public_key.toPublicKeyString()
