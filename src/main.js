@@ -290,7 +290,7 @@ var global = module.exports = typeof window != 'undefined' && window.Math == Mat
         });
       }
 
-      // 2020-03-05  xulin_add 解签和验签
+      // 2020-03-05  xulin_add 签名和验签
       signString(params){
         return this.promiseCompatible("transactions/_signString", params);
       }

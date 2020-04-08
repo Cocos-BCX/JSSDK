@@ -20,7 +20,7 @@ export const _signString = async (store, params) => {
 }
 
 
-// 2020-03-05  xulin_add 解签
+// 2020-03-05  xulin_add 验签
 export const _checkingSignString = async (store, checkingSignParams) => {
   if(store.rootGetters['WalletDb/isLocked']){
     return {code:114,message:"Account is locked or not logged in"};
@@ -30,6 +30,7 @@ export const _checkingSignString = async (store, checkingSignParams) => {
     return result;
   }
 }
+
 
 export const transferAsset = async ({ dispatch,rootGetters },params) => {
   helper.trimParams(params)

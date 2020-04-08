@@ -8,7 +8,8 @@
     "lint": "eslint ./**/*.{vue,js}",
     "dev": "webpack-dev-server --progress --colors --inline --hot",
     "release": "webpack --config webpack.pro.config.js -p --progress --display-error-details --colors",
-    "release-npm": "cross-env BABEL_ENV=es babel npm-src -d build-npm/dist"
+    "release-npm": "cross-env BABEL_ENV=es babel npm-src -d build-npm/dist",
+    "release-node": "webpack --config webpack.pro.node.config.js -p --progress --display-error-details --colors"
   },
   "keywords": [
     "bcx",

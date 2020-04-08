@@ -55,6 +55,8 @@ var _helper = require('../lib/common/helper');
 
 var _helper2 = _interopRequireDefault(_helper);
 
+var _regular = require('../lib/common/regular');
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -145,21 +147,33 @@ var createAccountWithPassword = exports.createAccountWithPassword = function _ca
           return _context.abrupt('return', { code: 103, message: "Please enter the correct account name(/^[a-z]([a-z0-9\.-]){4,62}$/)" });
 
         case 5:
+          if (_regular.NewPassword.test(password)) {
+            _context.next = 7;
+            break;
+          }
+
+          return _context.abrupt('return', {
+            code: 311,
+            //Please confirm that account is registered through account mode, accounts registered in wallet mode cannot login here.
+            message: 'password format error'
+          });
+
+        case 7:
           commit = store.commit, dispatch = store.dispatch, rootGetters = store.rootGetters, getters = store.getters;
-          _context.next = 8;
+          _context.next = 10;
           return _regenerator2.default.awrap(dispatch("user/getUserInfo", { account: account, isCache: true }, { root: true }));
 
-        case 8:
+        case 10:
           acc_res = _context.sent;
 
           if (!(acc_res.code == 1)) {
-            _context.next = 11;
+            _context.next = 13;
             break;
           }
 
           return _context.abrupt('return', { code: 159, message: "Account exists" });
 
-        case 11:
+        case 13:
 
           commit(types.ACCOUNT_SIGNUP_REQUEST);
           //generate owner and active keys
@@ -171,11 +185,11 @@ var createAccountWithPassword = exports.createAccountWithPassword = function _ca
           exist_account_id = getters.getAccountUserId;
 
           if (!exist_account_id) {
-            _context.next = 22;
+            _context.next = 24;
             break;
           }
 
-          _context.next = 19;
+          _context.next = 21;
           return _regenerator2.default.awrap(dispatch("application_api_create_account", {
             owner_pubkey: owner_private.toPublicKey().toPublicKeyString(),
             active_pubkey: active_private.toPublicKey().toPublicKeyString(),
@@ -186,14 +200,14 @@ var createAccountWithPassword = exports.createAccountWithPassword = function _ca
             onlyGetFee: onlyGetFee
           }));
 
-        case 19:
+        case 21:
           return _context.abrupt('return', _context.sent);
 
-        case 22:
+        case 24:
           settingsAPIs = rootGetters["setting/g_settingsAPIs"];
           //faucet account registration
 
-          _context.next = 25;
+          _context.next = 27;
           return _regenerator2.default.awrap(_api2.default.Account.createAccount({
             name: account,
             activePubkey: active_private.toPublicKey().toPublicKeyString(),
@@ -201,15 +215,15 @@ var createAccountWithPassword = exports.createAccountWithPassword = function _ca
             referrer: settingsAPIs.referrer || ''
           }, settingsAPIs.default_faucet));
 
-        case 25:
+        case 27:
           result = _context.sent;
 
-        case 26:
+        case 28:
 
           console.log('Account created : ', result.success);
 
           if (!result.success) {
-            _context.next = 30;
+            _context.next = 32;
             break;
           }
 
@@ -230,12 +244,12 @@ var createAccountWithPassword = exports.createAccountWithPassword = function _ca
             }, 2000);
           }));
 
-        case 30:
+        case 32:
 
           commit(types.ACCOUNT_SIGNUP_ERROR, { error: result.error });
           return _context.abrupt('return', { code: result.code, message: result.error, error: result.error });
 
-        case 32:
+        case 34:
         case 'end':
           return _context.stop();
       }
@@ -380,50 +394,62 @@ var createAccountWithWallet = exports.createAccountWithWallet = function _callee
 
           dispatch("transactions/setOnlyGetOPFee", onlyGetFee, { root: true });
 
-          if (/^[a-z]([a-z0-9\.-]){4,62}/.test(account)) {
+          if (_regular.NewPassword.test(password)) {
             _context3.next = 6;
+            break;
+          }
+
+          return _context3.abrupt('return', {
+            code: 311,
+            //Please confirm that account is registered through account mode, accounts registered in wallet mode cannot login here.
+            message: 'password format error'
+          });
+
+        case 6:
+          if (/^[a-z]([a-z0-9\.-]){4,62}/.test(account)) {
+            _context3.next = 8;
             break;
           }
 
           return _context3.abrupt('return', { code: 103, message: "Please enter the correct account name(/^[a-z]([a-z0-9\.-]){4,62}/)" });
 
-        case 6:
+        case 8:
           if (rootGetters["WalletDb/wallet"]) {
-            _context3.next = 9;
+            _context3.next = 11;
             break;
           }
 
-          _context3.next = 9;
+          _context3.next = 11;
           return _regenerator2.default.awrap(dispatch("account/_logout", null, { root: true }));
 
-        case 9:
-          _context3.next = 11;
+        case 11:
+          _context3.next = 13;
           return _regenerator2.default.awrap(dispatch("user/getUserInfo", { account: account, isCache: true }, { root: true }));
 
-        case 11:
+        case 13:
           acc_res = _context3.sent;
 
           if (!(acc_res.code == 1)) {
-            _context3.next = 14;
+            _context3.next = 16;
             break;
           }
 
           return _context3.abrupt('return', { code: 159, message: "Account exists" });
 
-        case 14:
+        case 16:
           if (!rootGetters["WalletDb/wallet"]) {
-            _context3.next = 20;
+            _context3.next = 22;
             break;
           }
 
           if (!rootGetters["WalletDb/isLocked"]) {
-            _context3.next = 17;
+            _context3.next = 19;
             break;
           }
 
           return _context3.abrupt('return', { code: 149, message: "Please unlock your wallet first" });
 
-        case 17:
+        case 19:
           return _context3.abrupt('return', dispatch("WalletDb/createAccount", {
             account_name: account,
             registrar: rootGetters["account/getAccountUserId"],
@@ -437,10 +463,10 @@ var createAccountWithWallet = exports.createAccountWithWallet = function _callee
             return { code: 0, message: error.message, error: error };
           }));
 
-        case 20:
+        case 22:
           return _context3.abrupt('return', dispatch("WalletDb/createWallet", { password: password, account: account }, { root: true }));
 
-        case 21:
+        case 23:
         case 'end':
           return _context3.stop();
       }
@@ -631,36 +657,49 @@ var importPrivateKey = exports.importPrivateKey = function _callee5(_ref9, param
 
         case 2:
           _params$password2 = params.password, password = _params$password2 === undefined ? "" : _params$password2, privateKey = params.privateKey;
-          accounts = rootGetters["AccountStore/linkedAccounts"].toJS();
 
-          if (!accounts.length) {
-            _context5.next = 10;
+          if (_regular.NewPassword.test(password)) {
+            _context5.next = 5;
             break;
           }
 
-          _context5.next = 7;
+          return _context5.abrupt('return', {
+            code: 311,
+            //Please confirm that account is registered through account mode, accounts registered in wallet mode cannot login here.
+            message: 'password format error'
+          });
+
+        case 5:
+          accounts = rootGetters["AccountStore/linkedAccounts"].toJS();
+
+          if (!accounts.length) {
+            _context5.next = 12;
+            break;
+          }
+
+          _context5.next = 9;
           return _regenerator2.default.awrap(dispatch("WalletDb/validatePassword", { password: password, unlock: true }, { root: true }));
 
-        case 7:
+        case 9:
           vp_res = _context5.sent;
 
           if (!(vp_res.code != 1)) {
-            _context5.next = 10;
+            _context5.next = 12;
             break;
           }
 
           return _context5.abrupt('return', vp_res);
 
-        case 10:
+        case 12:
           if (rootGetters["WalletDb/wallet"]) {
-            _context5.next = 13;
+            _context5.next = 15;
             break;
           }
 
-          _context5.next = 13;
+          _context5.next = 15;
           return _regenerator2.default.awrap(dispatch("account/_logout", null, { root: true }));
 
-        case 13:
+        case 15:
           private_key = _bcxjsCores.PrivateKey.fromWif(privateKey); //could throw and error
 
           private_plainhex = private_key.toBuffer().toString('hex');
@@ -671,74 +710,74 @@ var importPrivateKey = exports.importPrivateKey = function _callee5(_ref9, param
           state.imported_keys_public[public_key_string] = true;
 
           if (!rootGetters["PrivateKeyStore/keys"][public_key_string]) {
-            _context5.next = 20;
+            _context5.next = 22;
             break;
           }
 
           return _context5.abrupt('return', { code: 160, message: "The private key has been imported into the wallet" });
 
-        case 20:
-          _context5.next = 22;
+        case 22:
+          _context5.next = 24;
           return _regenerator2.default.awrap(_api2.default.Account.getAccountIdByOwnerPubkey(public_key_string));
 
-        case 22:
+        case 24:
           userId = _context5.sent;
           id = userId && userId[0];
           acc_res = void 0, account_name = "";
 
           if (!id) {
-            _context5.next = 38;
+            _context5.next = 40;
             break;
           }
 
-          _context5.next = 28;
+          _context5.next = 30;
           return _regenerator2.default.awrap(dispatch("user/fetchUserForIsSave", { nameOrId: id, isSave: true }, { root: true }));
 
-        case 28:
+        case 30:
           acc_res = _context5.sent;
 
           if (!acc_res.success) {
-            _context5.next = 35;
+            _context5.next = 37;
             break;
           }
 
           account_name = acc_res.data.account.name;
-          _context5.next = 33;
+          _context5.next = 35;
           return _regenerator2.default.awrap(dispatch("AccountStore/setCurrentAccount", account_name, { root: true }));
 
-        case 33:
-          _context5.next = 36;
+        case 35:
+          _context5.next = 38;
           break;
 
-        case 35:
+        case 37:
           return _context5.abrupt('return', acc_res);
 
-        case 36:
-          _context5.next = 39;
+        case 38:
+          _context5.next = 41;
           break;
 
-        case 38:
+        case 40:
           return _context5.abrupt('return', { code: 110, message: "The private key has no account information" });
 
-        case 39:
+        case 41:
 
           state.keys_to_account[private_plainhex] = {
             account_names: [account_name], public_key_string: public_key_string
           };
 
           if (!rootGetters["WalletDb/wallet"]) {
-            _context5.next = 44;
+            _context5.next = 46;
             break;
           }
 
           return _context5.abrupt('return', dispatch("importWIFKey", { password: password, public_key_string: public_key_string }));
 
-        case 44:
+        case 46:
           return _context5.abrupt('return', dispatch("WalletDb/createWallet", { password: password, isCreateAccount: false }, { root: true }).then(function () {
             return dispatch("importWIFKey", { password: password, p_public_key_string: public_key_string });
           }));
 
-        case 45:
+        case 47:
         case 'end':
           return _context5.stop();
       }
