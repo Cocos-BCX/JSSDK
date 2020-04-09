@@ -53,7 +53,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var initialState = {
-    versions: "2.1.15",
+    versions: "2.2.0",
     ops_limit: 100,
     autoReconnect: true,
     defaultSettings: {
