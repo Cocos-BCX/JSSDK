@@ -186,7 +186,8 @@ import * as utils from './utils/index';
             setCurrentAccount:"AccountStore/setCurrentAccount",
             proposeRelateWorldView:"NHAssets/proposeRelateWorldView",
             updateCollateralForGas:"assets/updateCollateralForGas",
-            claimVestingBalance:"account/claimVestingBalance"
+            claimVestingBalance:"account/claimVestingBalance",
+
           }
           
           const use_validateAccount_methods={
@@ -245,6 +246,18 @@ import * as utils from './utils/index';
       }
 
       /*************Interfaces need Special Parameters processing***start****/
+
+      // 2020-03-05  xulin_add 解签和验签
+      signString(params){
+        return new Promise((resolve)=>{
+          console.log("signString params:", params)
+          let result = this.promiseCompatible("transactions/_signString", params)
+          resolve(result)
+        })
+      }
+      checkingSignString(params){
+        return this.promiseCompatible("transactions/_checkingSignString", params);
+      }
 
       transferNHAsset(params){
         let {toAccount,callback}=params;
@@ -340,13 +353,36 @@ import * as utils from './utils/index';
           current_account:this.getAccountInfo()
         }
       }
+
+
+      psdChangePrivateKey(password){
+        let myAccountName = this.getAccountInfo()
+
+        let active_private = this.promiseCompatible("account/_psdChangePrivateKey",{
+          account: myAccountName.account_name,
+          password: password
+        })
+      }
+
+      psdDecodeMemo(memo, account, password){
+        if(this.getAccountInfo().isLocked){
+          return {code:114,message:"Account is locked or not logged in"};
+        }
+        if(memo){
+          let result = this.api.getters["PrivateKeyStore/psdDecodeMemo"](memo,this.api,account, password)
+          // return {code:1,data:this.api.getters["PrivateKeyStore/psdDecodeMemo"](memo,this.api,account, password)};
+          return result
+        }else{
+          return {code:129,message:"Parameter 'memo' can not be empty"};
+        }
+      }
       //decrypt memo
       decodeMemo(memo){
         if(this.getAccountInfo().isLocked){
           return {code:114,message:"Account is locked or not logged in"};
         }
         if(memo){
-          return this.api.getters["PrivateKeyStore/decodeMemo"](memo,this.api);
+          return {code:1,data:this.api.getters["PrivateKeyStore/decodeMemo"](memo,this.api)};
         }else{
           return {code:129,message:"Parameter 'memo' can not be empty"};
         }

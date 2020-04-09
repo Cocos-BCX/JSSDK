@@ -7,6 +7,7 @@ import PersistentStorage from '../services/persistent-storage';
 import * as WalletDbS from '../store/WalletDb';
 import utils from '../lib/common/utils';
 import helper from '../lib/common/helper';
+import { NewPassword } from "../lib/common/regular"
 
 let _passwordKey = null;
 const OWNER_KEY_INDEX = 1;
@@ -70,6 +71,15 @@ export const createAccountWithPassword = async (store, params) => {
  
   if(!(/^[a-z]([a-z0-9\.-]){4,62}$/.test(account))){
     return {code:103,message:"Please enter the correct account name(/^[a-z]([a-z0-9\.-]){4,62}$/)"};
+  }
+  
+
+  if (!NewPassword.test(password)) {
+    return {
+      code:311,
+      //Please confirm that account is registered through account mode, accounts registered in wallet mode cannot login here.
+      message: 'password format error'
+    };
   }
   
   const { commit,dispatch,rootGetters,getters } = store;
@@ -199,6 +209,13 @@ export const createAccountWithWallet=async({dispatch,rootGetters},params)=>{
   let {callback,account,password,onlyGetFee=false}=params;
   dispatch("transactions/setOnlyGetOPFee",onlyGetFee,{root:true});
 
+  if (!NewPassword.test(password)) {
+    return {
+      code:311,
+      //Please confirm that account is registered through account mode, accounts registered in wallet mode cannot login here.
+      message: 'password format error'
+    };
+  }
   if(!(/^[a-z]([a-z0-9\.-]){4,62}/.test(account))){
     return {code:103,message:"Please enter the correct account name(/^[a-z]([a-z0-9\.-]){4,62}/)"}
   }
@@ -352,6 +369,14 @@ export const importPrivateKey=async ({rootGetters,state,dispatch},params)=>{
   }
   let {password="",privateKey}=params;
 
+
+  if (!NewPassword.test(password)) {
+    return {
+      code:311,
+      //Please confirm that account is registered through account mode, accounts registered in wallet mode cannot login here.
+      message: 'password format error'
+    };
+  }
   let accounts=rootGetters["AccountStore/linkedAccounts"].toJS()
   if(accounts.length){
     let vp_res=await dispatch("WalletDb/validatePassword",{password,unlock:true},{root:true});
@@ -746,6 +771,12 @@ export const _accountOpt=async ({ commit, rootGetters,dispatch },{method,params=
   }else{
      return {code:-11,message:"Please login first"};
   }
+}
+
+export const _psdChangePrivateKey=async ({dispatch},{account, password})=>{
+  // let owner_private = WalletDbS.generateKeyFromPassword(account, "owner", password);
+  let active_private = WalletDbS.generateKeyFromPassword(account, "active", password);
+  return active_private
 }
 
 //_validateAccount will check the incoming parameters of account to determine whether the account exists.

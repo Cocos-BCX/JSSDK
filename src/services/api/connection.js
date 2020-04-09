@@ -9,9 +9,10 @@ let nodesManager;
  */
 const connect = async ({statusCallback=null, changeNodeUrl="",store,refresh=false}) => {
   let {ws_node_list,select_ws_node,check_cached_nodes_data}=store.rootGetters["setting/g_settingsAPIs"];
-
   let url=changeNodeUrl;
   let isTestPing=false;//check if ping tested; 
+
+  // 知识测试一下连接是否正常  测试完毕就关掉了ws
   if(!nodesManager||refresh){
     nodesManager = new NodesManager({
       nodes:ws_node_list,
@@ -20,13 +21,16 @@ const connect = async ({statusCallback=null, changeNodeUrl="",store,refresh=fals
     isTestPing=true;
     await nodesManager.testNodesPings();
   }
+
   if(url){
     //if connected url is selected address, then get another address
     if(select_ws_node==url) url = nodesManager.getAnotherNodeUrl(url)||url;
   }else{
     //if connected url is null or empty, then connect the fastest one
     nodesManager._selectedNodeUrl="";
+    // 测试所有ws连接是否能连接成功  成功则存入缓存
     if(!isTestPing) await nodesManager.testNodesPings();
+    // 返回_selectedNodeUrl
     url = nodesManager.getInitialNodeUrl();
   }
 

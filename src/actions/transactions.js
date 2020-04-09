@@ -2,6 +2,36 @@ import * as types from '../mutations';
 import API from '../services/api';
 import helper from '../lib/common/helper';
 
+// 2020-03-05  xulin_add  签名
+export const _signString = async (store, params) => {
+  let { signContent } = params
+
+  if(store.rootGetters['WalletDb/isLocked']){
+    return {code:114,message:"Account is locked or not logged in"};
+  }
+  const fromId = store.rootGetters['account/getAccountUserId'];
+  
+  let fromAccount = (await store.dispatch("user/fetchUser",fromId,{root:true})).data;
+  const result = await API.Transactions.signString(fromAccount,store, signContent);
+  
+  if(result){
+    return result;
+  }
+}
+
+
+// 2020-03-05  xulin_add 验签
+export const _checkingSignString = async (store, checkingSignParams) => {
+  if(store.rootGetters['WalletDb/isLocked']){
+    return {code:114,message:"Account is locked or not logged in"};
+  }
+  const result = await API.Transactions.checkingSignString(checkingSignParams);
+  if(result){
+    return result;
+  }
+}
+
+
 export const transferAsset = async ({ dispatch,rootGetters },params) => {
   helper.trimParams(params)
 
@@ -55,9 +85,7 @@ export const _transactionOperations = async (store, { operations,proposeAccount=
     }
     proposeAccount=pAcc.data.account.id;
   }
-
   const fromAccount =  (await dispatch("user/fetchUser",fromId,{root:true})).data;
-
   if(rootGetters['WalletDb/isLocked']){
     return {code:114,message:"Account is locked or not logged in"};
   }

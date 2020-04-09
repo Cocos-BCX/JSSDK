@@ -1,4 +1,4 @@
-import { PrivateKey, key, Aes, brainKey,ChainValidation,FetchChain,ChainStore,FetchChainObjects } from 'bcxjs-cores';
+import { PrivateKey, key, Aes, brainKey,ChainValidation,FetchChain,ChainStore,FetchChainObjects,  } from 'bcxjs-cores';
 import Immutable from "immutable";
 
 import * as types from '../mutations';
@@ -7,6 +7,7 @@ import PersistentStorage from '../services/persistent-storage';
 import * as WalletDbS from '../store/WalletDb';
 import utils from '../lib/common/utils';
 import helper from '../lib/common/helper';
+import { NewPassword } from "../lib/common/regular"
 
 let _passwordKey = null;
 const OWNER_KEY_INDEX = 1;
@@ -72,6 +73,14 @@ export const createAccountWithPassword = async (store, params) => {
     return {code:103,message:"Please enter the correct account name(/^[a-z]([a-z0-9\.-]){4,62}$/)"};
   }
   
+
+  if (!NewPassword.test(password)) {
+    return {
+      code:311,
+      //Please confirm that account is registered through account mode, accounts registered in wallet mode cannot login here.
+      message: 'password format error'
+    };
+  }
   const { commit,dispatch,rootGetters,getters } = store;
   
   let acc_res=await dispatch("user/getUserInfo",{account,isCache:true},{root:true});
@@ -108,7 +117,6 @@ export const createAccountWithPassword = async (store, params) => {
     },settingsAPIs.default_faucet);
   }
 
-  console.log('Account created : ', result.success);
   if (result.success) {
     return new Promise(resolve=>{
       setTimeout(()=>{
@@ -174,7 +182,6 @@ export const createAccountWithPublicKey = async (store, params) => {
     },settingsAPIs.default_faucet);
   }
 
-  console.log('Account created : ', result.success);
   if (result.success) {
     const userId = await API.Account.getAccountIdByOwnerPubkey(result.data.account.owner_key);
     let id = userId && userId[0];
@@ -199,6 +206,14 @@ export const createAccountWithWallet=async({dispatch,rootGetters},params)=>{
   let {callback,account,password,onlyGetFee=false}=params;
   dispatch("transactions/setOnlyGetOPFee",onlyGetFee,{root:true});
 
+
+  if (!NewPassword.test(password)) {
+    return {
+      code:311,
+      //Please confirm that account is registered through account mode, accounts registered in wallet mode cannot login here.
+      message: 'password format error'
+    };
+  }
   if(!(/^[a-z]([a-z0-9\.-]){4,62}/.test(account))){
     return {code:103,message:"Please enter the correct account name(/^[a-z]([a-z0-9\.-]){4,62}/)"}
   }
@@ -346,12 +361,33 @@ export const keyLogin=async (store,params)=>{
   };
 }
 
+// export const signString=async ({dispatch},{account},params)=>{
+  
+//   // let result = API.Account.getUser("1.2.246828")
+//   let result = (await dispatch("user/fetchUser",'1.2.246828',{root:true})).data;
+//   console.log(result)
+//   console.log(result.account.active.key_auths[0])
+//   console.log(result.account.active.key_auths[0][0])
+//   let pub_key = result.account.active.key_auths[0][0]
+//   let private_key=await dispatch("WalletDb/getPrivateKey",pub_key,{root:true});
+//   console.log(private_key)
+//   return result
+// }
+
 export const importPrivateKey=async ({rootGetters,state,dispatch},params)=>{
   if(!helper.trimParams(params)){
     return {code:101,message:"Parameter is missing"};
   }
   let {password="",privateKey}=params;
 
+
+  if (!NewPassword.test(password)) {
+    return {
+      code:311,
+      //Please confirm that account is registered through account mode, accounts registered in wallet mode cannot login here.
+      message: 'password format error'
+    };
+  }
   let accounts=rootGetters["AccountStore/linkedAccounts"].toJS()
   if(accounts.length){
     let vp_res=await dispatch("WalletDb/validatePassword",{password,unlock:true},{root:true});
@@ -359,7 +395,6 @@ export const importPrivateKey=async ({rootGetters,state,dispatch},params)=>{
       return vp_res;
     }
   }
-
   if(!rootGetters["WalletDb/wallet"])
      await dispatch("account/_logout",null,{root:true});
 
@@ -486,8 +521,6 @@ export const passwordLogin = async (store,params) => {
  
   const { commit,rootGetters,dispatch } = store;  
   commit(types.ACCOUNT_LOGIN_REQUEST);
-
-  
   let {privKey : ownerKey} =await dispatch("WalletDb/generateKeyFromPassword",{
     account, 
     role:"owner", 
@@ -635,7 +668,6 @@ export const checkCachedUserData =async ({ commit,dispatch,rootGetters }) => {
         isSave:true,
         activePubkey:data.activePubkey
       },{root:true});
-
       if(cacheAccount.code==1&&data.activePubkey&&cacheAccount.data.account.active.key_auths[0][0]==data.activePubkey){
         await dispatch("PrivateKeyStore/setKeys",{
           import_account_names: [data.userId],
@@ -667,13 +699,11 @@ export const _getPrivateKey=async ({dispatch},{account})=>{
     let result;
     let active = account.active;
     let owner = account.owner;
-    // let activePublicKey = (active.key_auths && active.key_auths.length > 0) ? active.key_auths[0][0] : '';
-    // let ownerPublicKey = (owner.key_auths && owner.key_auths.length > 0) ? owner.key_auths[0][0] : '';
-
     let activePrivateKeys=[];
     let ownerPrivateKeys=[];
     let activePrivateKey="";
     let ownerPrivateKey="";
+    console.log('account: ', account)
     await Promise.all(active.key_auths.map(async item=>{
        activePrivateKey=await dispatch("WalletDb/getPrivateKey",item[0],{root:true});
        if(!!activePrivateKey) activePrivateKeys.push(activePrivateKey.toWif());
@@ -746,6 +776,12 @@ export const _accountOpt=async ({ commit, rootGetters,dispatch },{method,params=
   }else{
      return {code:-11,message:"Please login first"};
   }
+}
+
+export const _psdChangePrivateKey=async ({dispatch},{account, password})=>{
+  // let owner_private = WalletDbS.generateKeyFromPassword(account, "owner", password);
+  let active_private = WalletDbS.generateKeyFromPassword(account, "active", password);
+  return active_private
 }
 
 //_validateAccount will check the incoming parameters of account to determine whether the account exists.
