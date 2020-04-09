@@ -30,4 +30,4 @@ var GithubAddrReg = exports.GithubAddrReg = /^https:\/\/github.com/;
 // 包含数字，大小写，特殊符号
 var AllReg = exports.AllReg = /^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?\d)(?=.*?[#@*&.]).*$/;
 
-var NewPassword = exports.NewPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*.]).{12,}$/;
+var NewPassword = exports.NewPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*.-]).{12,}$/;

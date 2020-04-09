@@ -1,6 +1,6 @@
 {
   "name": "bcxjs",
-  "version": "2.2.1",
+  "version": "2.2.3",
   "description": "bcx",
   "main": "src/index.js",
   "scripts": {
