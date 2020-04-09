@@ -27,4 +27,4 @@ export const GithubAddrReg = /^https:\/\/github.com/;
 // 包含数字，大小写，特殊符号
 export const AllReg = /^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?\d)(?=.*?[#@*&.]).*$/;
 
-export const NewPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*.]).{12,}$/;
+export const NewPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*.-]).{12,}$/;
