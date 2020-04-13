@@ -518,7 +518,7 @@
                         </div>
                         <div class="div_module_c" id="div_sign" pclass="class_11" >
                             <h2>签名</h2>
-                            <div class="div_getPrivateKey div_module">
+                            <div class="div_getSignString div_module">
                                 <input type="text" id="input_sign" placeholder="签名信息"  /><br><br>
                                 <input type="button" id="btn_sign" value="签名"  /><br><br>
                                 <p class="res"></p>
@@ -526,7 +526,7 @@
                         </div>
                         <div class="div_module_c" id="div_checkoutSign" pclass="class_11" >
                             <h2>验签</h2>
-                            <div class="div_getPrivateKey div_module">
+                            <div class="div_checkoutSign div_module">
                                 <input type="text" id="input_sign_checkoutSign" placeholder="签名信息"  /><br><br>
                                 <input type="text" id="input_checkoutSign" placeholder="验签信息"  /><br><br>
                                 <input type="button" id="btn_checkoutSign" value="验签"  /><br><br>
@@ -2899,8 +2899,8 @@
                         bcx.signString({
                             signContent: document.getElementById('input_sign').value
                         }).then(res=>{
-                            console.log("========")
                             console.log(res)
+                            $(".div_getSignString .res").JSONView(res,{collapsed:true});
                         });
                     },
                     checkoutSign(){
@@ -2909,6 +2909,7 @@
                             signContent: document.getElementById('input_sign_checkoutSign').value
                         }).then(res=>{
                             console.log(res)
+                            $(".div_checkoutSign .res").JSONView(res,{collapsed:true});
                         });
                     },
                     queryUserInfo:function(){

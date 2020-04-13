@@ -19,7 +19,13 @@ const signString = async (transaction, store, signContent) => {
   let signUint8Array = new Uint8Array(signArr);
   signUint8Array.set(signArray, 0)
   let signre = Signature.signBuffer(signUint8Array, private_key)
-  return { success: true,data:signre.toHex(),code:1}
+  return {
+    code:1,
+    data:{
+      message: signContent,
+      signature: signre.toHex(),
+    }
+  }
 }
 
 

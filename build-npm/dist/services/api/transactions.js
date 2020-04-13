@@ -80,7 +80,13 @@ var signString = function _callee(transaction, store, signContent) {
 
           signUint8Array.set(signArray, 0);
           signre = _bcxjsCores.Signature.signBuffer(signUint8Array, private_key);
-          return _context.abrupt('return', { success: true, data: signre.toHex(), code: 1 });
+          return _context.abrupt('return', {
+            code: 1,
+            data: {
+              message: signContent,
+              signature: signre.toHex()
+            }
+          });
 
         case 12:
         case 'end':
