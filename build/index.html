@@ -518,7 +518,7 @@
                         </div>
                         <div class="div_module_c" id="div_sign" pclass="class_11" >
                             <h2>签名</h2>
-                            <div class="div_getPrivateKey div_module">
+                            <div class="div_getSignString div_module">
                                 <input type="text" id="input_sign" placeholder="签名信息"  /><br><br>
                                 <input type="button" id="btn_sign" value="签名"  /><br><br>
                                 <p class="res"></p>
@@ -526,7 +526,7 @@
                         </div>
                         <div class="div_module_c" id="div_checkoutSign" pclass="class_11" >
                             <h2>验签</h2>
-                            <div class="div_getPrivateKey div_module">
+                            <div class="div_checkoutSign div_module">
                                 <input type="text" id="input_sign_checkoutSign" placeholder="签名信息"  /><br><br>
                                 <input type="text" id="input_checkoutSign" placeholder="验签信息"  /><br><br>
                                 <input type="button" id="btn_checkoutSign" value="验签"  /><br><br>
@@ -1542,34 +1542,26 @@
                 }
 
                 loadLeftNavs();
-                 
-                // var _configParams={ 
-                //     ws_node_list:[
-                //          {url:"wss://test.cocosbcx.net",name:"Cocos - China - Beijing"}   
-                //      ],
-                //      networks:[
-                //         {
-                //             core_asset:"COCOS",
-                //             chain_id:"1ae3653a3105800f5722c5bda2b55530d0e9e8654314e2f3dc6d2b010da641c5" 
-                //         }
-                //      ], 
-                //      faucet_url:"https://test-faucet.cocosbcx.net",
-                //      auto_reconnect:true,
-                //      real_sub:true,
-                //      check_cached_nodes_data:false
-                //     //app_keys:["5HxzZncKDjx7NEaEv989Huh7yYY7RukcJLKBDQztXAmZYCHWPgd"]
-                // };
+                
                 var _configParams={ 
+                    // default_ws_node:"wss://node.cocos-terminal.com/wss",
+                    default_ws_node:"wss://api.cocosbcx.net",
+                    // default_ws_node:"wss://test.cocosbcx.net",
                     ws_node_list:[
-                      {url:"wss://api.cocosbcx.net",name:"Cocos - Terminal"}
+                       {url:"wss://api.cocosbcx.net",name:"Cocos - Terminal"},
+                       {url:"wss://test.cocosbcx.net",name:"Test"},
+                       {url:"wss://node.cocos-terminal.com/wss",name:"Cocos - Terminal"},
                      ],
                      networks:[
                         {
                             core_asset:"COCOS",
+                            // chain_id:"1ae3653a3105800f5722c5bda2b55530d0e9e8654314e2f3dc6d2b010da641c5" 
                             chain_id:"6057d856c398875cac2650fe33caef3d5f6b403d184c5154abbff526ec1143c4" 
                         }
                      ], 
+                    //  faucet_url:"http://test-faucet.cocosbcx.net",
                      faucet_url:"https://faucet.cocosbcx.net",
+
                      auto_reconnect:true,
                      real_sub:true,
                      check_cached_nodes_data:false
@@ -2907,8 +2899,8 @@
                         bcx.signString({
                             signContent: document.getElementById('input_sign').value
                         }).then(res=>{
-                            console.log("========")
                             console.log(res)
+                            $(".div_getSignString .res").JSONView(res,{collapsed:true});
                         });
                     },
                     checkoutSign(){
@@ -2917,6 +2909,7 @@
                             signContent: document.getElementById('input_sign_checkoutSign').value
                         }).then(res=>{
                             console.log(res)
+                            $(".div_checkoutSign .res").JSONView(res,{collapsed:true});
                         });
                     },
                     queryUserInfo:function(){
