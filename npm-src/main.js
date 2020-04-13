@@ -250,7 +250,6 @@ import * as utils from './utils/index';
       // 2020-03-05  xulin_add 解签和验签
       signString(params){
         return new Promise((resolve)=>{
-          console.log("signString params:", params)
           let result = this.promiseCompatible("transactions/_signString", params)
           resolve(result)
         })

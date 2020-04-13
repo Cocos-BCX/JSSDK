@@ -703,7 +703,6 @@ export const _getPrivateKey=async ({dispatch},{account})=>{
     let ownerPrivateKeys=[];
     let activePrivateKey="";
     let ownerPrivateKey="";
-    console.log('account: ', account)
     await Promise.all(active.key_auths.map(async item=>{
        activePrivateKey=await dispatch("WalletDb/getPrivateKey",item[0],{root:true});
        if(!!activePrivateKey) activePrivateKeys.push(activePrivateKey.toWif());

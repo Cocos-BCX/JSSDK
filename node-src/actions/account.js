@@ -108,7 +108,6 @@ export const createAccountWithPassword = async (store, params) => {
     },settingsAPIs.default_faucet);
   }
 
-  console.log('Account created : ', result.success);
   if (result.success) {
     return new Promise(resolve=>{
       setTimeout(()=>{
@@ -174,7 +173,6 @@ export const createAccountWithPublicKey = async (store, params) => {
     },settingsAPIs.default_faucet);
   }
 
-  console.log('Account created : ', result.success);
   if (result.success) {
     const userId = await API.Account.getAccountIdByOwnerPubkey(result.data.account.owner_key);
     let id = userId && userId[0];

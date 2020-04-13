@@ -323,11 +323,6 @@ export const getUserAllBalance=async (store,params)=>{
         let eqValue=amount;
         let fromSymbol = fromAsset.get("symbol");
         if(fromSymbol!=toAsset.symbol){
-          console.log("=======")
-          console.log(marketStats)
-          console.log(fromSymbol)
-          console.log(eqValue)
-          console.log(marketStats.hasOwnProperty(fromSymbol))
           let price=marketStats[fromSymbol].latest_price;
           eqValue =eqValue*price;
         }
