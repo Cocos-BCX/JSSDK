@@ -381,7 +381,6 @@ var BCX = function () {
       var _this5 = this;
 
       return new _promise2.default(function (resolve) {
-        console.log("signString params:", params);
         var result = _this5.promiseCompatible("transactions/_signString", params);
         resolve(result);
       });
