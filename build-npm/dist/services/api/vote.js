@@ -360,7 +360,7 @@ var updateAccountData = function _callee3(store, type) {
                             prev_committee: committee,
                             prev_workers: workers,
                             prev_vote_ids: vids,
-                            vote_for_witness: account.getIn(["asset_locked", "vote_for_witness"])
+                            vote_for_witness: type == "witnesses" ? account.getIn(["asset_locked", "vote_for_witness"]) : account.getIn(["asset_locked", "vote_for_committee"])
                         };
                         commit(types.SET_VOTES_STATE, state);
 

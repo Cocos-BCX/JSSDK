@@ -539,4 +539,21 @@ var global = module.exports = typeof window != 'undefined' && window.Math == Mat
   // export default BCX;
   global.BCX=BCX;
 
- 
+//  {
+//   block_num: 5337
+// type: "contract_share_fee_operation"
+// payload:
+// sharer: "1.2.5"
+// total_share_fee: 4189
+// amounts: Array(1)
+// 0: {amount: 4189, asset_id: "1.3.0"}
+// length: 1
+// __proto__: Array(0)
+// __proto__: Object
+// date: "2020/04/16 13:59:20"
+// id: "1.11.27"
+// result:
+// real_running_time: 136
+// type: "void_result"
+// __proto__: Object
+// __proto__: Object}

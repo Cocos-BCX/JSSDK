@@ -34,7 +34,7 @@ const actions = {
   fetchUserOperations: async (store, { account_id,limit,startId,endId }) => {
     const { commit } = store;
     commit(types.FETCH_USER_OPERATIONS_REQUEST);
-
+    console.log("...........")
     const result = await API.Operations.getUserOperations({ userId:account_id,limit,store,startId,endId });
     if (result.code==1) {
       // fetch assets used in operations
