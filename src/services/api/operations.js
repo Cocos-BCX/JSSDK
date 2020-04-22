@@ -23,6 +23,8 @@ let reqBlockOK=true;
 // Service for dealing with operations (transactions)
 const Operations = {
   _operationTypes: {
+    55: 'account_authentication_operation',
+    56: 'contract_share_fee_operation',
     300:"contract_affecteds_asset",
     3010:"contract_affecteds_nh_transfer_from",
     3011:"contract_affecteds_nh_transfer_to",
@@ -66,17 +68,22 @@ const Operations = {
     const [type, payload] = operation.op;
     const operationType = Operations._operationTypes[type];
     let date = "";
+    console.log('_parseOperation: .........', isReqDate)
+    console.log('Operations', Operations)
+    console.log('operation..........', operation)
     if(operation.date){
+      console.log('operation.date: ', operation.date)
       date=operation.date;
     }else if(isReqDate){
+      console.log('isReqDate', operation.date)
         if(ApiObjectDyn.code==1)
         date = Operations._getOperationDate(operation, ApiObject, ApiObjectDyn);
         let block_res=await API.Operations.get_block_header(operation.block_num);
+        console.log('block_res:', block_res)
         if(block_res.code==1){
           date=new Date(block_res.data.timestamp+"Z").format("yyyy/MM/dd HH:mm:ss");
         }
     }
-    
     let isBid = false;
     let otherUserName = null;
     let res={
@@ -89,6 +96,7 @@ const Operations = {
     if(op_id){
       res.id=op_id;
     }
+    console.log("operation.result: ", operation)
     // if (operationType === 'fill_order' || operationType === 'limit_order_create') {
     //   isBid = await Operations._checkIfBidOperation(operation);
     //   res.buyer=isBid;
@@ -134,15 +142,21 @@ const Operations = {
   // Parses array of operations, return array of parsed operations and array of assets ids
   // that were user in it. United Labs of BCTech.
   parseOperations: async ({ operations, store,isContract=false,isReqDate=true }) => {
-    // console.info("operations",operations);
+    console.info("operations",operations);
+
     _store=store;
     const ApiInstance = Apis.instance();
     const ApiObject =isReqDate?[(await API.Explorer.getGlobalObject(true)).data]:null;
     const ApiObjectDyn =isReqDate?[(await API.Explorer.getDynGlobalObject(false)).data]:null;
-    const operationTypes = [0, 1, 2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,23,24,26,27,30,31,34,35,37,38,39,40,41,42,43,44,45,50,54,300,301,303,3010,3011,3012];//,53,54.55,56,57,58
+    console.log('ApiObject: ', ApiObject)
+    console.log('ApiObjectDyn: ', ApiObjectDyn)
+    const operationTypes = [0, 1, 2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,23,24,26,27,30,31,34,35,37,38,39,40,41,42,43,44,45,50,54,55,56,300,301,303,3010,3011,3012];//,53,54.55,56,57,58   ,55,56
     const filteredOperations = operations.filter(op => {
+      console.log(op)
       return operationTypes.includes(op.op[0])
     });
+    console.log('filteredOperations: ..........', filteredOperations)
+    console.log(filteredOperations.length)
     let parsedOperations=[];
     for(let j=0;j<filteredOperations.length;j++){
       parsedOperations.push(await Operations._parseOperation(filteredOperations[j], ApiObject, ApiObjectDyn,isReqDate));
@@ -157,7 +171,9 @@ const Operations = {
         delete item.id;
         delete item.date; 
       }
+      console.log("item=========", item)
       let parseOpObj=await Operations.getParseOperations(item);
+      console.log("parseOpObj=======", parseOpObj)
       item.parseOperationsText=parseOpObj.opText.join("");
       item.parseOperations=parseOpObj.opObj;
       item.parseOperations.fees=[];
@@ -224,6 +240,8 @@ const Operations = {
     let o;
     switch(op.type){
       case "transfer":
+        console.log("=====op====", op)
+        console.log("=====op.payload=====", op.payload)
         return await Operations.getTranslateInfo(
                 "operation_transfer",
                 [
@@ -237,6 +255,27 @@ const Operations = {
                     {type: "account", value: op.payload.to, arg: "to"}
                 ]
             )
+            break;
+      case "contract_share_fee_operation":
+        console.log("=====op====", op)
+        console.log("=====op.payload=====", op.payload)
+            // return ""
+            let amounts = []
+            for (let i = 0; i < op.payload.amounts.length; i++) {
+              const element = op.payload.amounts[i]
+              amounts.push({
+                type: "amounts",
+                value: op.payload.amounts[i],
+                arg: "amount",
+                decimalOffset: op.payload.amounts[i].asset_id === "1.3.0" ? 0 : null
+              })
+            }
+            let sharerArr = [{type: "account", value: op.payload.sharer, arg: "account"}]
+            let params = sharerArr.concat(amounts)
+            return await Operations.getTranslateInfo(
+                "operation_update_account",
+                params
+            );
             break;
       case "account_create":
             return await Operations.getTranslateInfo(
@@ -894,7 +933,18 @@ const Operations = {
                     break;
                 case "amount":
                     value =await Operations.FormattedAsset(key.value.amount,key.value.asset_id,key.decimalOffset);
+                    console.log(": ::::", value)
                     if(localId=="contract_affecteds_asset"){
+                      let amount=Number((value.split(" "))[0]);
+                      if(amount>0){
+                        value="+"+value;
+                      }
+                    }
+                    break;
+                case "amounts":
+                  console.log("key.......", key)
+                    value =await Operations.FormattedAsset(key.value.amount,key.value.asset_id,key.decimalOffset);
+                    if(localId == "contract_affecteds_asset"){
                       let amount=Number((value.split(" "))[0]);
                       if(amount>0){
                         value="+"+value;
@@ -995,6 +1045,8 @@ const Operations = {
         [userId, startId, limit, endId]
       );
       if (response && typeof (response) === 'object') {
+      console.log('get_account_history: ', response)
+        
         const parsedOperations = await Operations.parseOperations({ operations: response,store });
         return {
           code: 1,

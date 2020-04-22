@@ -392,43 +392,40 @@ var actions = {
                     case 0:
                         _passwordKey = state._passwordKey;
 
-                        console.log(state);
-                        console.log(state._passwordKey);
-
                         if (!_passwordKey) {
-                            _context3.next = 5;
+                            _context3.next = 3;
                             break;
                         }
 
                         return _context3.abrupt('return', _passwordKey[public_key]);
 
-                    case 5:
+                    case 3:
                         if (public_key) {
-                            _context3.next = 7;
+                            _context3.next = 5;
                             break;
                         }
 
                         return _context3.abrupt('return', null);
 
-                    case 7:
+                    case 5:
                         if (public_key.Q) public_key = public_key.toPublicKeyString();
                         private_key_tcomb = rootGetters["PrivateKeyStore/getTcomb_byPubkey"](public_key);
 
                         if (private_key_tcomb) {
-                            _context3.next = 11;
+                            _context3.next = 9;
                             break;
                         }
 
                         return _context3.abrupt('return', null);
 
-                    case 11:
-                        _context3.next = 13;
+                    case 9:
+                        _context3.next = 11;
                         return _regenerator2.default.awrap(dispatch("decryptTcomb_PrivateKey", private_key_tcomb));
 
-                    case 13:
+                    case 11:
                         return _context3.abrupt('return', _context3.sent);
 
-                    case 14:
+                    case 12:
                     case 'end':
                         return _context3.stop();
                 }
