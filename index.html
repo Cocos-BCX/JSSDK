@@ -325,7 +325,7 @@
                         <h2 style="border-bottom:0; padding-bottom:0; margin:6px 0;">钱包解锁与锁定</h2>
                         <div class="div_unlock div_module">
                             <p>私钥模式登录可以使用该方法</p>
-                            <input type="text" class="pwd" placeholder="解锁密码" value="xulin1"/><br><br>
+                            <input type="text" class="pwd" placeholder="解锁密码" value="Kokko313@020"/><br><br>
                             <input type="button" id="btn_unlock" value="确认解锁"  /><br><br>
                             <input type="button" id="btn_lock" value="确认锁定"  />
                         </div>
@@ -514,6 +514,12 @@
                                 <input type="button" id="btn_psdChangePrivateKey" value="测试密码转化私钥"  /><br><br>
                                 <input type="button" id="btn_getPrivateKey" value="获取私钥"  /><br><br>
                                 <p class="res"></p>
+                            </div>
+                        </div>
+                        <div class="div_module_c" id="div_decodeOneMemo" pclass="class_11" >
+                            <h2>解码备注</h2>
+                            <div class="div_getDecodeOneMemo div_module">
+                                <input type="button" id="input_decodeOneMemo" placeholder="解码备注"  /><br><br>
                             </div>
                         </div>
                         <div class="div_module_c" id="div_sign" pclass="class_11" >
@@ -1545,8 +1551,8 @@
                 
                 var _configParams={ 
                     // default_ws_node:"wss://node.cocos-terminal.com/wss",
-                    default_ws_node:"wss://api.cocosbcx.net",
-                    // default_ws_node:"wss://test.cocosbcx.net",
+                    // default_ws_node:"wss://api.cocosbcx.net",
+                    default_ws_node:"wss://test.cocosbcx.net",
                     // default_ws_node:"ws://192.168.90.46:41346",
                     ws_node_list:[
                        {url:"ws://192.168.90.46:41346", name:"Cocos - Terminal"},
@@ -1557,8 +1563,8 @@
                      networks:[
                         {
                             core_asset:"COCOS",
-                            chain_id:"1ae3653a3105800f5722c5bda2b55530d0e9e8654314e2f3dc6d2b010da641c5" 
-                            // chain_id:"6057d856c398875cac2650fe33caef3d5f6b403d184c5154abbff526ec1143c4" 
+                            // chain_id:"1ae3653a3105800f5722c5bda2b55530d0e9e8654314e2f3dc6d2b010da641c5" 
+                            chain_id:"6057d856c398875cac2650fe33caef3d5f6b403d184c5154abbff526ec1143c4" 
                         }
                      ], 
                      faucet_url:"http://test-faucet.cocosbcx.net",
@@ -2699,7 +2705,7 @@
                         gel(".div_createAccountWithWallet .btn_signup").onclick=function(){
                             _wallet.createAccountWithWallet(false);
                         };
-
+                        
                         gel("#btn_backupDownload").onclick=_wallet.backupDownload;
                         gel(".div_restoreWalletFile .file").onchange=_wallet.loadWalletFile;
                         gel("#btn_restoreWallet").onclick=_wallet.restoreWallet;
@@ -2829,6 +2835,8 @@
                         gel("#btn_queryUserInfo").onclick=this.queryUserInfo;
                         gel("#btn_getPrivateKey").onclick=this.getPrivateKey;
                         gel("#btn_sign").onclick=this.sign;
+                        
+                        gel("#input_decodeOneMemo").onclick=this.decodeOneMemofn;
                         gel("#btn_checkoutSign").onclick=this.checkoutSign;
                         
                         gel("#btn_psdChangePrivateKey").onclick=this.psdChangePrivateKey;
@@ -2896,6 +2904,14 @@
                             console.info(res);
                             $(".div_getPrivateKey .res").JSONView(res);
                         });
+                    },
+                    decodeOneMemofn(){
+                        bcx.decodeOneMemo({from: "COCOS56a5dTnfGpuPoWACnYj65dahcXMpTrNQkV3hHWCFkLxMF5mXpx",
+message: "6ed9f4e204ed30eb02df87d5ae37cb266f9d454c3b016ccbc7435756897e67e5",
+nonce: "406564363788210",
+to: "COCOS89HRNzKE8oJNzEM9Fqc5P4ZLfXKWTNmr8m4z2R1p1RPvur8Q1h"}).then(res => {
+                            console.log(res)
+                        })
                     },
                     sign(){
                         bcx.signString({

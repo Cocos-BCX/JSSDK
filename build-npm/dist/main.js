@@ -390,6 +390,14 @@ var BCX = function () {
     value: function checkingSignString(params) {
       return this.promiseCompatible("transactions/_checkingSignString", params);
     }
+
+    // 2020-03-05  xulin_add 签名和验签
+
+  }, {
+    key: 'decodeOneMemo',
+    value: function decodeOneMemo(params) {
+      return this.promiseCompatible("transactions/_decodeOneMemo", params, this.api);
+    }
   }, {
     key: 'transferNHAsset',
     value: function transferNHAsset(params) {
