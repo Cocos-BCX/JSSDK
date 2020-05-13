@@ -189,11 +189,12 @@ const transactionOpWorker = async (fromId,operations,fromAccount,propose_options
 
 const transactionOp = async (fromId,operations,fromAccount,proposeAccountId="",store) => {
   // console.log('fromId: ', fromId)
-  // console.log('operations: ', operations)
+  console.log('operations: ', operations)
   // console.log('fromAccount: ', fromAccount)
   // console.log('proposeAccountId: ', proposeAccountId)
   // return false
   const opObjects=await buildOPObjects(operations,proposeAccountId||fromId,fromAccount,store);
+  console.log("opObjects", opObjects)
   if(opObjects.code&&opObjects.code!=1){
     return opObjects;
   }
@@ -203,7 +204,8 @@ const transactionOp = async (fromId,operations,fromAccount,proposeAccountId="",s
   opObjects.forEach(op=>{
     transaction.add_type_operation(op.type, op.opObject); 
   });
-
+  console.log('opObjects.forEach', opObjects)
+  return false
   // let {crontab}=store.rootState.crontab;
   
   // if(crontab){

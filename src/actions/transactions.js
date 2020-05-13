@@ -122,6 +122,7 @@ export const _transactionOperations = async (store, { operations,proposeAccount=
 
   let worker=rootGetters["setting/g_settingsAPIs"].worker;
   // console.info("worker",worker,rootGetters["setting/g_settingsAPIs"]);
+  console.log(worker?"transactionOpWorker":"transactionOp")
   const res=await API.Transactions[worker?"transactionOpWorker":"transactionOp"](fromId,operations,fromAccount,proposeAccount,store);
   if (res.success) {
 

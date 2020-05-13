@@ -1,6 +1,7 @@
 import * as types from '../mutations';
 import API from '../services/api';
 import helper from '../lib/common/helper';
+import { PublicKey, Aes } from "bcxjs-cores";
 
 // 2020-03-05  xulin_add  签名
 export const _signString = async (store, params) => {
@@ -29,6 +30,35 @@ export const _checkingSignString = async (store, checkingSignParams) => {
   if(result){
     return result;
   }
+}
+
+// 4-29 解码单个备注
+export const _decodeOneMemo = async (store, memo_con, storeApi) => {
+  let memo = memo_con
+
+  if(store.rootGetters['WalletDb/isLocked']){
+    return {code:114,message:"Account is locked or not logged in"};
+  }
+  const fromId = store.rootGetters['account/getAccountUserId'];
+  
+    let fromAccount = (await store.dispatch("user/fetchUser",fromId,{root:true})).data;
+    let activepubkey = fromAccount.account.active.key_auths[0][0]
+    let private_key = await store.dispatch("WalletDb/getPrivateKey",activepubkey,{root:true})
+    let pubkey = memo.from == activepubkey ? memo.to : memo.from;
+    let public_key = PublicKey.fromPublicKeyString(pubkey)
+    let memo_text = private_key ? Aes.decrypt_with_checksum(
+      private_key,
+      public_key,
+      memo.nonce,
+      memo.message
+  ).toString("utf-8") : null;
+  let result = {
+    code: 1,
+    data: {
+      text: memo_text, isMine: memo.from == activepubkey
+    }
+  }
+  return result
 }
 
 export const transferAsset = async ({ dispatch,rootGetters },params) => {

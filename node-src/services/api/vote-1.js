@@ -86,7 +86,6 @@ export const _getVoteObjects= async (store,type = "witnesses", vote_ids,isCache)
                 );
             });
         const lastActive = active.last() || `1.${isWitness ? "6" : "5"}.1`;
-
         lastIdx = parseInt(lastActive.split(".")[2], 10);
         for (var i = isWitness?1:0; i <= lastIdx + 10; i++) {
             vote_ids.push(`1.${isWitness ? "6" : "5"}.${i}`);
@@ -245,7 +244,7 @@ const updateAccountData=async (store,type)=>{
             prev_committee: committee,
             prev_workers: workers,
             prev_vote_ids: vids,
-            vote_for_witness:type=="witnesses"?account.getIn(["asset_locked","vote_for_witness"]):account.getIn(["asset_locked","vote_for_committee"])
+            vote_for_witness:account.getIn(["asset_locked","vote_for_witness"])
         };
         commit(types.SET_VOTES_STATE,state);
   
@@ -257,7 +256,7 @@ const updateAccountData=async (store,type)=>{
   }
 
   //process formatted voting data
-export const formatVotes=async (store,proxy_account_id)=>{
+  export const formatVotes=async (store,proxy_account_id)=>{
     let {state,rootGetters,getters,dispatch}=store;
 
     let  core_asset=await dispatch("assets/fetchAssets",{assets:["1.3.0"],isOne:true},{root:true});
@@ -306,6 +305,7 @@ export const formatVotes=async (store,proxy_account_id)=>{
                     // ? "remove"
                     // : "add";
             let {url, votes,id,supporters,work_status} = getWitnessOrCommittee(type, account,core_asset);
+            console.log("supporters", supporters)
             let link = url && url.length > 0 && url.indexOf("http") === -1
                 ? "http://" + url
                 : url;
@@ -319,10 +319,11 @@ export const formatVotes=async (store,proxy_account_id)=>{
 
             let account_id=account.get("id");
             let owner_votes=0;
+
+
             if(getters["getVotesState"]&&action){
                  owner_votes=helper.getFullNum(getters["getVotesState"].vote_for_witness.get("amount"),core_asset.precision);
             }
-            // console.info("owner_votes",getters["getVotesState"].vote_for_witness.get("amount"),owner_votes);
             
             let vote_obj=vote_ids_obj[account_id];
             let {vote_id,total_missed,last_confirmed_block_num,last_aslot}=vote_obj.toJS();

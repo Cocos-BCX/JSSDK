@@ -2553,6 +2553,18 @@
                             $(".div_reserveAsset .res").JSONView(res);
                         })
                     },
+                    decryptMemo:function(){
+                        bcx.decryptMemo({
+                            toAccount:gel(".div_issueAsset .to_account").value,
+                            amount:Number(gel(".div_issueAsset .amount").value),
+                            assetId:gel(".div_issueAsset .asset_id").value,
+                            memo:'',
+                            isEncryption:gel(".div_issueAsset .isEncryption").checked
+                        }).then(res=>{
+                            console.info('issueAsset res',res);
+                            $(".div_issueAsset .res").JSONView(res);
+                        })
+                    },
                     issueAsset:function(){
                         bcx.issueAsset({
                             toAccount:gel(".div_issueAsset .to_account").value,
