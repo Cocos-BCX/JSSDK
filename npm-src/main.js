@@ -257,6 +257,11 @@ import * as utils from './utils/index';
       checkingSignString(params){
         return this.promiseCompatible("transactions/_checkingSignString", params);
       }
+      
+      // 2020-03-05  xulin_add 签名和验签
+      decodeOneMemo(params){
+        return this.promiseCompatible("transactions/_decodeOneMemo", params, this.api);
+      }
 
       transferNHAsset(params){
         let {toAccount,callback}=params;

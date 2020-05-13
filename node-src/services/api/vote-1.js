@@ -214,6 +214,8 @@ const updateAccountData=async (store,type)=>{
                 if (account_id) {
                     committee = committee.push(account_id);
                 } else if ((account_id = obj.get("worker_account"))) {
+                    // console.log( "worker: ", obj );
+                    //     workers = workers.add(obj.get("id"));
                 } else if ((account_id = obj.get("witness_account"))) {
                     witnesses = witnesses.push(account_id);
                 }
@@ -242,7 +244,7 @@ const updateAccountData=async (store,type)=>{
             prev_committee: committee,
             prev_workers: workers,
             prev_vote_ids: vids,
-            vote_for_witness:type=="witnesses"?account.getIn(["asset_locked","vote_for_witness"]):account.getIn(["asset_locked","vote_for_committee"])
+            vote_for_witness:account.getIn(["asset_locked","vote_for_witness"])
         };
         commit(types.SET_VOTES_STATE,state);
   
@@ -254,7 +256,7 @@ const updateAccountData=async (store,type)=>{
   }
 
   //process formatted voting data
-export const formatVotes=async (store,proxy_account_id)=>{
+  export const formatVotes=async (store,proxy_account_id)=>{
     let {state,rootGetters,getters,dispatch}=store;
 
     let  core_asset=await dispatch("assets/fetchAssets",{assets:["1.3.0"],isOne:true},{root:true});
@@ -303,6 +305,7 @@ export const formatVotes=async (store,proxy_account_id)=>{
                     // ? "remove"
                     // : "add";
             let {url, votes,id,supporters,work_status} = getWitnessOrCommittee(type, account,core_asset);
+            console.log("supporters", supporters)
             let link = url && url.length > 0 && url.indexOf("http") === -1
                 ? "http://" + url
                 : url;
@@ -368,10 +371,12 @@ function getWitnessOrCommittee(type, acct,c_asset) {
             account = ChainStore.getCommitteeMemberById(acct.get("id"));
         }
     }
+    // console.info("account",JSON.parse(JSON.stringify(account)));
     url = account ? account.get("url") : url;
     votes = account ? account.get("total_votes") : votes;
     work_status = account ? account.get("work_status") : work_status;
 
+    // console.info("account",JSON.parse(JSON.stringify(account)));
     if(c_asset){
         supporters=account?account.get("supporters"):supporters;
         if(supporters)

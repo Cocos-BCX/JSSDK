@@ -295,6 +295,11 @@ import * as utils from './utils/index';
         return this.promiseCompatible("transactions/_checkingSignString", params);
       }
 
+      // 2020-03-05  xulin_add 签名和验签
+      decodeOneMemo(params){
+        return this.promiseCompatible("transactions/_decodeOneMemo", params, this.api);
+      }
+
       unlockAccount(params){
         let userInfo=this.getAccountInfo();
         if(userInfo.mode=="account"){

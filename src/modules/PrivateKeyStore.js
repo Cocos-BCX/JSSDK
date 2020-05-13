@@ -145,6 +145,12 @@ const getters={
             if (private_key) {
                 let tryLegacy = false;
                 try {
+
+                    console.log("==============")
+                    console.log(private_key)
+                    console.log(private_key.toWif())
+                    console.log(public_key)
+                    console.log(memo)
                     memo_text = private_key ? Aes.decrypt_with_checksum(
                         private_key,
                         public_key,

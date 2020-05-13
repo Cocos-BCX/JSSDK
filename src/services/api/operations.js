@@ -148,15 +148,10 @@ const Operations = {
     const ApiInstance = Apis.instance();
     const ApiObject =isReqDate?[(await API.Explorer.getGlobalObject(true)).data]:null;
     const ApiObjectDyn =isReqDate?[(await API.Explorer.getDynGlobalObject(false)).data]:null;
-    console.log('ApiObject: ', ApiObject)
-    console.log('ApiObjectDyn: ', ApiObjectDyn)
     const operationTypes = [0, 1, 2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,23,24,26,27,30,31,34,35,37,38,39,40,41,42,43,44,45,50,54,55,56,300,301,303,3010,3011,3012];//,53,54.55,56,57,58   ,55,56
     const filteredOperations = operations.filter(op => {
-      console.log(op)
       return operationTypes.includes(op.op[0])
     });
-    console.log('filteredOperations: ..........', filteredOperations)
-    console.log(filteredOperations.length)
     let parsedOperations=[];
     for(let j=0;j<filteredOperations.length;j++){
       parsedOperations.push(await Operations._parseOperation(filteredOperations[j], ApiObject, ApiObjectDyn,isReqDate));
@@ -171,9 +166,7 @@ const Operations = {
         delete item.id;
         delete item.date; 
       }
-      console.log("item=========", item)
       let parseOpObj=await Operations.getParseOperations(item);
-      console.log("parseOpObj=======", parseOpObj)
       item.parseOperationsText=parseOpObj.opText.join("");
       item.parseOperations=parseOpObj.opObj;
       item.parseOperations.fees=[];

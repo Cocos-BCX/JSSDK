@@ -368,12 +368,10 @@ function getWitnessOrCommittee(type, acct,c_asset) {
             account = ChainStore.getCommitteeMemberById(acct.get("id"));
         }
     }
-    // console.info("account",JSON.parse(JSON.stringify(account)));
     url = account ? account.get("url") : url;
     votes = account ? account.get("total_votes") : votes;
     work_status = account ? account.get("work_status") : work_status;
 
-    // console.info("account",JSON.parse(JSON.stringify(account)));
     if(c_asset){
         supporters=account?account.get("supporters"):supporters;
         if(supporters)
