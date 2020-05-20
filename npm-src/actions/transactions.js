@@ -3,7 +3,6 @@ import API from '../services/api';
 import helper from '../lib/common/helper';
 import { PublicKey, Aes } from "bcxjs-cores";
 
-
 // 2020-03-05  xulin_add  签名
 export const _signString = async (store, params) => {
   let { signContent } = params
@@ -22,9 +21,11 @@ export const _signString = async (store, params) => {
 }
 
 
-
-// 2020-03-05  xulin_add 解签
+// 2020-03-05  xulin_add 验签
 export const _checkingSignString = async (store, checkingSignParams) => {
+  if(store.rootGetters['WalletDb/isLocked']){
+    return {code:114,message:"Account is locked or not logged in"};
+  }
   const result = await API.Transactions.checkingSignString(checkingSignParams);
   if(result){
     return result;
@@ -34,9 +35,11 @@ export const _checkingSignString = async (store, checkingSignParams) => {
 // 4-29 解码单个备注
 export const _decodeOneMemo = async (store, memo_con, storeApi) => {
   let memo = memo_con
-
   if(store.rootGetters['WalletDb/isLocked']){
     return {code:114,message:"Account is locked or not logged in"};
+  }
+  if (!memo.from || !memo.to || !memo.nonce || !memo.message) {
+    return {code:101,message:"Parameter is missing"};
   }
   const fromId = store.rootGetters['account/getAccountUserId'];
   
@@ -61,9 +64,53 @@ export const _decodeOneMemo = async (store, memo_con, storeApi) => {
 }
 
 
+// 2020-05-13  xulin add  加密memo
+export const encryptionOneMome = async ({ dispatch,rootGetters },params) => {
+
+  if(rootGetters['WalletDb/isLocked']){
+    return {code:114,message:"Account is locked or not logged in"};
+  }
+  if (!params.memo || !params.toAccount) {
+    return {code:101,message:"Parameter is missing"};
+  }
+  helper.trimParams(params)
+  const fromId =rootGetters['account/getAccountUserId'];
+  let {fromAccount="",toAccount,amount=0,memo,assetId="1.3.0",isEncryption=true,
+  onlyGetFee=false,proposeAccount="",isPropose}=params;
+  
+  if(!toAccount){
+    return {code:124,message:"Receivables account name can not be empty"}
+  }
+
+  if(isPropose){
+    proposeAccount=fromAccount;
+  }
+  
+  assetId=assetId||"1.3.0";
+  assetId=assetId.toUpperCase();
+
+  return dispatch('_encryptionOneMomeOperations', {
+    operations:[{
+      op_type:0,
+      type:"transfer",
+      params:{
+        to:toAccount,
+        amount,
+        asset_id:assetId,
+        memo,
+        isEncryption
+      }
+    }],
+    proposeAccount,
+    onlyGetFee
+  });
+};
+
+
+
+
 export const transferAsset = async ({ dispatch,rootGetters },params) => {
   helper.trimParams(params)
-
   let {fromAccount="",toAccount,amount=0,memo,assetId="1.3.0",isEncryption=true,
   onlyGetFee=false,proposeAccount="",isPropose}=params;
   
@@ -101,6 +148,32 @@ export const setOnlyGetOPFee=({commit},b)=>{
 
 
 
+// 2020-05-13 xulin add 加密memo
+export const _encryptionOneMomeOperations = async (store, { operations,proposeAccount="",onlyGetFee=false}) => {
+  let {commit, rootGetters,dispatch }=store;
+  dispatch("setOnlyGetOPFee",onlyGetFee);
+  commit(types.TRANSFER_ASSET_REQUEST);
+  commit(types.SET_TRX_DATA,null);//clear last SET_TRX_DATA
+  const fromId =rootGetters['account/getAccountUserId'];
+  if(proposeAccount){
+    let pAcc=await API.Account.getUser(proposeAccount,true);
+    if(pAcc.code!=1){
+      return pAcc;
+    }
+    proposeAccount=pAcc.data.account.id;
+  }
+  const fromAccount =  (await dispatch("user/fetchUser",fromId,{root:true})).data;
+  if(rootGetters['WalletDb/isLocked']){
+    return {code:114,message:"Account is locked or not logged in"};
+  }
+
+  // let worker=rootGetters["setting/g_settingsAPIs"].worker;
+  const res=await API.Transactions.oneMomeOp(fromId,operations,fromAccount,proposeAccount,store);
+
+  return res
+};
+
+
 export const _transactionOperations = async (store, { operations,proposeAccount="",onlyGetFee=false}) => {
   let {commit, rootGetters,dispatch }=store;
   dispatch("setOnlyGetOPFee",onlyGetFee);
@@ -114,9 +187,7 @@ export const _transactionOperations = async (store, { operations,proposeAccount=
     }
     proposeAccount=pAcc.data.account.id;
   }
-
   const fromAccount =  (await dispatch("user/fetchUser",fromId,{root:true})).data;
-
   if(rootGetters['WalletDb/isLocked']){
     return {code:114,message:"Account is locked or not logged in"};
   }

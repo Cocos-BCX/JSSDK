@@ -1,4 +1,5 @@
-import { PrivateKey,TransactionBuilder, Signature, Serializer, TransactionHelper } from 'bcxjs-cores';
+import { PrivateKey,TransactionBuilder, Signature, Serializer, TransactionHelper, Aes } from 'bcxjs-cores';
+
 import { ChainConfig,Apis } from 'bcxjs-ws';
 import { getUser } from './account';
 import { encryptMemo } from '../../utils';
@@ -187,14 +188,22 @@ const transactionOpWorker = async (fromId,operations,fromAccount,propose_options
     }
 };
 
+
+// 2020-05-13 xulin add 加密memo
+const oneMomeOp = async (fromId,operations,fromAccount,proposeAccountId="",store) => {
+
+  const opObjects=await buildOPObjects(operations,proposeAccountId||fromId,fromAccount,store);
+  opObjects.success = true
+  return opObjects
+};
+
+
 const transactionOp = async (fromId,operations,fromAccount,proposeAccountId="",store) => {
   // console.log('fromId: ', fromId)
-  console.log('operations: ', operations)
   // console.log('fromAccount: ', fromAccount)
   // console.log('proposeAccountId: ', proposeAccountId)
   // return false
   const opObjects=await buildOPObjects(operations,proposeAccountId||fromId,fromAccount,store);
-  console.log("opObjects", opObjects)
   if(opObjects.code&&opObjects.code!=1){
     return opObjects;
   }
@@ -204,8 +213,6 @@ const transactionOp = async (fromId,operations,fromAccount,proposeAccountId="",s
   opObjects.forEach(op=>{
     transaction.add_type_operation(op.type, op.opObject); 
   });
-  console.log('opObjects.forEach', opObjects)
-  return false
   // let {crontab}=store.rootState.crontab;
   
   // if(crontab){
@@ -261,7 +268,6 @@ const buildOPObjects=async (operations,fromId,fromAccount,store)=>{
         let assetObj=await API.Assets.fetch_asset_one(asset_id);
         if(assetObj.code!=1) return assetObj;
         assetObj=assetObj.data;
-
         switch(opItem.type){
           case "account_update":
             if("action" in opParams){
@@ -348,7 +354,6 @@ const buildOPObjects=async (operations,fromId,fromAccount,store)=>{
 
           }else if(op_type==0||op_type==13){
               let {to,amount=0,memo,isEncryption}=opParams;
-
               let toAccount =await getUser(to);
               if (!toAccount.success)  return { success: false, error: 'Account receivable does not exist',code:116 };
               
@@ -371,10 +376,18 @@ const buildOPObjects=async (operations,fromId,fromAccount,store)=>{
                   let memo_key=toAccount.data.account.options.memo_key;
                   let memo_from_privkey =await store.dispatch("WalletDb/getPrivateKey",fromAccount.account.options.memo_key,{root:true})
                   memo=encryptMemo(new Buffer(memo, "utf-8"), memo_from_privkey, memo_key);
+
                 }
-                
+                memo.message = memo.message.toString("hex")
                 try {
-                  opObject.memo =[isEncryption?1:0,memo];//
+                  // opObject.memo =[isEncryption?1:0,memo];//
+                  return {
+                    code: 1,
+                    success:false,
+                    data: {
+                       memo: memo
+                    }
+                  }
                 } catch (error) {
                   return { success: false, error: 'Encrypt memo failed',code:118 };
                 }
@@ -389,7 +402,6 @@ const buildOPObjects=async (operations,fromId,fromAccount,store)=>{
             opObject
         });
       }catch(e){
-        console.info("e",e);
         return {
           success:false,
           error:e.message,
@@ -422,4 +434,4 @@ const getUpdateAccountObject=(params,fromAccount)=>{
 }
 
 
-export default { transactionOp,transactionOpWorker, signString, checkingSignString };
+export default { oneMomeOp, transactionOp,transactionOpWorker, signString, checkingSignString };

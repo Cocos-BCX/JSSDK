@@ -90,6 +90,7 @@ const actions = {
               fromWif = PrivateKey.fromWif(password);
           } catch(err) { }
           let acc =await dispatch("user/fetchUser",account,{root:true});
+          
           if(!acc.success){
             return { code:acc.code,message:acc.error };
           }    
@@ -105,7 +106,7 @@ const actions = {
                     if (!fromWif) {
                         key =await dispatch("generateKeyFromPassword",{account, role, password});
                     }
-            
+                    
                     let foundRole = false;
                 
                     if (role === "memo") {
@@ -136,10 +137,11 @@ const actions = {
                     }
             }));
         }
-
           //_passwordKey null + wallet not null => in wallet mode
           if(!_passwordKey&&rootGetters["account/getWallet"]){
+              
             let res =await dispatch("validatePassword",{password,unlock:true});
+            
             if (res.success) {//&& !cloudMode
                 return {code:1, cloudMode: false};
             }

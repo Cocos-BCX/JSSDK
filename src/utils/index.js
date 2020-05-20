@@ -145,14 +145,12 @@ export const calcPortfolioData = ({
 export const encryptMemo = (memo, fromKey, toPubkey) => {
   const nonce = TransactionHelper.unique_nonce_uint64();
   const activePubkey = fromKey.toPublicKey().toPublicKeyString();
-  
   const message = Aes.encrypt_with_checksum(
     fromKey,
     toPubkey,
     nonce,
     memo
   );
-
   return {
     from: activePubkey,
     to: toPubkey,

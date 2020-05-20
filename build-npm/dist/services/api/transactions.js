@@ -250,6 +250,7 @@ var signTransaction = function _callee3(transaction, store) {
           return _context3.finish(31);
 
         case 39:
+          // console.info("transaction",transaction);
           //Contract authentication
           try {
             app_keys = store.rootGetters["PrivateKeyStore/app_keys"];
@@ -452,10 +453,11 @@ var transactionOpWorker = function _callee6(fromId, operations, fromAccount, pro
   }, null, undefined);
 };
 
-var transactionOp = function _callee7(fromId, operations, fromAccount) {
+// 2020-05-13 xulin add 加密memo
+var oneMomeOp = function _callee7(fromId, operations, fromAccount) {
   var proposeAccountId = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : "";
   var store = arguments[4];
-  var opObjects, transaction, propose_options;
+  var opObjects;
   return _regenerator2.default.async(function _callee7$(_context7) {
     while (1) {
       switch (_context7.prev = _context7.next) {
@@ -466,12 +468,37 @@ var transactionOp = function _callee7(fromId, operations, fromAccount) {
         case 2:
           opObjects = _context7.sent;
 
+          opObjects.success = true;
+          return _context7.abrupt('return', opObjects);
+
+        case 5:
+        case 'end':
+          return _context7.stop();
+      }
+    }
+  }, null, undefined);
+};
+
+var transactionOp = function _callee8(fromId, operations, fromAccount) {
+  var proposeAccountId = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : "";
+  var store = arguments[4];
+  var opObjects, transaction, propose_options;
+  return _regenerator2.default.async(function _callee8$(_context8) {
+    while (1) {
+      switch (_context8.prev = _context8.next) {
+        case 0:
+          _context8.next = 2;
+          return _regenerator2.default.awrap(buildOPObjects(operations, proposeAccountId || fromId, fromAccount, store));
+
+        case 2:
+          opObjects = _context8.sent;
+
           if (!(opObjects.code && opObjects.code != 1)) {
-            _context7.next = 5;
+            _context8.next = 5;
             break;
           }
 
-          return _context7.abrupt('return', opObjects);
+          return _context8.abrupt('return', opObjects);
 
         case 5:
           transaction = new _bcxjsCores.TransactionBuilder();
@@ -480,7 +507,6 @@ var transactionOp = function _callee7(fromId, operations, fromAccount) {
           opObjects.forEach(function (op) {
             transaction.add_type_operation(op.type, op.opObject);
           });
-
           // let {crontab}=store.rootState.crontab;
 
           // if(crontab){
@@ -514,11 +540,11 @@ var transactionOp = function _callee7(fromId, operations, fromAccount) {
           // }
 
           if (!proposeAccountId) {
-            _context7.next = 12;
+            _context8.next = 12;
             break;
           }
 
-          _context7.next = 10;
+          _context8.next = 10;
           return _regenerator2.default.awrap(transaction.update_head_block());
 
         case 10:
@@ -529,22 +555,22 @@ var transactionOp = function _callee7(fromId, operations, fromAccount) {
           transaction.propose(propose_options);
 
         case 12:
-          return _context7.abrupt('return', process_transaction(transaction, store, opObjects));
+          return _context8.abrupt('return', process_transaction(transaction, store, opObjects));
 
         case 13:
         case 'end':
-          return _context7.stop();
+          return _context8.stop();
       }
     }
   }, null, undefined);
 };
 
-var buildOPObjects = function _callee8(operations, fromId, fromAccount, store) {
+var buildOPObjects = function _callee9(operations, fromId, fromAccount, store) {
   var opObjects, opObject, opItem, i, opParams, _opParams$asset_id, asset_id, _opParams$fee_asset_i, fee_asset_id, assetObj, name, data, authority, contractId, functionName, valueList, runTime, pending_orders_fee, price, _opParams$priceAssetI, priceAssetId, price_amount_res, _opItem, op_type, to, _opParams$amount, amount, memo, isEncryption, toAccount, amount_res, memo_key, memo_from_privkey;
 
-  return _regenerator2.default.async(function _callee8$(_context8) {
+  return _regenerator2.default.async(function _callee9$(_context9) {
     while (1) {
-      switch (_context8.prev = _context8.next) {
+      switch (_context9.prev = _context9.next) {
         case 0:
           opObjects = [];
           opObject = void 0, opItem = void 0;
@@ -552,33 +578,32 @@ var buildOPObjects = function _callee8(operations, fromId, fromAccount, store) {
 
         case 3:
           if (!(i < operations.length)) {
-            _context8.next = 104;
+            _context9.next = 104;
             break;
           }
 
           opObject = null;
           opItem = operations[i];
-          _context8.prev = 6;
+          _context9.prev = 6;
           opParams = opItem.params;
           _opParams$asset_id = opParams.asset_id, asset_id = _opParams$asset_id === undefined ? "1.3.0" : _opParams$asset_id, _opParams$fee_asset_i = opParams.fee_asset_id, fee_asset_id = _opParams$fee_asset_i === undefined ? "1.3.0" : _opParams$fee_asset_i;
-          _context8.next = 11;
+          _context9.next = 11;
           return _regenerator2.default.awrap(_api2.default.Assets.fetch_asset_one(asset_id));
 
         case 11:
-          assetObj = _context8.sent;
+          assetObj = _context9.sent;
 
           if (!(assetObj.code != 1)) {
-            _context8.next = 14;
+            _context9.next = 14;
             break;
           }
 
-          return _context8.abrupt('return', assetObj);
+          return _context9.abrupt('return', assetObj);
 
         case 14:
           assetObj = assetObj.data;
-
-          _context8.t0 = opItem.type;
-          _context8.next = _context8.t0 === "account_update" ? 18 : _context8.t0 === "contract_create" ? 20 : _context8.t0 === "revise_contract" ? 23 : _context8.t0 === "call_contract_function" ? 25 : _context8.t0 === "create_nh_asset_order" ? 28 : _context8.t0 === "limit_order_cancel" ? 43 : _context8.t0 === "vesting_balance_withdraw" ? 45 : 47;
+          _context9.t0 = opItem.type;
+          _context9.next = _context9.t0 === "account_update" ? 18 : _context9.t0 === "contract_create" ? 20 : _context9.t0 === "revise_contract" ? 23 : _context9.t0 === "call_contract_function" ? 25 : _context9.t0 === "create_nh_asset_order" ? 28 : _context9.t0 === "limit_order_cancel" ? 43 : _context9.t0 === "vesting_balance_withdraw" ? 45 : 47;
           break;
 
         case 18:
@@ -587,7 +612,7 @@ var buildOPObjects = function _callee8(operations, fromId, fromAccount, store) {
           } else {
             opObject = opParams.updateObject;
           }
-          return _context8.abrupt('break', 47);
+          return _context9.abrupt('break', 47);
 
         case 20:
           name = opParams.name, data = opParams.data, authority = opParams.authority;
@@ -599,7 +624,7 @@ var buildOPObjects = function _callee8(operations, fromId, fromAccount, store) {
             contract_authority: authority,
             extensions: []
           };
-          return _context8.abrupt('break', 47);
+          return _context9.abrupt('break', 47);
 
         case 23:
           opObject = (0, _extends3.default)({
@@ -607,7 +632,7 @@ var buildOPObjects = function _callee8(operations, fromId, fromAccount, store) {
           }, opParams, {
             extensions: []
           });
-          return _context8.abrupt('break', 47);
+          return _context9.abrupt('break', 47);
 
         case 25:
           contractId = opParams.contractId, functionName = opParams.functionName, valueList = opParams.valueList, runTime = opParams.runTime;
@@ -619,38 +644,38 @@ var buildOPObjects = function _callee8(operations, fromId, fromAccount, store) {
             value_list: valueList,
             extensions: []
           };
-          return _context8.abrupt('break', 47);
+          return _context9.abrupt('break', 47);
 
         case 28:
           pending_orders_fee = opParams.pending_orders_fee, price = opParams.price, _opParams$priceAssetI = opParams.priceAssetId, priceAssetId = _opParams$priceAssetI === undefined ? "1.3.0" : _opParams$priceAssetI;
-          _context8.next = 31;
+          _context9.next = 31;
           return _regenerator2.default.awrap(_helper2.default.toOpAmount(pending_orders_fee, assetObj));
 
         case 31:
-          pending_orders_fee = _context8.sent;
+          pending_orders_fee = _context9.sent;
 
           if (pending_orders_fee.success) {
-            _context8.next = 34;
+            _context9.next = 34;
             break;
           }
 
-          return _context8.abrupt('return', pending_orders_fee);
+          return _context9.abrupt('return', pending_orders_fee);
 
         case 34:
           opParams.pending_orders_fee = pending_orders_fee.data;
 
-          _context8.next = 37;
+          _context9.next = 37;
           return _regenerator2.default.awrap(_helper2.default.toOpAmount(price, priceAssetId));
 
         case 37:
-          price_amount_res = _context8.sent;
+          price_amount_res = _context9.sent;
 
           if (price_amount_res.success) {
-            _context8.next = 40;
+            _context9.next = 40;
             break;
           }
 
-          return _context8.abrupt('return', price_amount_res);
+          return _context9.abrupt('return', price_amount_res);
 
         case 40:
           opParams.price = price_amount_res.data;
@@ -658,89 +683,89 @@ var buildOPObjects = function _callee8(operations, fromId, fromAccount, store) {
           opObject = (0, _extends3.default)({
             seller: fromId
           }, opParams);
-          return _context8.abrupt('break', 47);
+          return _context9.abrupt('break', 47);
 
         case 43:
           opObject = {
             fee_paying_account: fromId,
             order: opParams.orderId
           };
-          return _context8.abrupt('break', 47);
+          return _context9.abrupt('break', 47);
 
         case 45:
           opObject = (0, _extends3.default)({
             owner: fromId
           }, opParams);
-          return _context8.abrupt('break', 47);
+          return _context9.abrupt('break', 47);
 
         case 47:
           _opItem = opItem, op_type = _opItem.op_type;
 
           if (!(typeof op_type != "undefined")) {
-            _context8.next = 94;
+            _context9.next = 95;
             break;
           }
 
           if (!(op_type >= 37 && op_type <= 45 && op_type != 43)) {
-            _context8.next = 62;
+            _context9.next = 62;
             break;
           }
 
           if ("asset_id" in opParams) opParams.asset_id = assetObj.symbol;
 
           opObject = opParams;
-          _context8.t1 = op_type;
-          _context8.next = _context8.t1 === 42 ? 55 : _context8.t1 === 39 ? 57 : 59;
+          _context9.t1 = op_type;
+          _context9.next = _context9.t1 === 42 ? 55 : _context9.t1 === 39 ? 57 : 59;
           break;
 
         case 55:
           opObject.from = fromId;
-          return _context8.abrupt('break', 60);
+          return _context9.abrupt('break', 60);
 
         case 57:
           opObject.related_account = fromId;
-          return _context8.abrupt('break', 60);
+          return _context9.abrupt('break', 60);
 
         case 59:
           opObject.fee_paying_account = fromId;
 
         case 60:
-          _context8.next = 94;
+          _context9.next = 95;
           break;
 
         case 62:
           if (!(op_type == 0 || op_type == 13)) {
-            _context8.next = 93;
+            _context9.next = 94;
             break;
           }
 
           to = opParams.to, _opParams$amount = opParams.amount, amount = _opParams$amount === undefined ? 0 : _opParams$amount, memo = opParams.memo, isEncryption = opParams.isEncryption;
-          _context8.next = 66;
+          _context9.next = 66;
           return _regenerator2.default.awrap((0, _account.getUser)(to));
 
         case 66:
-          toAccount = _context8.sent;
+          toAccount = _context9.sent;
 
           if (toAccount.success) {
-            _context8.next = 69;
+            _context9.next = 69;
             break;
           }
 
-          return _context8.abrupt('return', { success: false, error: 'Account receivable does not exist', code: 116 });
+          return _context9.abrupt('return', { success: false, error: 'Account receivable does not exist', code: 116 });
 
         case 69:
-          _context8.next = 71;
+          _context9.next = 71;
           return _regenerator2.default.awrap(_helper2.default.toOpAmount(amount, assetObj));
 
         case 71:
-          amount_res = _context8.sent;
+          amount_res = _context9.sent;
 
           if (amount_res.success) {
-            _context8.next = 74;
+            _context9.next = 74;
             break;
           }
 
-          return _context8.abrupt('return', amount_res);
+          return _context9.abrupt('return', amount_res);
 
         case 74:
           amount = amount_res.data;
@@ -757,79 +782,81 @@ var buildOPObjects = function _callee8(operations, fromId, fromAccount, store) {
           }
 
           if (!memo) {
-            _context8.next = 91;
+            _context9.next = 92;
             break;
           }
 
           if (!isEncryption) {
-            _context8.next = 84;
+            _context9.next = 84;
             break;
           }
 
           memo_key = toAccount.data.account.options.memo_key;
-          _context8.next = 82;
+          _context9.next = 82;
           return _regenerator2.default.awrap(store.dispatch("WalletDb/getPrivateKey", fromAccount.account.options.memo_key, { root: true }));
 
         case 82:
-          memo_from_privkey = _context8.sent;
+          memo_from_privkey = _context9.sent;
 
           memo = (0, _utils.encryptMemo)(new Buffer(memo, "utf-8"), memo_from_privkey, memo_key);
 
         case 84:
-          _context8.prev = 84;
+          memo.message = memo.message.toString("hex");
+          _context9.prev = 85;
+          return _context9.abrupt('return', {
+            code: 1,
+            success: false,
+            data: {
+              memo: memo
+            }
+          });
 
-          opObject.memo = [isEncryption ? 1 : 0, memo]; //
-          _context8.next = 91;
+        case 89:
+          _context9.prev = 89;
+          _context9.t2 = _context9['catch'](85);
+          return _context9.abrupt('return', { success: false, error: 'Encrypt memo failed', code: 118 });
+
+        case 92:
+          _context9.next = 95;
           break;
 
-        case 88:
-          _context8.prev = 88;
-          _context8.t2 = _context8['catch'](84);
-          return _context8.abrupt('return', { success: false, error: 'Encrypt memo failed', code: 118 });
-
-        case 91:
-          _context8.next = 94;
-          break;
-
-        case 93:
+        case 94:
           if (!opObject) {
             opObject = opParams;
           }
 
-        case 94:
+        case 95:
 
           opObjects.push({
             type: opItem.type,
             opObject: opObject
           });
-          _context8.next = 101;
+          _context9.next = 101;
           break;
 
-        case 97:
-          _context8.prev = 97;
-          _context8.t3 = _context8['catch'](6);
-
-          console.info("e", _context8.t3);
-          return _context8.abrupt('return', {
+        case 98:
+          _context9.prev = 98;
+          _context9.t3 = _context9['catch'](6);
+          return _context9.abrupt('return', {
             success: false,
-            error: _context8.t3.message,
+            error: _context9.t3.message,
             code: 0
           });
 
         case 101:
           i++;
-          _context8.next = 3;
+          _context9.next = 3;
           break;
 
         case 104:
-          return _context8.abrupt('return', opObjects);
+          return _context9.abrupt('return', opObjects);
 
         case 105:
         case 'end':
-          return _context8.stop();
+          return _context9.stop();
       }
     }
-  }, null, undefined, [[6, 97], [84, 88]]);
+  }, null, undefined, [[6, 98], [85, 89]]);
 };
 
 var getUpdateAccountObject = function getUpdateAccountObject(params, fromAccount) {
@@ -855,4 +882,4 @@ var getUpdateAccountObject = function getUpdateAccountObject(params, fromAccount
   return updateObject;
 };
 
-exports.default = { transactionOp: transactionOp, transactionOpWorker: transactionOpWorker, signString: signString, checkingSignString: checkingSignString };
+exports.default = { oneMomeOp: oneMomeOp, transactionOp: transactionOp, transactionOpWorker: transactionOpWorker, signString: signString, checkingSignString: checkingSignString };
