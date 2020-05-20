@@ -548,7 +548,7 @@ export const passwordLogin = async (store,params) => {
       account,
       roles:["active", "owner", "memo"]
     },{root:true})
-
+    
     delete vp_result.cloudMode;
     delete vp_result.success;
     if(vp_result.code!=1){
@@ -559,7 +559,6 @@ export const passwordLogin = async (store,params) => {
 
     commit(types.ACCOUNT_LOGIN_COMPLETE, {userId: id});
     PersistentStorage.saveUserData({ id });
-
     return await dispatch("getAccountInfo")
   }else{
     commit(types.ACCOUNT_LOGIN_ERROR, { error: 'Login error' });

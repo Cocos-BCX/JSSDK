@@ -188,6 +188,8 @@ var global = module.exports = typeof window != 'undefined' && window.Math == Mat
             callContractFunction:"contract/callContractFunction",
 
             transferAsset:"transactions/transferAsset",
+            // 2020-05-13 xulin add
+            encryptionOneMome:"transactions/encryptionOneMome",
             setCurrentAccount:"AccountStore/setCurrentAccount",
             proposeRelateWorldView:"NHAssets/proposeRelateWorldView",
             updateCollateralForGas:"assets/updateCollateralForGas",

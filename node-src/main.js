@@ -186,6 +186,8 @@ import * as utils from './utils/index';
 
             transferAsset:"transactions/transferAsset",
             transferAssets:"transactions/transferAssets",
+            // 2020-05-13 xulin add
+            encryptionOneMome:"transactions/encryptionOneMome",
             
             setCurrentAccount:"AccountStore/setCurrentAccount",
             proposeRelateWorldView:"NHAssets/proposeRelateWorldView",

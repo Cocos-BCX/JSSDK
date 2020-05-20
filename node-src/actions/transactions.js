@@ -61,6 +61,45 @@ export const _decodeOneMemo = async (store, memo_con, storeApi) => {
   return result
 }
 
+
+
+// 2020-05-13  xulin add
+export const encryptionOneMome = async ({ dispatch,rootGetters },params) => {
+  helper.trimParams(params)
+  console.log("encryptionOneMome.........")
+  const fromId =rootGetters['account/getAccountUserId'];
+  let {fromAccount="",toAccount,amount=0,memo,assetId="1.3.0",isEncryption=true,
+  onlyGetFee=false,proposeAccount="",isPropose}=params;
+  
+  if(!toAccount){
+    return {code:124,message:"Receivables account name can not be empty"}
+  }
+
+  if(isPropose){
+    proposeAccount=fromAccount;
+  }
+  
+  assetId=assetId||"1.3.0";
+  assetId=assetId.toUpperCase();
+
+  return dispatch('_encryptionOneMomeOperations', {
+    operations:[{
+      op_type:0,
+      type:"transfer",
+      params:{
+        to:toAccount,
+        amount,
+        asset_id:assetId,
+        memo,
+        isEncryption
+      }
+    }],
+    proposeAccount,
+    onlyGetFee
+  });
+};
+
+
 export const transferAsset = async ({ dispatch,rootGetters },params) => {
   helper.trimParams(params)
 
@@ -130,6 +169,93 @@ export const transferAssets = async ({ dispatch,rootGetters },params) => {
 export const setOnlyGetOPFee=({commit},b)=>{
   commit(types.SET_ONLY_GET_OP_FEE,b);
 }
+
+
+
+
+
+// 2020-05-13 xulin add
+export const _encryptionOneMomeOperations = async (store, { operations,proposeAccount="",onlyGetFee=false}) => {
+  console.log("_encryptionOneMomeOperations")
+  let {commit, rootGetters,dispatch }=store;
+  dispatch("setOnlyGetOPFee",onlyGetFee);
+  commit(types.TRANSFER_ASSET_REQUEST);
+  commit(types.SET_TRX_DATA,null);//clear last SET_TRX_DATA
+  const fromId =rootGetters['account/getAccountUserId'];
+  if(proposeAccount){
+    let pAcc=await API.Account.getUser(proposeAccount,true);
+    if(pAcc.code!=1){
+      return pAcc;
+    }
+    proposeAccount=pAcc.data.account.id;
+  }
+  const fromAccount =  (await dispatch("user/fetchUser",fromId,{root:true})).data;
+  console.log('fromAccount...', fromAccount)
+  if(rootGetters['WalletDb/isLocked']){
+    return {code:114,message:"Account is locked or not logged in"};
+  }
+
+  // let worker=rootGetters["setting/g_settingsAPIs"].worker;
+  const res=await API.Transactions.oneMomeOp(fromId,operations,fromAccount,proposeAccount,store);
+  console.log('res', res)
+  return res
+  // if (res.success) {
+
+  //   // if(onlyGetFee) return {code:1,data:res.data}
+    
+  //    let {id,block_num,trx}=res.data[0];
+  //    let results=[];
+  //    let op_result;
+  //    for(let i=0;i<trx.operation_results.length;i++){
+  //         op_result=trx.operation_results[i][1];
+  //         if(op_result.contract_affecteds){
+  //             let _operations=op_result.contract_affecteds.map(item=>{
+  //                 let op_num=item[0]+300;
+  //                 if(item[0]==1){
+  //                   op_num=op_num+""+item[1].action
+  //                 }
+  //                 return {
+  //                   block_num,
+  //                   id:"",
+  //                   op:[Number(op_num),item[1]]
+  //                 }
+  //             });
+  //             op_result.contract_affecteds=(await API.Operations.parseOperations({
+  //               operations:_operations,
+  //               store,
+  //               isContract:true
+  //             })).map(item=>{
+  //                 item.result=item.parse_operations;
+  //                 item.result_text=item.parse_operations_text;
+
+  //                 delete item.payload;
+  //                 delete item.parse_operations;
+  //                 delete item.parse_operations_text;
+
+  //                 return item;
+  //             }); 
+  //         }
+
+  //       if(Object.keys(op_result).length) results.push(op_result);
+  //    }
+
+  //     let params=operations[0].params;
+  //     if("action" in params&&params.action=="changePassword"){
+  //       dispatch("account/_logout",null,{root:true});
+  //     }
+
+  //   return {
+  //           code:1,
+  //           data:results,
+  //           trx_data:{
+  //             trx_id:id,
+  //             block_num:block_num
+  //          }      
+  //         };
+  // } else {
+  //   return TRANSFER_ASSET_ERROR({error:res.error,code:res.code})
+  // }
+};
 
 
 
