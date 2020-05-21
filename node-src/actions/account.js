@@ -359,10 +359,10 @@ export const importPrivateKey=async ({rootGetters,state,dispatch},params)=>{
   //   };
   // }
   let accounts=rootGetters["AccountStore/linkedAccounts"].toJS()
-  console.log('accounts......', accounts)
+  
   if(accounts.length){
     let vp_res=await dispatch("WalletDb/validatePassword",{password,unlock:true},{root:true});
-    console.log("vp_res....", JSON.stringify(vp_res))
+   
     if(vp_res.code!=1){
       return vp_res;
     }
@@ -371,28 +371,23 @@ export const importPrivateKey=async ({rootGetters,state,dispatch},params)=>{
      await dispatch("account/_logout",null,{root:true});
 
   var private_key = PrivateKey.fromWif(privateKey) //could throw and error
-  console.log('private_key', private_key)
+  
   var private_plainhex = private_key.toBuffer().toString('hex');
-  console.log('private_plainhex.....', private_plainhex)
   var public_key = private_key.toPublicKey() // S L O W
-  console.log('public_key......', public_key)
   var public_key_string = public_key.toPublicKeyString()
-  console.log('public_key_string........', public_key_string)
   state.imported_keys_public[public_key_string] = true;
   if(rootGetters["PrivateKeyStore/keys"][public_key_string]){
     return {code:160,message:"The private key has been imported into the wallet"}
   }
   const userId = await API.Account.getAccountIdByOwnerPubkey(public_key_string);
-  console.log('userId.......', JSON.stringify(userId))
+  
   const id = userId && userId[0];
   let acc_res,account_name="";
   if(id){
-    console.log('id..', id)
     
     acc_res=await dispatch("user/fetchUserForIsSave",{nameOrId:id,isSave:true},{root:true});
-    console.log('acc_res.......', JSON.stringify(acc_res))
+    
     if(acc_res.success){
-      console.log('acc_res.success.......:', acc_res.success)
       account_name=acc_res.data.account.name;
       // await dispatch("AccountStore/setCurrentAccount",account_name,{root:true});
     }else{
