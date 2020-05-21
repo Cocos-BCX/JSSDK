@@ -66,7 +66,7 @@ export const _decodeOneMemo = async (store, memo_con, storeApi) => {
 // 2020-05-13  xulin add
 export const encryptionOneMome = async ({ dispatch,rootGetters },params) => {
   helper.trimParams(params)
-  console.log("encryptionOneMome.........")
+  
   const fromId =rootGetters['account/getAccountUserId'];
   let {fromAccount="",toAccount,amount=0,memo,assetId="1.3.0",isEncryption=true,
   onlyGetFee=false,proposeAccount="",isPropose}=params;
@@ -176,7 +176,7 @@ export const setOnlyGetOPFee=({commit},b)=>{
 
 // 2020-05-13 xulin add
 export const _encryptionOneMomeOperations = async (store, { operations,proposeAccount="",onlyGetFee=false}) => {
-  console.log("_encryptionOneMomeOperations")
+  
   let {commit, rootGetters,dispatch }=store;
   dispatch("setOnlyGetOPFee",onlyGetFee);
   commit(types.TRANSFER_ASSET_REQUEST);
@@ -190,14 +190,14 @@ export const _encryptionOneMomeOperations = async (store, { operations,proposeAc
     proposeAccount=pAcc.data.account.id;
   }
   const fromAccount =  (await dispatch("user/fetchUser",fromId,{root:true})).data;
-  console.log('fromAccount...', fromAccount)
+  
   if(rootGetters['WalletDb/isLocked']){
     return {code:114,message:"Account is locked or not logged in"};
   }
 
   // let worker=rootGetters["setting/g_settingsAPIs"].worker;
   const res=await API.Transactions.oneMomeOp(fromId,operations,fromAccount,proposeAccount,store);
-  console.log('res', res)
+  
   return res
   // if (res.success) {
 
