@@ -186,30 +186,13 @@ const transactionOpWorker = async (fromId,operations,fromAccount,propose_options
 };
 
 
+// 2020-05-13 xulin add 加密memo
 const oneMomeOp = async (fromId,operations,fromAccount,proposeAccountId="",store) => {
 
-  // console.log('fromId: ', fromId)
-  // console.log('fromAccount: ', fromAccount)
-  // console.log('proposeAccountId: ', proposeAccountId)
-  // return false
-  console.log(operations)
-  const opObjects=await buildOPObjects(operations,proposeAccountId||fromId,fromAccount,store);
-  console.log('opObjects', opObjects)
+  const opObjects=await buildOPMemoObjects(operations,proposeAccountId||fromId,fromAccount,store);
   opObjects.success = true
-  // console.log("opObjects。。。。。。。", opObjects)
-  // if(opObjects.code&&opObjects.code!=1){
-  //   return opObjects;
-  // }
-  
-  // const transaction = new TransactionBuilder();
-  // // console.info("opObjects",opObjects);
-  // opObjects.forEach(op=>{
-  //   transaction.add_type_operation(op.type, op.opObject); 
-  // });
   return opObjects
-  // return  process_transaction(transaction,store,opObjects);
 };
-
 
 
 const transactionOp = async (fromId,operations,fromAccount,proposeAccountId="",store) => {
@@ -268,7 +251,7 @@ const transactionOp = async (fromId,operations,fromAccount,proposeAccountId="",s
 };
 
 
-const buildOPObjects=async (operations,fromId,fromAccount,store)=>{
+const buildOPMemoObjects=async (operations,fromId,fromAccount,store)=>{
   let opObjects=[];
   let opObject,opItem;
   for(let i=0;i<operations.length;i++){
@@ -393,7 +376,7 @@ const buildOPObjects=async (operations,fromId,fromAccount,store)=>{
                 }
                 memo.message = memo.message.toString("hex")
                 try {
-                  // opObject.memo =[isEncryption?1:0,memo];//
+                  opObject.memo =[isEncryption?1:0,memo];//
                   return {
                     code: 1,
                     success:false,
@@ -411,10 +394,163 @@ const buildOPObjects=async (operations,fromId,fromAccount,store)=>{
         }
 
         opObjects.push({
+          type:opItem.type,
+          opObject
+        });
+      }catch(e){
+        console.info("e",e);
+        return {
+          success:false,
+          error:e.message,
+          code:0
+        }
+      }
+  }
+
+  return opObjects;
+}
+
+const buildOPObjects=async (operations,fromId,fromAccount,store)=>{
+  let opObjects=[];
+  let opObject,opItem;
+  for(let i=0;i<operations.length;i++){
+      opObject=null;
+      opItem=operations[i];
+      try{
+        let opParams=opItem.params;
+        let {asset_id="1.3.0",fee_asset_id="1.3.0"}=opParams;
+
+        let assetObj=await API.Assets.fetch_asset_one(asset_id);
+        if(assetObj.code!=1) return assetObj;
+        assetObj=assetObj.data;
+        switch(opItem.type){
+          case "account_update":
+            if("action" in opParams){
+              opObject=getUpdateAccountObject(opParams,fromAccount.account);
+            }else{
+              opObject=opParams.updateObject;
+            }   
+            break;  
+          case "contract_create":
+            let {name,data,authority}=opParams;
+            opObject = {
+              owner: fromId,
+              name,
+              data,
+              contract_authority:authority,
+              extensions:[]
+            };   
+            break;  
+            case "revise_contract":
+              opObject = {
+                reviser: fromId,
+                ...opParams,
+                extensions:[]
+              };   
+            break; 
+          case "call_contract_function":
+            let {contractId,functionName,valueList,runTime}=opParams;
+            opObject = {
+              caller:fromId,
+              contract_id:contractId,
+              function_name:functionName,
+              value_list:valueList,
+              extensions:[]
+            };   
+            break; 
+          case "create_nh_asset_order":
+            let {pending_orders_fee,price,priceAssetId="1.3.0"}=opParams;
+
+            pending_orders_fee=await helper.toOpAmount(pending_orders_fee,assetObj);
+            if(!pending_orders_fee.success){
+              return pending_orders_fee;
+            }
+            opParams.pending_orders_fee=pending_orders_fee.data;
+
+            let price_amount_res=await helper.toOpAmount(price,priceAssetId);
+            if(!price_amount_res.success){
+              return price_amount_res;
+            }
+            opParams.price=price_amount_res.data;
+
+            opObject = {
+              seller: fromId,
+              ...opParams
+            };
+            break;
+          case "limit_order_cancel":
+            opObject={
+              fee_paying_account:fromId,
+              order:opParams.orderId
+            }
+            break;
+          case "vesting_balance_withdraw":
+            opObject={
+              owner:fromId,
+              ...opParams
+            }
+            break
+        }
+
+        let {op_type}=opItem;
+
+        if(typeof op_type!="undefined"){
+          if((op_type>=37&&op_type<=45)&&op_type!=43){
+              if("asset_id" in opParams)  opParams.asset_id=assetObj.symbol;
+              
+              opObject=opParams;
+              switch (op_type){
+                case 42:opObject.from=fromId;
+                      break;
+                case 39:opObject.related_account=fromId;
+                      break;
+                  default:opObject.fee_paying_account=fromId;
+              }
+
+          }else if(op_type==0||op_type==13){
+              let {to,amount=0,memo,isEncryption}=opParams;
+
+              let toAccount =await getUser(to);
+              if (!toAccount.success)  return { success: false, error: 'Account receivable does not exist',code:116 };
+              
+              let amount_res=await helper.toOpAmount(amount,assetObj);
+              if(!amount_res.success) return amount_res;
+              amount=amount_res.data;
+
+              opObject = { };
+              if(op_type==0){
+                opObject.from=fromId;
+                opObject.to=toAccount.data.account.id;
+                opObject.amount=amount
+              }else if(op_type==13){
+                opObject.issuer=fromId;
+                opObject.issue_to_account=toAccount.data.account.id;
+                opObject.asset_to_issue=amount;
+              }
+              if (memo) {
+                if(isEncryption){
+                  let memo_key=toAccount.data.account.options.memo_key;
+                  let memo_from_privkey =await store.dispatch("WalletDb/getPrivateKey",fromAccount.account.options.memo_key,{root:true})
+                  memo=encryptMemo(new Buffer(memo, "utf-8"), memo_from_privkey, memo_key);
+                }
+                
+                try {
+                  opObject.memo =[isEncryption?1:0,memo];//
+                } catch (error) {
+                  return { success: false, error: 'Encrypt memo failed',code:118 };
+                }
+              }
+          }else if(!opObject){
+            opObject=opParams;
+          } 
+        }
+
+        opObjects.push({
             type:opItem.type,
             opObject
         });
       }catch(e){
+        console.info("e",e);
         return {
           success:false,
           error:e.message,
@@ -447,4 +583,4 @@ const getUpdateAccountObject=(params,fromAccount)=>{
 }
 
 
-export default { oneMomeOp, transactionOp,transactionOpWorker, signString, checkingSignString };
+export default { oneMomeOp, buildOPMemoObjects, transactionOp,transactionOpWorker, signString, checkingSignString };

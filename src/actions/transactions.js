@@ -109,8 +109,11 @@ export const encryptionOneMome = async ({ dispatch,rootGetters },params) => {
 
 
 
+
+
 export const transferAsset = async ({ dispatch,rootGetters },params) => {
   helper.trimParams(params)
+
   let {fromAccount="",toAccount,amount=0,memo,assetId="1.3.0",isEncryption=true,
   onlyGetFee=false,proposeAccount="",isPropose}=params;
   
@@ -172,6 +175,7 @@ export const _encryptionOneMomeOperations = async (store, { operations,proposeAc
 
   return res
 };
+
 
 
 export const _transactionOperations = async (store, { operations,proposeAccount="",onlyGetFee=false}) => {
