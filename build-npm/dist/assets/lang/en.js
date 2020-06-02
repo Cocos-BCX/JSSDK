@@ -53,6 +53,7 @@ var en_US = {
    trxTypes_transfer_from_blind: "Transfer from blinded account",
    trxTypes_asset_claim_fees: "Claim asset fees",
 
+   trxTypes_contract_share_fee_operation: 'Contract share fee operation',
    trxTypes_call_contract_function: "Contract transaction",
    trxTypes_contract_create: "Create contract",
    trxTypes_revise_contract: "Upate contract",
