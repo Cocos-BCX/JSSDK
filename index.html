@@ -1541,10 +1541,10 @@
        
     </div>
 
-        <script src="assets/bcx.js?v=7"></script>
-        <script type="text/javascript" src="./build/FELib/jquery-1.8.3.min.js" charset="utf-8"></script>
-        <script type="text/javascript" src="./build/FELib/jsonview/jquery.jsonview.min.js" charset="utf-8"></script>
-
+        <script src="./assets/bcx.min.js?v=7"></script>
+        <script type="text/javascript" src="./FELib/jquery-1.8.3.min.js" charset="utf-8"></script>
+        <script type="text/javascript" src="./FELib/jsonview/jquery.jsonview.min.js" charset="utf-8"></script>
+    
         <script>
                 function loadLeftNavs(){
                     var el_modules=document.querySelectorAll(".right_main_content .body .div_module_c");
@@ -1570,7 +1570,7 @@
                     // default_ws_node:"wss://node.cocos-terminal.com/wss",
                     // default_ws_node:"wss://api.cocosbcx.net",
                     default_ws_node:"wss://test.cocosbcx.net",
-                    // default_ws_node:"ws://192.168.90.46:41346",
+                    // default_ws_node:"ws://192.168.90.46:8349",
                     ws_node_list:[
                        {url:"ws://192.168.90.46:41346", name:"Cocos - Terminal"},
                        {url:"wss://test.cocosbcx.net",name:"Test"},
@@ -1581,7 +1581,9 @@
                         {
                             core_asset:"COCOS",
                             // chain_id:"1ae3653a3105800f5722c5bda2b55530d0e9e8654314e2f3dc6d2b010da641c5" 
-                            chain_id:"6057d856c398875cac2650fe33caef3d5f6b403d184c5154abbff526ec1143c4" 
+                            // chain_id:"6057d856c398875cac2650fe33caef3d5f6b403d184c5154abbff526ec1143c4",
+
+                            chain_id: '8a123e6b6a93e9ffd95b7ed65a06eee076be3e980cc6a7ccb8c1f1a0ad8e1923'
                         }
                      ], 
                      faucet_url:"http://test-faucet.cocosbcx.net",
@@ -3713,8 +3715,10 @@
                                 memo="";
                             }
                         }
-
+                        console.log()
                         if(item.result.type=="error_result"||item.result.type=="contract_result"){
+                            
+                            console.log('============')
                             var results="";
                             if(item.result.type=="contract_result")
                                 item.result.contract_affecteds.forEach(c_op=>{
@@ -3740,7 +3744,7 @@
                             <td scope="row" width="80">${item.block_num}</th>
                                 <td width="140" >${item.type_name}</td>
                             <td style="max-width:500px; word-wrap: break-word; padding-right:10px;">
-                                ${item.parse_operations_text} <span class="memo">${memo}</span>
+                                ${item.type=="contract_share_fee_operation"?JSON.stringify(item.raw_data):item.parse_operations_text} <span class="memo">${memo}</span>
                                 ${more}
                                 ${new_options_html}
                             </td>
