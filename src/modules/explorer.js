@@ -33,7 +33,7 @@ const actions={
             parse_ops=await API.Operations.parseOperations({ operations: parse_ops,store });
             transaction.parse_ops=parse_ops.operations;
             transaction.trx_id=transactionId;
-            transaction.expiration=new Date(transaction.expiration+"Z").format("yyyy/MM/dd HH:mm:ss");
+            transaction.expiration=new Date(transaction.expiration+"Z").bcxformat("yyyy/MM/dd HH:mm:ss");
             delete transaction.operations;
             delete transaction.operation_results;
 
@@ -78,7 +78,7 @@ const actions={
           }
 
           let blockInfo=result.data;
-          blockInfo.time=new Date(blockInfo.timestamp+"Z").format("yyyy/MM/dd HH:mm:ss");
+          blockInfo.time=new Date(blockInfo.timestamp+"Z").bcxformat("yyyy/MM/dd HH:mm:ss");
           blockInfo.block_height=block;
           blockInfo.witness_name=await API.Explorer.getWitnessName(blockInfo.witness);
 
@@ -172,7 +172,7 @@ const actions={
                     }
                     item.last_aslot_time=new Date(
                       date_now -(current_aslot - item.last_aslot) * parameters.block_interval * 1000
-                     ).format("yyyy/MM/dd HH:mm:ss");
+                     ).bcxformat("yyyy/MM/dd HH:mm:ss");
 
                     return item;
                 });
@@ -187,7 +187,7 @@ const actions={
                     participation,
                     witness_pay_per_block:helper.getFullNum(parameters.witness_pay_per_block/pow_precision),
                     witness_budget:helper.getFullNum(witness_budget/pow_precision),
-                    next_maintenance_time:new Date(next_maintenance_time+"Z").format("yyyy/MM/dd HH:mm:ss"),
+                    next_maintenance_time:new Date(next_maintenance_time+"Z").bcxformat("yyyy/MM/dd HH:mm:ss"),
                     witnesses,
                     core_asset_symbol:coreAsset.symbol
                   }

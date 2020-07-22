@@ -204,7 +204,7 @@ var get_translation_parts = exports.get_translation_parts = function get_transla
   return str.split(re);
 };
 
-Date.prototype.format = function (format) {
+Date.prototype.bcxformat = function (format) {
   if (!format) return "";
   var o = {
     "M+": this.getMonth() + 1, // month

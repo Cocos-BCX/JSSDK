@@ -91,7 +91,7 @@ var Operations = {
     var headBlock = ApiObjectDyn[0].head_block_number;
     var headBlockTime = new Date(ApiObjectDyn[0].time + 'Z');
     var secondsBelow = (headBlock - operation.block_num) * blockInterval;
-    var date = new Date(headBlockTime - secondsBelow * 1000).format("yyyy/MM/dd HH:mm:ss");
+    var date = new Date(headBlockTime - secondsBelow * 1000).bcxformat("yyyy/MM/dd HH:mm:ss");
     return date;
   },
 
@@ -159,7 +159,7 @@ var Operations = {
             block_res = _context2.sent;
 
             if (block_res.code == 1) {
-              date = new Date(block_res.data.timestamp + "Z").format("yyyy/MM/dd HH:mm:ss");
+              date = new Date(block_res.data.timestamp + "Z").bcxformat("yyyy/MM/dd HH:mm:ss");
             }
 
           case 13:
@@ -939,7 +939,7 @@ var Operations = {
           case 223:
             start_time = op.payload.start_time;
 
-            start_time = new Date(start_time + "Z").format("yyyy/MM/dd HH:mm:ss");
+            start_time = new Date(start_time + "Z").bcxformat("yyyy/MM/dd HH:mm:ss");
             if (op.type == "void_result") {
               op.result = {
                 result: "void_result"
@@ -982,7 +982,7 @@ var Operations = {
           case 241:
             restart_time = op.payload.restart_time;
 
-            restart_time = new Date(restart_time + "Z").format("yyyy/MM/dd HH:mm:ss");
+            restart_time = new Date(restart_time + "Z").bcxformat("yyyy/MM/dd HH:mm:ss");
             _context4.next = 245;
             return _regenerator2.default.awrap(Operations.getTranslateInfo("operation_crontab_recover", [{ type: "account", value: op.payload.crontab_owner, arg: "crontab_owner" }, { type: "crontab", value: op.payload.crontab, arg: "crontab" }, { type: "restart_time", value: restart_time, arg: "restart_time" }]));
 

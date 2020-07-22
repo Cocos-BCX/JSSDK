@@ -510,8 +510,8 @@
                         <div class="div_module_c" id="div_getPrivateKey" pclass="class_11" >
                             <h2>获取私钥</h2>
                             <div class="div_getPrivateKey div_module">
-                                <!-- <input type="text" id="input_psd" placeholder="密码"  /><br><br>
-                                <input type="button" id="btn_psdChangePrivateKey" value="测试密码转化私钥"  /><br><br> -->
+                                <input type="text" id="input_psd" placeholder="密码"  /><br><br>
+                                <input type="button" id="btn_psdChangePrivateKey" value="测试密码转化私钥"  /><br><br>
                                 <input type="button" id="btn_getPrivateKey" value="获取私钥"  /><br><br>
                                 <p class="res"></p>
                             </div>
@@ -1566,14 +1566,13 @@
 
                 loadLeftNavs();
                 
-                
                 var _configParams={ 
                     // default_ws_node:"wss://node.cocos-terminal.com/wss",
                     // default_ws_node:"wss://api.cocosbcx.net",
                     default_ws_node:"wss://test.cocosbcx.net",
-                    // default_ws_node:"ws://192.168.90.46:8349",
+                    // default_ws_node:"ws://192.168.90.46:41346",
                     ws_node_list:[
-                    //    {url:"ws://192.168.90.46:41346", name:"Cocos - Terminal"},
+                       {url:"ws://192.168.90.46:41346", name:"Cocos - Terminal"},
                        {url:"wss://test.cocosbcx.net",name:"Test"},
                        {url:"wss://api.cocosbcx.net",name:"Cocos - Terminal"},
                        {url:"wss://node.cocos-terminal.com/wss",name:"Cocos - Terminal"},
@@ -1581,10 +1580,8 @@
                      networks:[
                         {
                             core_asset:"COCOS",
-                            chain_id:"1ae3653a3105800f5722c5bda2b55530d0e9e8654314e2f3dc6d2b010da641c5" 
-                            // chain_id:"6057d856c398875cac2650fe33caef3d5f6b403d184c5154abbff526ec1143c4",
-
-                            // chain_id: '8a123e6b6a93e9ffd95b7ed65a06eee076be3e980cc6a7ccb8c1f1a0ad8e1923'
+                            // chain_id:"1ae3653a3105800f5722c5bda2b55530d0e9e8654314e2f3dc6d2b010da641c5" 
+                            chain_id:"6057d856c398875cac2650fe33caef3d5f6b403d184c5154abbff526ec1143c4" 
                         }
                      ], 
                      faucet_url:"http://test-faucet.cocosbcx.net",
@@ -3716,10 +3713,8 @@
                                 memo="";
                             }
                         }
-                        console.log()
+
                         if(item.result.type=="error_result"||item.result.type=="contract_result"){
-                            
-                            console.log('============')
                             var results="";
                             if(item.result.type=="contract_result")
                                 item.result.contract_affecteds.forEach(c_op=>{
@@ -3745,7 +3740,7 @@
                             <td scope="row" width="80">${item.block_num}</th>
                                 <td width="140" >${item.type_name}</td>
                             <td style="max-width:500px; word-wrap: break-word; padding-right:10px;">
-                                ${item.type=="contract_share_fee_operation"?JSON.stringify(item.raw_data):item.parse_operations_text} <span class="memo">${memo}</span>
+                                ${item.parse_operations_text} <span class="memo">${memo}</span>
                                 ${more}
                                 ${new_options_html}
                             </td>
@@ -3848,14 +3843,14 @@
                         } else if(isOnlyShowM){
                             return time;
                         }else{
-                            var createCurrentDayEndTime=new Date(createDate.format("yyyy/MM/dd")+" 23:59:59");
+                            var createCurrentDayEndTime=new Date(createDate.bcxformat("yyyy/MM/dd")+" 23:59:59");
                             var createCurrentDayEndMin=parseInt((createCurrentDayEndTime.getTime()-createDate.getTime())/(1000*60));
                             if (m < createCurrentDayEndMin) {
                                 return parseInt(m / 60) + "小时前";//return "今天 " + TimeToHourMin(time);
                             } else if (m > createCurrentDayEndMin && m < createCurrentDayEndMin + 24 * 60) {
                                 return "昨天 " + this.TimeToHourMin(time)
                             } else if (createDate.getFullYear() == nowDate.getFullYear()) {
-                                    return createDate.format("MM月dd日 HH:mm:ss");
+                                    return createDate.bcxformat("MM月dd日 HH:mm:ss");
                             } else {  return time; }
                         }
                     },

@@ -4,7 +4,7 @@ import helper from '../../lib/common/helper';
 
 const formatItems=async (items,total)=>{
          items=items.map(item=>{
-                item.create_time=new Date(item.create_time+'Z').format("yyyy/MM/dd HH:mm:ss");
+                item.create_time=new Date(item.create_time+'Z').bcxformat("yyyy/MM/dd HH:mm:ss");
                 let describe_with_contract={}
                 let item_data;
 
@@ -289,7 +289,7 @@ const fomatOrders=async (orders)=>{
              parseInt(b_split[2], 10)- parseInt(a_split[2], 10)
         );
     }).map(item=>{
-        item.expiration=new Date(item.expiration+"Z").format("yyyy/MM/dd HH:mm:ss");
+        item.expiration=new Date(item.expiration+"Z").bcxformat("yyyy/MM/dd HH:mm:ss");
         return item;
     });
     if(orders.length){

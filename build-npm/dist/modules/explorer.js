@@ -95,7 +95,7 @@ var actions = {
 
             transaction.parse_ops = parse_ops.operations;
             transaction.trx_id = transactionId;
-            transaction.expiration = new Date(transaction.expiration + "Z").format("yyyy/MM/dd HH:mm:ss");
+            transaction.expiration = new Date(transaction.expiration + "Z").bcxformat("yyyy/MM/dd HH:mm:ss");
             delete transaction.operations;
             delete transaction.operation_results;
 
@@ -188,7 +188,7 @@ var actions = {
 
                       blockInfo = result.data;
 
-                      blockInfo.time = new Date(blockInfo.timestamp + "Z").format("yyyy/MM/dd HH:mm:ss");
+                      blockInfo.time = new Date(blockInfo.timestamp + "Z").bcxformat("yyyy/MM/dd HH:mm:ss");
                       blockInfo.block_height = block;
                       _context3.next = 6;
                       return _regenerator2.default.awrap(_api2.default.Explorer.getWitnessName(blockInfo.witness));
@@ -384,7 +384,7 @@ var actions = {
                       } else {
                         date_now = _last_date_now;
                       }
-                      item.last_aslot_time = new Date(date_now - (current_aslot - item.last_aslot) * parameters.block_interval * 1000).format("yyyy/MM/dd HH:mm:ss");
+                      item.last_aslot_time = new Date(date_now - (current_aslot - item.last_aslot) * parameters.block_interval * 1000).bcxformat("yyyy/MM/dd HH:mm:ss");
 
                       return item;
                     });
@@ -399,7 +399,7 @@ var actions = {
                         participation: participation,
                         witness_pay_per_block: _helper2.default.getFullNum(parameters.witness_pay_per_block / pow_precision),
                         witness_budget: _helper2.default.getFullNum(witness_budget / pow_precision),
-                        next_maintenance_time: new Date(next_maintenance_time + "Z").format("yyyy/MM/dd HH:mm:ss"),
+                        next_maintenance_time: new Date(next_maintenance_time + "Z").bcxformat("yyyy/MM/dd HH:mm:ss"),
                         witnesses: witnesses,
                         core_asset_symbol: coreAsset.symbol
                       }

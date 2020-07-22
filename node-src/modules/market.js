@@ -602,7 +602,7 @@ const mutations = {
 const _calcMarketStats=(history, baseAsset, quoteAsset, recent)=>{
       let yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
-      // console.info("yesterday",yesterday.format("yyyy/MM:dd HH:mm:ss"))
+      // console.info("yesterday",yesterday.bcxformat("yyyy/MM:dd HH:mm:ss"))
 
       yesterday = yesterday.getTime();
       let volumeBase = 0,

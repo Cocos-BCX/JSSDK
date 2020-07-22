@@ -135,7 +135,7 @@ var actions = {
 
                                             proposals.push({
                                                 id: id,
-                                                expiration: new Date(expiration_time + "Z").format("yyyy/MM/dd HH:mm:ss"),
+                                                expiration: new Date(expiration_time + "Z").bcxformat("yyyy/MM/dd HH:mm:ss"),
                                                 parse_operations: parse_operations,
                                                 parse_operations_text: parse_operations_text,
                                                 raw_data: raw_data,

@@ -335,7 +335,7 @@ var Market = function () {
                         block_res = _context2.sent;
 
                         if (block_res.code == 1) {
-                          item.block_time = new Date(block_res.data.timestamp + "Z").format("yyyy/MM/dd HH:mm:ss");
+                          item.block_time = new Date(block_res.data.timestamp + "Z").bcxformat("yyyy/MM/dd HH:mm:ss");
                         }
                         return _context2.abrupt('return', item);
 
@@ -660,7 +660,7 @@ var Market = function () {
                         block_res = _context5.sent;
 
                         if (block_res.code == 1) {
-                          date = new Date(block_res.data.timestamp + "Z").format("yyyy/MM/dd HH:mm:ss");
+                          date = new Date(block_res.data.timestamp + "Z").bcxformat("yyyy/MM/dd HH:mm:ss");
                         } else {
                           date = _api2.default.Operations._getOperationDate(trx.toJS(), ApiObject, ApiObjectDyn);
                         }
@@ -799,7 +799,7 @@ var Market = function () {
           amount_unit: _this9.quoteAsset.get("symbol"),
           turnover: _utils4.default.format_number(order[isBid ? "amountForSale" : "amountToReceive"]().getAmount({ real: true }), _this9.baseAsset.get("precision")),
           turnover_unit: _this9.baseAsset.get("symbol"),
-          expiration: new Date(order.expiration + "Z").format("yyyy/MM/dd HH:mm:ss")
+          expiration: new Date(order.expiration + "Z").bcxformat("yyyy/MM/dd HH:mm:ss")
         };
         if (order.type) {
           item.type = order.type;
