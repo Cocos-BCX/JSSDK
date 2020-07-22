@@ -204,7 +204,7 @@ class Market {
       this.currentAccount.history=await Promise.all(history.map(async item=>{
         let block_res=await API.Operations.get_block_header(item.block_num);
         if(block_res.code==1){
-          item.block_time=new Date(block_res.data.timestamp+"Z").format("yyyy/MM/dd HH:mm:ss");
+          item.block_time=new Date(block_res.data.timestamp+"Z").bcxformat("yyyy/MM/dd HH:mm:ss");
         }
         return item;
       }))
@@ -444,7 +444,7 @@ class Market {
               let date="";
               let block_res=await API.Operations.get_block_header(block_num);
               if(block_res.code==1){
-                date=new Date(block_res.data.timestamp+"Z").format("yyyy/MM/dd HH:mm:ss");
+                date=new Date(block_res.data.timestamp+"Z").bcxformat("yyyy/MM/dd HH:mm:ss");
               }else{
                  date = API.Operations._getOperationDate(trx.toJS(), ApiObject, ApiObjectDyn);
               }
@@ -551,7 +551,7 @@ class Market {
         amount_unit:this.quoteAsset.get("symbol"),
         turnover:_utils.format_number(order[isBid ? "amountForSale" : "amountToReceive"]().getAmount({real: true}),  this.baseAsset.get("precision")),
         turnover_unit:this.baseAsset.get("symbol"),
-        expiration:new Date(order.expiration+"Z").format("yyyy/MM/dd HH:mm:ss")
+        expiration:new Date(order.expiration+"Z").bcxformat("yyyy/MM/dd HH:mm:ss")
       }
       if(order.type){
         item.type=order.type;

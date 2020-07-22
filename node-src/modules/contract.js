@@ -204,7 +204,7 @@ const actions={
             contract_authority,
             contract_data:helper.formatTable(contract_data),
             contract_data_type:formatTableWithStructs(contract_data),
-            create_date:new Date(creation_date+"Z").format("yyyy/MM/dd HH:mm:ss"),
+            create_date:new Date(creation_date+"Z").bcxformat("yyyy/MM/dd HH:mm:ss"),
             current_version,
             id,
             lua_code,

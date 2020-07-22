@@ -45,7 +45,7 @@ const Operations = {
     const headBlock = ApiObjectDyn[0].head_block_number;
     const headBlockTime = new Date(ApiObjectDyn[0].time + 'Z');
     const secondsBelow = (headBlock - operation.block_num) * blockInterval;
-    const date = new Date(headBlockTime - (secondsBelow * 1000)).format("yyyy/MM/dd HH:mm:ss");
+    const date = new Date(headBlockTime - (secondsBelow * 1000)).bcxformat("yyyy/MM/dd HH:mm:ss");
     return date;
   },
 
@@ -73,7 +73,7 @@ const Operations = {
         date = Operations._getOperationDate(operation, ApiObject, ApiObjectDyn);
         let block_res=await API.Operations.get_block_header(operation.block_num);
         if(block_res.code==1){
-          date=new Date(block_res.data.timestamp+"Z").format("yyyy/MM/dd HH:mm:ss");
+          date=new Date(block_res.data.timestamp+"Z").bcxformat("yyyy/MM/dd HH:mm:ss");
         }
     }
     
@@ -785,7 +785,7 @@ const Operations = {
               break;
         case "crontab_create":
               let start_time=op.payload.start_time;
-              start_time=new Date(start_time+"Z").format("yyyy/MM/dd HH:mm:ss");
+              start_time=new Date(start_time+"Z").bcxformat("yyyy/MM/dd HH:mm:ss");
               if(op.type=="void_result"){
                 op.result={
                   result:"void_result"
@@ -834,7 +834,7 @@ const Operations = {
             break;
         case "crontab_recover":
            let restart_time=op.payload.restart_time;
-           restart_time=new Date(restart_time+"Z").format("yyyy/MM/dd HH:mm:ss");
+           restart_time=new Date(restart_time+"Z").bcxformat("yyyy/MM/dd HH:mm:ss");
            return await Operations.getTranslateInfo(
                     "operation_crontab_recover",
                     [

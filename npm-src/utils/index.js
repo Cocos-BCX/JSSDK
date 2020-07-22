@@ -191,7 +191,7 @@ export const get_translation_parts=str=> {
 }
 
 
-Date.prototype.format = function (format) {
+Date.prototype.bcxformat = function (format) {
   if(!format) return "";
   var o = {
       "M+": this.getMonth() + 1, // month

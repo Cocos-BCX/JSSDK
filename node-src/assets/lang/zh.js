@@ -47,7 +47,6 @@
     trxTypes_asset_claim_fees: "领取资产手续费",
     trxTypes_asset_fund_fee_pool: "注资资产手续费池",
 
-    trxTypes_contract_share_fee_operation: '合约费用分担',
     trxTypes_call_contract_function: "合约交易",
     trxTypes_contract_create:"创建合约",
     trxTypes_revise_contract:"更新合约",

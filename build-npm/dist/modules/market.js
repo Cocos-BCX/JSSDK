@@ -984,7 +984,7 @@ var mutations = (_mutations = {}, (0, _defineProperty3.default)(_mutations, type
 var _calcMarketStats = function _calcMarketStats(history, baseAsset, quoteAsset, recent) {
     var yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    // console.info("yesterday",yesterday.format("yyyy/MM:dd HH:mm:ss"))
+    // console.info("yesterday",yesterday.bcxformat("yyyy/MM:dd HH:mm:ss"))
 
     yesterday = yesterday.getTime();
     var volumeBase = 0,
