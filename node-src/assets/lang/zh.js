@@ -135,6 +135,7 @@
     operation_update_collateral_for_gas:"(mortgager) 将 (beneficiary) 抵押物调整为 (collateral)",
     operation_vesting_balance_create:"(account) 创建冻结账目余额 (amount)",
     operation_asset_settle_cancel:"(account) 取消资产清算 (amount)",
+    operation_update_global_property_extensions: "(account)更新全局扩展属性",
 
     
     contract_affecteds_nh_modifined:"(affected_account) 的NH资产 (affected_item) 修改数据 (modified)",

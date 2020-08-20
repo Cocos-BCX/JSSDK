@@ -134,12 +134,11 @@ const Operations = {
   // Parses array of operations, return array of parsed operations and array of assets ids
   // that were user in it. United Labs of BCTech.
   parseOperations: async ({ operations, store,isContract=false,isReqDate=true }) => {
-    // console.info("operations",operations);
     _store=store;
     const ApiInstance = Apis.instance();
     const ApiObject =isReqDate?[(await API.Explorer.getGlobalObject(true)).data]:null;
     const ApiObjectDyn =isReqDate?[(await API.Explorer.getDynGlobalObject(false)).data]:null;
-    const operationTypes = [0, 1, 2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,23,24,26,27,30,31,34,35,37,38,39,40,41,42,43,44,45,50,54,300,301,303,3010,3011,3012];//,53,54.55,56,57,58
+    const operationTypes = [0, 1, 2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,23,24,26,27,30,31,34,35,37,38,39,40,41,42,43,44,45,50,54,55,56,57,300,301,303,3010,3011,3012];//,53,54.55,56,57,58
     const filteredOperations = operations.filter(op => {
       return operationTypes.includes(op.op[0])
     });
@@ -861,6 +860,14 @@ const Operations = {
                     ]
                 )
               break;
+          case "update_global_property_extensions":
+              return await Operations.getTranslateInfo(
+                "operation_update_global_property_extensions",
+                [
+                  {type: "account", value: op.account, arg: "account"},
+                ]
+            );
+            break;
     }
   },
   getTranslateInfo:async (localId, keys)=>{
