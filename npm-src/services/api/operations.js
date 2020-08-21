@@ -134,7 +134,7 @@ const Operations = {
   // Parses array of operations, return array of parsed operations and array of assets ids
   // that were user in it. United Labs of BCTech.
   parseOperations: async ({ operations, store,isContract=false,isReqDate=true }) => {
-    console.info("operations: ",operations);
+    // console.info("operations: ",operations);
     _store=store;
     const ApiInstance = Apis.instance();
     const ApiObject =isReqDate?[(await API.Explorer.getGlobalObject(true)).data]:null;
