@@ -71,7 +71,7 @@
     trxTypes_contract_affecteds_nh_transfer_to:"NH asset receive",
     trxTypes_contract_affecteds_nh_modifined:"NH asset data modification",
     trxTypes_contract_affecteds_log:"log",
-
+    trxTypes_update_global_property_extensions: "update global property extensions",
     
     //operation
     operation_pending: "pending {blocks} blocks",
@@ -133,7 +133,7 @@
     operation_relate_world_view:"(related_account) relation (view_owner) worldview (world_view)",
     operation_relate_nh_asset:"(nh_asset_creator) (related) parent NH asset (nh_asset) and child NH asset (nh_asset) Association",
     operation_update_collateral_for_gas:"(mortgager) adjust (beneficiary) collateral to (collateral)",
-    operation_update_global_property_extensions: "(account)update global extensions parameter",
+    operation_update_global_property_extensions: "(account) update global extensions parameter",
 
     contract_affecteds_nh_modifined:"(affected_account) NH assets (affected_item) modify data (modified)",
     contract_affecteds_nh_transfer_to:"NH asset (affected_item) transfer (affected_account)",
