@@ -262,7 +262,7 @@ var Operations = {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            // console.info("operations",operations);
+            // console.info("operations: ",operations);
             _store = store;
             ApiInstance = _bcxjsWs.Apis.instance();
 
@@ -305,7 +305,7 @@ var Operations = {
 
           case 19:
             ApiObjectDyn = _context3.t2;
-            operationTypes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 23, 24, 26, 27, 30, 31, 34, 35, 37, 38, 39, 40, 41, 42, 43, 44, 45, 50, 54, 300, 301, 303, 3010, 3011, 3012]; //,53,54.55,56,57,58
+            operationTypes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 23, 24, 26, 27, 30, 31, 34, 35, 37, 38, 39, 40, 41, 42, 43, 44, 45, 50, 54, 55, 56, 57, 300, 301, 303, 3010, 3011, 3012]; //,53,54.55,56,57,58
 
             filteredOperations = operations.filter(function (op) {
               return operationTypes.includes(op.op[0]);
@@ -472,7 +472,7 @@ var Operations = {
           case 0:
             o = void 0;
             _context4.t0 = op.type;
-            _context4.next = _context4.t0 === "transfer" ? 4 : _context4.t0 === "account_create" ? 8 : _context4.t0 === "account_update" ? 12 : _context4.t0 === "account_upgrade" ? 16 : _context4.t0 === "witness_create" ? 20 : _context4.t0 === "committee_member_create" ? 24 : _context4.t0 === "witness_update" ? 28 : _context4.t0 === "committee_member_update" ? 32 : _context4.t0 === "fill_order" ? 36 : _context4.t0 === "limit_order_create" ? 49 : _context4.t0 === "limit_order_cancel" ? 58 : _context4.t0 === "call_order_update" ? 62 : _context4.t0 === "vesting_balance_withdraw" ? 66 : _context4.t0 === "call_contract_function" ? 70 : _context4.t0 === "contract_create" ? 82 : _context4.t0 === "revise_contract" ? 86 : _context4.t0 === "register_nh_asset_creator" ? 90 : _context4.t0 === "create_world_view" ? 94 : _context4.t0 === "create_nh_asset" ? 98 : _context4.t0 === "delete_nh_asset" ? 104 : _context4.t0 === "transfer_nh_asset" ? 108 : _context4.t0 === "relate_nh_asset" ? 112 : _context4.t0 === "create_nh_asset_order" ? 116 : _context4.t0 === "cancel_nh_asset_order" ? 120 : _context4.t0 === "fill_nh_asset_order" ? 124 : _context4.t0 === "relate_world_view" ? 128 : _context4.t0 === "proposal_create" ? 132 : _context4.t0 === "committee_member_update_global_parameters" ? 142 : _context4.t0 === "proposal_update" ? 146 : _context4.t0 === "contract_affecteds_nh_transfer_from" ? 150 : _context4.t0 === "contract_affecteds_nh_transfer_to" ? 154 : _context4.t0 === "contract_affecteds_nh_modifined" ? 158 : _context4.t0 === "contract_affecteds_asset" ? 162 : _context4.t0 === "contract_affecteds_log" ? 166 : _context4.t0 === "asset_create" ? 170 : _context4.t0 === "asset_update_bitasset" ? 174 : _context4.t0 === "asset_update" ? 174 : _context4.t0 === "asset_update_restricted" ? 178 : _context4.t0 === "asset_issue" ? 183 : _context4.t0 === "asset_reserve" ? 187 : _context4.t0 === "asset_fund_fee_pool" ? 191 : _context4.t0 === "asset_publish_feed" ? 195 : _context4.t0 === "asset_global_settle" ? 199 : _context4.t0 === "asset_settle" ? 203 : _context4.t0 === "asset_settle_cancel" ? 207 : _context4.t0 === "vesting_balance_create" ? 211 : _context4.t0 === "asset_update_feed_producers" ? 215 : _context4.t0 === "asset_claim_fees" ? 219 : _context4.t0 === "crontab_create" ? 223 : _context4.t0 === "crontab_cancel" ? 237 : _context4.t0 === "crontab_recover" ? 241 : _context4.t0 === "update_collateral_for_gas" ? 247 : 251;
+            _context4.next = _context4.t0 === "transfer" ? 4 : _context4.t0 === "account_create" ? 8 : _context4.t0 === "account_update" ? 12 : _context4.t0 === "account_upgrade" ? 16 : _context4.t0 === "witness_create" ? 20 : _context4.t0 === "committee_member_create" ? 24 : _context4.t0 === "witness_update" ? 28 : _context4.t0 === "committee_member_update" ? 32 : _context4.t0 === "fill_order" ? 36 : _context4.t0 === "limit_order_create" ? 49 : _context4.t0 === "limit_order_cancel" ? 58 : _context4.t0 === "call_order_update" ? 62 : _context4.t0 === "vesting_balance_withdraw" ? 66 : _context4.t0 === "call_contract_function" ? 70 : _context4.t0 === "contract_create" ? 82 : _context4.t0 === "revise_contract" ? 86 : _context4.t0 === "register_nh_asset_creator" ? 90 : _context4.t0 === "create_world_view" ? 94 : _context4.t0 === "create_nh_asset" ? 98 : _context4.t0 === "delete_nh_asset" ? 104 : _context4.t0 === "transfer_nh_asset" ? 108 : _context4.t0 === "relate_nh_asset" ? 112 : _context4.t0 === "create_nh_asset_order" ? 116 : _context4.t0 === "cancel_nh_asset_order" ? 120 : _context4.t0 === "fill_nh_asset_order" ? 124 : _context4.t0 === "relate_world_view" ? 128 : _context4.t0 === "proposal_create" ? 132 : _context4.t0 === "committee_member_update_global_parameters" ? 142 : _context4.t0 === "proposal_update" ? 146 : _context4.t0 === "contract_affecteds_nh_transfer_from" ? 150 : _context4.t0 === "contract_affecteds_nh_transfer_to" ? 154 : _context4.t0 === "contract_affecteds_nh_modifined" ? 158 : _context4.t0 === "contract_affecteds_asset" ? 162 : _context4.t0 === "contract_affecteds_log" ? 166 : _context4.t0 === "asset_create" ? 170 : _context4.t0 === "asset_update_bitasset" ? 174 : _context4.t0 === "asset_update" ? 174 : _context4.t0 === "asset_update_restricted" ? 178 : _context4.t0 === "asset_issue" ? 183 : _context4.t0 === "asset_reserve" ? 187 : _context4.t0 === "asset_fund_fee_pool" ? 191 : _context4.t0 === "asset_publish_feed" ? 195 : _context4.t0 === "asset_global_settle" ? 199 : _context4.t0 === "asset_settle" ? 203 : _context4.t0 === "asset_settle_cancel" ? 207 : _context4.t0 === "vesting_balance_create" ? 211 : _context4.t0 === "asset_update_feed_producers" ? 215 : _context4.t0 === "asset_claim_fees" ? 219 : _context4.t0 === "crontab_create" ? 223 : _context4.t0 === "crontab_cancel" ? 237 : _context4.t0 === "crontab_recover" ? 241 : _context4.t0 === "update_collateral_for_gas" ? 247 : _context4.t0 === "update_global_property_extensions" ? 251 : 255;
             break;
 
           case 4:
@@ -1004,6 +1004,13 @@ var Operations = {
             return _context4.abrupt('return', _context4.sent);
 
           case 251:
+            _context4.next = 253;
+            return _regenerator2.default.awrap(Operations.getTranslateInfo("operation_update_global_property_extensions", [{ type: "account", value: op.account, arg: "account" }]));
+
+          case 253:
+            return _context4.abrupt('return', _context4.sent);
+
+          case 255:
           case 'end':
             return _context4.stop();
         }
