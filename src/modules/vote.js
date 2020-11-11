@@ -1,14 +1,15 @@
 import * as types from '../mutations';
 import API from '../services/api';
+import Immutable from "immutable";
 
 const initialState = {
-  all_witnesses:[],
-  all_committee:[],
+  all_witnesses: Immutable.List(),
+  all_committee: Immutable.List(),
   all_type:"witnesses",
   globalObject:null,
   votes_state:null,
   getVoteObjects_callback:null,
-  vote_ids_obj:null,
+  vote_ids_obj:{},
   vote_ids:[],
   queryAccount:"",
   isExplorer:false
@@ -32,6 +33,8 @@ const getters={
 const actions={
   getVoteObjects:(store,{type = "witnesses",callback,queryAccount="",isExplorer=false,isCache=false}) => {
      let {dispatch,rootGetters,commit,state}=store;
+     store.state.all_witnesses=Immutable.List();
+     store.state.all_committee=Immutable.List();
      commit(types.SET_ALL_TYPE,type);
      commit(types.set_getVoteObjects_callback,callback);
      commit(types.SET_QUERY_ACCOUNT,queryAccount);
@@ -39,23 +42,6 @@ const actions={
      isCache=isCache||false;
      API.Vote._getVoteObjects(store,type,null,isCache);
   },
-  // publishVotes:async (store,{witnesses_ids=null,committee_ids=null,votes,callback})=>{
-  //     let {commit,getters,dispatch}=store;
-  //     dispatch("getVoteObjects",{type:"witnesses",callback:(res)=>{
-  //             if(res.code!=1){
-  //               callback&&callback(res);
-  //               return;
-  //             }
-  //             let {witnesses,committee,proxy_account_id}=getters.getVotesState;
-  //             if(!witnesses_ids){
-  //               witnesses_ids=witnesses.toArray();
-  //             }
-  //             if(!committee_ids){
-  //               committee_ids=committee.toArray();
-  //             }
-  //             API.Vote.publishVotes(store,witnesses_ids,committee_ids,votes,callback);
-  //     }})
-  // },
 
   publishVotes:async (store,{vote_ids,votes,type="witnesses",callback})=>{
     API.Vote.publishVotes(store,vote_ids,votes,type,callback);
@@ -155,8 +141,8 @@ const actions={
 
 const mutations = {
   [types.SET_ALL_WITNESSES_COMMITTEE]: (state,params) => {
-    state.all_witnesses=params.all_witnesses
-    state.all_committee=params.all_committee
+    state.all_witnesses=state.all_witnesses.merge(params.all_witnesses);
+    state.all_committee=state.all_committee.merge(params.all_committee);
   },
   [types.SET_ALL_TYPE]: (state,type) => {
     state.all_type=type
@@ -174,7 +160,12 @@ const mutations = {
     state.publishVotes_callback=callback;
   },
   [types.SET_VOTE_IDS_OBJ]:(state,vote_ids_obj)=>{
-    state.vote_ids_obj=vote_ids_obj;
+    for(let key in vote_ids_obj){
+        if(vote_ids_obj[key]){
+          state.vote_ids_obj[key]=vote_ids_obj[key]
+        }
+    }
+    // state.vote_ids_obj=vote_ids_obj;
   },
   [types.SET_VOTE_IDS]:(state,ids)=>{
     state.vote_ids=ids;
