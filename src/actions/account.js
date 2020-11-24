@@ -74,7 +74,7 @@ export const createAccountWithPassword = async (store, params) => {
   }
   
 
-  if (!NewPassword.test(password)) {
+  if (!NewPassword.test(password)&&false) {
     return {
       code:311,
       //Please confirm that account is registered through account mode, accounts registered in wallet mode cannot login here.
