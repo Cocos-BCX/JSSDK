@@ -1584,8 +1584,8 @@
                             chain_id:"6057d856c398875cac2650fe33caef3d5f6b403d184c5154abbff526ec1143c4" 
                         }
                      ], 
-                     faucet_url:"http://test-faucet.cocosbcx.net",
-                    //  faucet_url:"https://faucet.cocosbcx.net",
+                     //faucet_url:"http://test-faucet.cocosbcx.net",
+                     faucet_url:"https://faucet.cocosbcx.net",
 
                      auto_reconnect:true,
                      real_sub:true,
@@ -3503,7 +3503,7 @@
                     queryNHAssets:function(){
                         bcx.queryNHAssets({
                             NHAssetIds:gel(".div_queryNHAssets .NHAssetHashOrIds").value.split(","),
-                            owner:true,
+                            owner:false,
                             callback:function(res){
                                 console.info("div_queryNHAssets res",res);
                                 $(".div_queryNHAssets .res").JSONView(res);

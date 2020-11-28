@@ -37,45 +37,50 @@ let bcx=_bcx.createBCX({
     check_cached_nodes_data:false                 
 });
 
+
+bcx.queryVotes({ type:"witnesses" })
+.then(res=>{
+    console.log('queryVotes res',res)
+})
 // bcx.queryBlock({
 //     block:600000
 // }).then(res=>{
 //     console.info("queryBlock res",res);
 // })
-bcx.passwordLogin({
-    account:"test2",
-    password:"12345678"
-}).then(res=>{
-    console.info("passwordLogin res",res)
-    if(res.code==1){
-        // bcx.publishVotes({
-        //     type:"witnesses",
-        //     vote_ids:["1.2.9", "1.2.10", "1.2.12", "1.2.5", "1.2.6", "1.2.15", "1.2.7", "1.2.8", "1.2.11", "1.2.13", "1.2.14"],
-        //     votes:2222
-        // }).then(res=>{
-        //     console.info("publishVotes res",res);
-        // })
-        // bcx.updateCollateralForGas({
-        //     mortgager:"test1",
-        //     beneficiary:"test2",
-        //     amount:120,
-        //     isPropose:false
-        // }).then(res=>{
-        //     console.info("updateCollateralForGas res",res);
-        // })
+// bcx.passwordLogin({
+//     account:"test2",
+//     password:"12345678"
+// }).then(res=>{
+//     console.info("passwordLogin res",res)
+//     if(res.code==1){
+//         // bcx.publishVotes({
+//         //     type:"witnesses",
+//         //     vote_ids:["1.2.9", "1.2.10", "1.2.12", "1.2.5", "1.2.6", "1.2.15", "1.2.7", "1.2.8", "1.2.11", "1.2.13", "1.2.14"],
+//         //     votes:2222
+//         // }).then(res=>{
+//         //     console.info("publishVotes res",res);
+//         // })
+//         // bcx.updateCollateralForGas({
+//         //     mortgager:"test1",
+//         //     beneficiary:"test2",
+//         //     amount:120,
+//         //     isPropose:false
+//         // }).then(res=>{
+//         //     console.info("updateCollateralForGas res",res);
+//         // })
 
-        bcx.transferAsset({
-            fromAccount:"test2",
-            toAccount:"test1",//query.to,
-            amount:1,//query.token,
-            assetId:"COCOS",
-            memo:"嘿嘿",
-            isEncryption:true
-        }).then(result=>{
-            console.info('bcx transferAsset',result);
-        })
-    }
-});
+//         bcx.transferAsset({
+//             fromAccount:"test2",
+//             toAccount:"test1",//query.to,
+//             amount:1,//query.token,
+//             assetId:"COCOS",
+//             memo:"嘿嘿",
+//             isEncryption:true
+//         }).then(result=>{
+//             console.info('bcx transferAsset',result);
+//         })
+//     }
+// });
 
 // bcx.createAccountWithPassword({
 //     account:"test1231",

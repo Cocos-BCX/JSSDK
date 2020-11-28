@@ -90,6 +90,7 @@ export const _getVoteObjects= async (store,type = "witnesses", vote_ids,isCache)
         for (var i = isWitness?1:0; i <= lastIdx + 10; i++) {
             vote_ids.push(`1.${isWitness ? "6" : "5"}.${i}`);
         }
+
     } else {
         lastIdx = parseInt(vote_ids[vote_ids.length - 1].split(".")[2], 10);
     }
@@ -199,7 +200,6 @@ const updateAccountData=async (store,type)=>{
     }else{
        ChainStore.getObjectsByVoteIds(vote_ids);
     }
-
     Promise.all([
         FetchChainObjects(ChainStore.getObjectByVoteID, vote_ids, 10000,{},false),
         // proxyPromise
@@ -214,6 +214,8 @@ const updateAccountData=async (store,type)=>{
                 if (account_id) {
                     committee = committee.push(account_id);
                 } else if ((account_id = obj.get("worker_account"))) {
+                    // console.log( "worker: ", obj );
+                    //     workers = workers.add(obj.get("id"));
                 } else if ((account_id = obj.get("witness_account"))) {
                     witnesses = witnesses.push(account_id);
                 }
@@ -242,7 +244,8 @@ const updateAccountData=async (store,type)=>{
             prev_committee: committee,
             prev_workers: workers,
             prev_vote_ids: vids,
-            vote_for_witness:type=="witnesses"?account.getIn(["asset_locked","vote_for_witness"]):account.getIn(["asset_locked","vote_for_committee"])
+            vote_for_witnesses:account.getIn(["asset_locked","vote_for_witness"]),
+            vote_for_committee:account.getIn(["asset_locked","vote_for_committee"])
         };
         commit(types.SET_VOTES_STATE,state);
   
@@ -316,11 +319,11 @@ export const formatVotes=async (store,proxy_account_id)=>{
 
             let account_id=account.get("id");
             let owner_votes=0;
-
-
             if(getters["getVotesState"]&&action){
-                 owner_votes=helper.getFullNum(getters["getVotesState"].vote_for_witness.get("amount"),core_asset.precision);
+                // vote_for_committee
+                 owner_votes=helper.getFullNum(getters["getVotesState"][`vote_for_${type}`].get("amount"),core_asset.precision);
             }
+            // console.info("owner_votes",getters["getVotesState"].vote_for_witness.get("amount"),owner_votes);
             
             let vote_obj=vote_ids_obj[account_id];
             let {vote_id,total_missed,last_confirmed_block_num,last_aslot}=vote_obj.toJS();
@@ -368,10 +371,12 @@ function getWitnessOrCommittee(type, acct,c_asset) {
             account = ChainStore.getCommitteeMemberById(acct.get("id"));
         }
     }
+    // console.info("account",JSON.parse(JSON.stringify(account)));
     url = account ? account.get("url") : url;
     votes = account ? account.get("total_votes") : votes;
     work_status = account ? account.get("work_status") : work_status;
 
+    // console.info("account",JSON.parse(JSON.stringify(account)));
     if(c_asset){
         supporters=account?account.get("supporters"):supporters;
         if(supporters)
